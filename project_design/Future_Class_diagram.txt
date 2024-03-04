@@ -16,6 +16,19 @@ class Particle {
    double charge
 }
 
+class tPosition {
+   double x
+   double y
+   double z
+}
+
+class Position {
+    double t
+    double x
+    double y
+    double z
+}
+
 class Momentum {
     double energy
     double px

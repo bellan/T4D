@@ -7,12 +7,16 @@ class Particle {
 public:
     Particle(Coordinates::Momentum momentum=0., Coordinates::Position initialPosition=0., double charge=0.):
         momentum(momentum),
-        initialPosition(initialPosition),
+        position(initialPosition),
         charge(charge) {}
+
+    void evolve(double timeStamp);
+
+    Coordinates::Position getPosition() { return position; }
 
 private:
     Coordinates::Momentum momentum;
-    Coordinates::Position initialPosition;
+    Coordinates::Position position;
 
     double charge;
-}
+};

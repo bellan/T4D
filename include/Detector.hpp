@@ -1,15 +1,36 @@
 #pragma once
 
-#include "tPosition.hpp"
+#include <optional>
+
+#include "Position.hpp"
+
+struct Measurement {
+   double x;
+   double y;
+   double t;
+   int detectorID;
+};
+
 class Detector {
 public:
-    Detector(double width=0., double height=0., Coordinates::tPosition position=Coordinates::tPosition()):
+    Detector(double zPosition=0., double width=0., double height=0., double depth=0.):
         width(width),
         height(height),
-        position(position) {}
+        depth(),
+        zPosition()
+    {}
+
+    double getZPosition() const { return zPosition; }
+    double getWidth() const { return width; }
+    std::optional<Measurement> measure(Coordinates::Position particlePosition) const;
+    
 
 private:
+    static int counter;
+
     double width;
     double height;
-    Coordinates::tPosition position;
+    double depth;
+    double zPosition;
+    int id;
 };

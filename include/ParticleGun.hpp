@@ -1,8 +1,11 @@
 #pragma once
 
-#include "tPosition.hpp"
+#include "Particle.hpp"
 
 class ParticleGun {
 public:
-    Coordinates::tPosition position;
+    Particle generateParticle() const;
+
+private:
+    double zposition;
 };
