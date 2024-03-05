@@ -1,13 +1,13 @@
 #include "Detector.hpp"
 #include "Particle.hpp"
 #include "ParticleGun.hpp"
-#include "Position.hpp"
+#include <TLorentzVector.h>
 #include "Simulation.hpp"
 
 // #include "TFile.h"
 
 Simulation::Simulation():
-    particleGun(),
+    particleGun(TVector3{}),
     detectors()
 {
     double minLen = detectors[0].getWidth();
@@ -24,8 +24,7 @@ void Simulation::simulate(int eventNumber, int maxIterations) const {
     for (int i=0; i<eventNumber; i++) {
         Particle particle = particleGun.generateParticle();
         for (int j=0; j<maxIterations; j++) {
-            particle.evolve(minTimeInterval);
-            Coordinates::Position position = particle.getPosition();
+            TLorentzVector position = particle.timeEvolve(minTimeInterval);
             for (auto detector : detectors) {
                 std::optional<Measurement> measure = detector.measure(position);
             }

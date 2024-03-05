@@ -1,36 +1,44 @@
 #pragma once
 
+#include <TLorentzVector.h>
+#include <TVector3.h>
 #include <optional>
 
-#include "Position.hpp"
-
+/**
+ * The measuremnt struct.
+ *
+ * It contains the data produced by the detector.
+ */
 struct Measurement {
-   double x;
-   double y;
-   double t;
-   int detectorID;
+    double t;
+    double x;
+    double y;
+    int detectorID;
 };
 
+
+/**
+ * The detector class.
+ *
+ * It represents a detector in the experiment.
+ * It can generate a Measurement given a particle position.
+ */
 class Detector {
 public:
-    Detector(double zPosition=0., double width=0., double height=0., double depth=0.):
-        width(width),
-        height(height),
-        depth(),
-        zPosition()
-    {}
+    Detector(double zPosition, double width, double height);
 
-    double getZPosition() const { return zPosition; }
+    TVector3 getBottmLeftPosition() const { return bottomLeftPosition; }
     double getWidth() const { return width; }
-    std::optional<Measurement> measure(Coordinates::Position particlePosition) const;
-    
+    double getHeight() const { return height; }
+    static void resetCounter() { counter = 0; } //TODO Consider removing this. It can be useful to instanciate differente experiments (e.g. one for the sim and one for the reconstruction).
+
+    std::optional<Measurement> measure(TLorentzVector particlePosition) const;
 
 private:
     static int counter;
 
+    int id;
     double width;
     double height;
-    double depth;
-    double zPosition;
-    int id;
+    TVector3 bottomLeftPosition;
 };

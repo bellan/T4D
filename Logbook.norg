@@ -1,0 +1,19 @@
+* 2024/02/27 Initial setup
+* 2020/02/29 Chosen uml editor
+* 2024/03/02 Created main classes for simulation and coordinate systems
+* 2024/03/04 Started implementing simulation. Had an idea about the time evolution
+  I can make the particle evolve using a fixed time-step. This is chosen to be the minimum time taken by the light to pass through a detector (which now has a depth). In this way the particles can evolve independently of the detectors and linear approximations can be made. It is also faster to compute (I think)
+  *I should ask Bellan*
+* 2024/03/05 Reverted to space evolution and integration of Root Physics library into the project for vectors.
+  Prof. Bellan suggested evolving the particle position using the final position of the detectors, since they are (at least for now) aligned along the z axis.
+  Maybe in the future, once we need to implement magnetic fields, the idea above could be applied (prof Bellan told me that it is the standard in complex symulations, but can be a mess to program from scrach).
+  Started documenting the project and integrating the ROOT Physics library with its vectors (they are pretty useful :) ).
+  However I find it can be difficult to work without measuremnt systems. *I could implement some dimentions classes in the future* (e.g. time or space).
+** Inserted a reset counter in the detector. *I should reflect on how to separate the simulation from the reconstruction*.
+** TODO in the near future
+   - ( ) Generate random momenta 
+   - ( ) Save data
+   - ( ) Create experiment generator
+   - ( ) Finish assembling the simulation
+** Once this is done you can start building the tracking system.
+

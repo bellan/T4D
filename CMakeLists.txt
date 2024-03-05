@@ -9,4 +9,6 @@ include_directories(${PROJECT_SOURCE_DIR}/include)
 # source directories
 file(GLOB sources ${PROJECT_SOURCE_DIR}/src/*.cpp)
 
+add_compile_options(-Wall -Wextra -Wpedantic)
+
 add_executable(Tracker main.cpp ${sources})
