@@ -16,4 +16,4 @@
    - ( ) Create experiment generator
    - ( ) Finish assembling the simulation
 ** Once this is done you can start building the tracking system.
-
+* 2024/03/06 Morning. I had an Idea: to calculate the angle of colatitude, you can just take the dot product normalized.
