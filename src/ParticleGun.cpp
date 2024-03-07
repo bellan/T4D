@@ -11,12 +11,27 @@
 #include <ctime>
 #include <vector>
 
+/**
+ * Default constructor
+ *
+ * It generates the particle gun assuming that all angles are valid to shoot.
+ *
+ * @param position the position of the gun.
+ */
 ParticleGun::ParticleGun(TVector3 position):
 position{position},
-maxColatitude{std::numbers::pi/2.},
+maxColatitude(M_PI/2.),
 randomGenerator(std::time(NULL)),
 timeCounter(0.) {}
 
+/**
+ * constructor with specified shooting angle
+ *
+ * It generates the particle gun determining the angles to shoot at.
+ *
+ * @param position the position of the gun.
+ * @param detector a vector of all the detectors used to determine the valid angles.
+ */
 ParticleGun::ParticleGun(TVector3 position, std::vector<Detector> detectors):
 position(position),
 randomGenerator(std::time(NULL)),
@@ -29,9 +44,17 @@ timeCounter(0.) {
     }
 }
 
+/**
+ * Generate a random particle
+ *
+ * It generates a particle in the position of the gun with a momentum directed to a random angle
+ * in the range of valid angles.
+ *
+ * @return the particle generated
+ */
 Particle ParticleGun::generateParticle() {
     double x, y, z;
-    randomGenerator.Sphere(x, y, z, 1.);
+    randomGenerator.Sphere(x, y, z, 1.); //TODO consider the angle range
     const double mass = randomGenerator.Uniform(0.,50.);    //TODO set range and units;
     const double kineticEnergy = randomGenerator.Uniform(0.,50.);
     const double charge = randomGenerator.Uniform(-50.,50.);

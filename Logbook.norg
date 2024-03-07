@@ -13,7 +13,11 @@
 ** TODO in the near future
    - (x) Generate random momenta 
    - ( ) Save data
-   - ( ) Create experiment generator
+   - (-) Create experiment generator
    - ( ) Finish assembling the simulation
+   - (x) Fix linking problems
 ** Once this is done you can start building the tracking system.
 * 2024/03/06 Morning. I had an Idea: to calculate the angle of colatitude, you can just take the dot product normalized.
+* 2024/03/07 Generated random particle. Fixed linking (vdt library was needed)
+** TODO in the near future
+   - ( ) Consider the angle range in the particle generator

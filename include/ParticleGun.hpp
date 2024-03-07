@@ -14,9 +14,13 @@
  */
 class ParticleGun {
 public:
-    ParticleGun(TVector3 position);
+    ParticleGun(TVector3 position = TVector3());
     ParticleGun(TVector3 position, std::vector<Detector> detectors);
 
+    void setMaxColatitude(double newValue) { maxColatitude = newValue; }
+    void setPosition(TVector3 newPosition) { position = newPosition; }
+    double getMaxColatitude() const { return maxColatitude; }
+    TVector3 getPosition() const { return position; }
     Particle generateParticle();
 
 private:
