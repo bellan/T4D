@@ -11,7 +11,7 @@
   However I find it can be difficult to work without measuremnt systems. *I could implement some dimentions classes in the future* (e.g. time or space).
 ** Inserted a reset counter in the detector. *I should reflect on how to separate the simulation from the reconstruction*.
 ** TODO in the near future
-   - ( ) Generate random momenta 
+   - (x) Generate random momenta 
    - ( ) Save data
    - ( ) Create experiment generator
    - ( ) Finish assembling the simulation

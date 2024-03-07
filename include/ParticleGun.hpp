@@ -1,7 +1,7 @@
 #pragma once
 
 #include <TVector3.h>
-#include <numbers>
+#include <TRandom1.h>
 #include <vector>
 
 #include "Detector.hpp"
@@ -14,13 +14,16 @@
  */
 class ParticleGun {
 public:
-    ParticleGun(TVector3 position): position(position), maxColatitude(std::numbers::pi/2.) {}
+    ParticleGun(TVector3 position);
     ParticleGun(TVector3 position, std::vector<Detector> detectors);
 
-    Particle generateParticle() const;
+    Particle generateParticle();
 
 private:
     TVector3 position;
 
     double maxColatitude;
+
+    TRandom1 randomGenerator;
+    double timeCounter;
 };
