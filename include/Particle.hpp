@@ -23,6 +23,7 @@ public:
     TLorentzVector timeEvolve(double timeStep);
 
     std::vector<TLorentzVector> getPositions() { return positions; }
+    TLorentzVector getMomentum() { return momentum; }
 
 private:
     TLorentzVector momentum;

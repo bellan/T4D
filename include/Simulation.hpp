@@ -12,7 +12,7 @@ class Simulation {
 public:
     Simulation();
     ~Simulation();
-    void simulate(int particlesNumber, int maxIterations); 
+    void simulate(int particlesNumber); 
     bool saveData(Measurement measure);
 
 private:

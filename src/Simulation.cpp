@@ -3,6 +3,8 @@
 #include <TFile.h>
 #include <TLorentzVector.h>
 #include <ctime>
+#include <iostream>
+#include <stdexcept>
 
 #include "Detector.hpp"
 #include "Particle.hpp"
@@ -17,13 +19,6 @@ Simulation::Simulation():
     dataFile(TFile::Open("prova.root","RECREATE")),
     dataTree("T", "Prova")
 {
-    double minLen = detectors[0].getWidth();
-    for (auto detector : detectors) {
-        if (detector.getWidth() < minLen)
-            minLen  = detector.getWidth();
-    }
-
-    minTimeInterval = minLen/3e8;
     const auto timeNow = std::time(NULL);
 
     dataTree.Branch("measure", &measureBuffer);
@@ -34,6 +29,17 @@ Simulation::Simulation():
     particleGun.setMaxColatitude(experiment.particleGun.getMaxColatitude());
     particleGun.setPosition(experiment.particleGun.getPosition());
 
+    if (detectors.size()==0) {
+        throw std::invalid_argument("No detector");
+    }
+
+    double minLen = detectors[0].getWidth();
+    for (auto detector : detectors) {
+        if (detector.getWidth() < minLen)
+            minLen  = detector.getWidth();
+    }
+
+    minTimeInterval = minLen/3e8;
 }
 
 /**
@@ -50,9 +56,12 @@ Simulation::~Simulation() {
  *
  * TODO determine what actually does
  */
-void Simulation::simulate(int particlesNumber, int maxIterations) {
+void Simulation::simulate(int particlesNumber) {
     for (int i=0; i<particlesNumber; i++) {
         Particle particle = particleGun.generateParticle();
+        std::cout << " - " << particle.getPositions()[0].T() << " " << particle.getPositions()[0].X() << " " << particle.getPositions()[0].Y() << " " << particle.getPositions()[0].Z() << " " <<
+             " - " << particle.getMomentum().E() << " " << particle.getMomentum().X() << " " << particle.getMomentum().Y() << " " << particle.getMomentum().Z() << " " << std::endl;
+
         for (auto detector : detectors) {
             auto position = particle.zSpaceEvolve(detector.getBottmLeftPosition().z());
             std::optional<Measurement> measure = detector.measure(position);
@@ -72,6 +81,7 @@ void Simulation::simulate(int particlesNumber, int maxIterations) {
  */
 bool Simulation::saveData(Measurement measure) {
     measureBuffer = measure;
+    std::cout<<measure.detectorID<<" " << measure.t << " " <<measure.x<<" " <<measure.y << std::endl;
     dataTree.Fill();
 
     return true;
