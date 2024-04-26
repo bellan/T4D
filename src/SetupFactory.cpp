@@ -9,6 +9,6 @@ ExperimentalSetup SetupFactory::generateExperiment() const {
         detectors.push_back(Detector(i* 5., 50, 50));
     }
 
-    const ParticleGun gun({0,3,3}, detectors);
+    const ParticleGun gun({0,0,0}, detectors);
     return {gun, detectors};
 }

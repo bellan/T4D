@@ -20,8 +20,8 @@
 * 2024/03/06 Morning. I had an Idea: to calculate the angle of colatitude, you can just take the dot product normalized.
 * 2024/03/07 Generated random particle. Fixed linking (vdt library was needed). Added factory. Added file saving.
 ** TODO in the near future
-   - ( ) Consider the angle range in the particle generator
-   - ( ) Test that the saved data is actually usalble
+   - (x) Consider the angle range in the particle generator
+   - (x) Test that the saved data is actually usable
  ** Started building tracking system
     - Open the file with all the measurements and load them in a single vector
     - Load the information about the position of the detectors in a vector of detectors 
@@ -48,3 +48,9 @@
 ** Assumptions
    - The first two detector are always hit (used to determine whether to skip the next ones), otherwise none must be.
    - The first two measurements are enough to estimate whether the next detector will be hit.
+* 2024/04/26
+** Fixed the angle range issue
+** Now every particle should be detected
+** TODO maybe later
+   - ( ) Control if the detectors are aligned properly or if they should be ignored (a problem when you start introducing shifted detectors)
+** There are problems with roundings. I think the best option is to save data in a smart way and do the kalman filter with a variable number of detectors (not what I hoped for)

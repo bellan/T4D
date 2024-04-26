@@ -2,7 +2,6 @@
 
 #include <TFile.h>
 #include <TLorentzVector.h>
-#include <ctime>
 #include <iostream>
 #include <stdexcept>
 
@@ -19,7 +18,6 @@ Simulation::Simulation():
     dataFile(TFile::Open("prova.root","RECREATE")),
     dataTree("T", "Prova")
 {
-    const auto timeNow = std::time(NULL);
 
     dataTree.Branch("measure", &measureBuffer);
 
@@ -64,6 +62,8 @@ void Simulation::simulate(int particlesNumber) {
 
         for (auto detector : detectors) {
             auto position = particle.zSpaceEvolve(detector.getBottmLeftPosition().z());
+
+            std::cout<<position.X()<< " " <<position.Y()<<" " <<position.Z()<< std::endl;
             std::optional<Measurement> measure = detector.measure(position);
             if (measure)
                 saveData(measure.value());

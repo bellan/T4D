@@ -14,10 +14,10 @@ int Detector::counter = 0;
  * It determines the position from the zPosition (since they are all aligned to the z-axis i.d. position=(0,0,z))
  */
 Detector::Detector(double zPosition, double width, double height):
-bottomLeftPosition{0,0,zPosition},
+id{counter},
 width{width},
 height{height},
-id{counter} {
+bottomLeftPosition{-width/2.,-height/2.,zPosition} {
     counter++;
 }
 
@@ -33,8 +33,8 @@ std::optional<Measurement> Detector::measure(TLorentzVector particlePosition) co
     const double deltaY = particlePosition.Y();
     const double deltaZ = particlePosition.Z() - this->bottomLeftPosition.z();
 
-    const bool xConstrain = deltaX > 0 && deltaX < width;
-    const bool yConstrain = deltaY > 0 && deltaY < height;
+    const bool xConstrain = deltaX > bottomLeftPosition.x() && deltaX < bottomLeftPosition.x() + width;
+    const bool yConstrain = deltaY > bottomLeftPosition.y() && deltaY < bottomLeftPosition.y() + height;
     const bool zConstrain = deltaZ == 0;
 
     return (xConstrain && yConstrain && zConstrain) ? std::optional<Measurement>{{particlePosition.T(), deltaX, deltaY, id}} : std::nullopt;
