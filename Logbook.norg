@@ -53,4 +53,7 @@
 ** Now every particle should be detected
 ** TODO maybe later
    - ( ) Control if the detectors are aligned properly or if they should be ignored (a problem when you start introducing shifted detectors)
-** There are problems with roundings. I think the best option is to save data in a smart way and do the kalman filter with a variable number of detectors (not what I hoped for)
+** There are problems with roundings. I think the best option is to save data in a smart way and do the kalman filter with a variable number of detectors ()
+* 2024/04/27
+** Having problem with trees
+
