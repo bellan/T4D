@@ -63,7 +63,6 @@ void Simulation::simulate(int particlesNumber) {
         for (auto detector : detectors) {
             auto position = particle.zSpaceEvolve(detector.getBottmLeftPosition().z());
 
-            std::cout<<position.X()<< " " <<position.Y()<<" " <<position.Z()<< std::endl;
             std::optional<Measurement> measure = detector.measure(position);
             if (measure)
                 saveData(measure.value());
@@ -83,6 +82,7 @@ bool Simulation::saveData(Measurement measure) {
     measureBuffer = measure;
     std::cout<<measure.detectorID<<" " << measure.t << " " <<measure.x<<" " <<measure.y << std::endl;
     dataTree.Fill();
+    dataTree.Print();
 
     return true;
 }
