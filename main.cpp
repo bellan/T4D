@@ -1,6 +1,6 @@
 #include "Simulation.hpp"
 
-int main (int argc, char *argv[])
+int main ()
 {
     
     auto simulation = Simulation();

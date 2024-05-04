@@ -16,19 +16,17 @@
 Simulation::Simulation():
     detectors(),
     dataFile(TFile::Open("../data/prova.root","RECREATE")),
-    dataTree("DataTree", "DataTree"),
     tBuffer(0),
     xBuffer(0),
     yBuffer(0),
-    idBuffer(1)
+    idBuffer(1),
+    dataTree("DataTree", "DataTree")
 {
 
-    std::cout << dataTree.GetNbranches() << std::endl;
     dataTree.Branch("t", &tBuffer);
     dataTree.Branch("x", &xBuffer);
     dataTree.Branch("y", &yBuffer);
     dataTree.Branch("id", &idBuffer);
-    std::cout << dataTree.GetNbranches() << std::endl;
 
     SetupFactory factory{};
     const ExperimentalSetup experiment = factory.generateExperiment();
