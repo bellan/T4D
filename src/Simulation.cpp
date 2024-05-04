@@ -16,7 +16,7 @@
 Simulation::Simulation():
     detectors(),
     dataFile(TFile::Open("prova.root","RECREATE")),
-    dataTree("T", "Prova")
+    dataTree("DataTree", "DataTree")
 {
 
     dataTree.Branch("measure", &measureBuffer);
@@ -47,6 +47,7 @@ Simulation::Simulation():
  */
 Simulation::~Simulation() {
     dataFile->WriteObject(&dataTree, "DataTree");
+    dataFile->Close();
 }
 
 /**
