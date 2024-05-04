@@ -21,7 +21,11 @@ private:
     std::vector<Detector> detectors;
     
     std::unique_ptr<TFile> dataFile;
-    Measurement measureBuffer;
+    
+    double tBuffer;
+    double xBuffer;
+    double yBuffer;
+    int idBuffer;
 
     TTree dataTree;
 

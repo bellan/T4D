@@ -15,11 +15,20 @@
  */
 Simulation::Simulation():
     detectors(),
-    dataFile(TFile::Open("prova.root","RECREATE")),
-    dataTree("DataTree", "DataTree")
+    dataFile(TFile::Open("../data/prova.root","RECREATE")),
+    dataTree("DataTree", "DataTree"),
+    tBuffer(0),
+    xBuffer(0),
+    yBuffer(0),
+    idBuffer(1)
 {
 
-    dataTree.Branch("measure", &measureBuffer);
+    std::cout << dataTree.GetNbranches() << std::endl;
+    dataTree.Branch("t", &tBuffer);
+    dataTree.Branch("x", &xBuffer);
+    dataTree.Branch("y", &yBuffer);
+    dataTree.Branch("id", &idBuffer);
+    std::cout << dataTree.GetNbranches() << std::endl;
 
     SetupFactory factory{};
     const ExperimentalSetup experiment = factory.generateExperiment();
@@ -80,10 +89,12 @@ void Simulation::simulate(int particlesNumber) {
  * @return true if everything succeded, false otherwise.
  */
 bool Simulation::saveData(Measurement measure) {
-    measureBuffer = measure;
     std::cout<<measure.detectorID<<" " << measure.t << " " <<measure.x<<" " <<measure.y << std::endl;
+    tBuffer = measure.t;
+    xBuffer = measure.x;
+    yBuffer = measure.y;
+    idBuffer = measure.detectorID;
     dataTree.Fill();
-    dataTree.Print();
 
     return true;
 }
