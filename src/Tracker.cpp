@@ -85,3 +85,30 @@ States Tracker::kalmanFilter(std::vector<Measurement> measurements) {
     return States(states, statesErrors);
 }
 
+// States Tracker::kalmanSmoother(States filteredStates) {
+//     std::vector<TMatrixD> filteredValues = filteredStates.values;
+//     std::vector<TMatrixD> filteredErrors = filteredStates.uncertainties;
+//
+//     std::vector<TMatrixD> smoothedValues(filteredValues.size());
+//     std::vector<TMatrixD> smoothedErrors(filteredErrors.size());
+//
+//     TMatrixD evolutionMatrix(8,8);
+//     // TODO: This should be with time intervals
+//     double evolutiondata[64] = {1.,0.,0.,0.,1.,0.,0.,0.,
+//                                 0.,1.,0.,0.,0.,1.,0.,0.,
+//                                 0.,0.,1.,0.,0.,0.,1.,0.,
+//                                 0.,0.,0.,1.,0.,0.,0.,1.,
+//                                 0.,0.,0.,0.,1.,0.,0.,0.,
+//                                 0.,0.,0.,0.,0.,1.,0.,0.,
+//                                 0.,0.,0.,0.,0.,0.,1.,0.,
+//                                 0.,0.,0.,0.,0.,0.,0.,1.};
+//     evolutionMatrix.SetMatrixArray(evolutiondata);
+//
+//     for (int i = filteredValues.size() - 2; i > -1; i--) {
+//         TMatrixD smoothedState = 
+//     }
+//
+//
+//
+//
+// }

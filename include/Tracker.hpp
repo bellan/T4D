@@ -15,6 +15,7 @@ class Tracker {
 public:
     std::vector<std::vector<Measurement>> importMeasurements();
     States kalmanFilter(std::vector<Measurement> measurements);
+    States kalmanSmoother(States filteredStates);
     ExperimentalSetup experimentalSetup;
 
 
