@@ -1,6 +1,8 @@
 #pragma once
 
 #include <TLorentzVector.h>
+#include <TMatrixD.h>
+#include <TMatrixDfwd.h>
 #include <TVector3.h>
 #include <optional>
 
@@ -30,6 +32,11 @@ public:
     TVector3 getBottmLeftPosition() const { return bottomLeftPosition; }
     double getWidth() const { return width; }
     double getHeight() const { return height; }
+
+    TMatrixD generateMeasureToStateMatrix() const;
+    TMatrixD generateStateToMeasureMatrix() const;
+
+
     static void resetCounter() { counter = 0; } //TODO Consider removing this. It can be useful to instanciate differente experiments (e.g. one for the sim and one for the reconstruction).
 
     std::optional<Measurement> measure(TLorentzVector particlePosition) const;

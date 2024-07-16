@@ -1,12 +1,19 @@
 #pragma once
 
 #include <TLorentzVector.h>
+#include <TMatrixDfwd.h>
 #include <vector>
 
 /**
  * The speed of light in international system of measurements.
  */
 constexpr double LIGHT_SPEED_IS = 299792458.;
+
+struct ParticleState {
+public:
+    TMatrixD state;
+
+}
 
 
 /**

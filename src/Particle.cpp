@@ -73,7 +73,7 @@ TLorentzVector Particle::timeEvolve(const double timeStep) {
     velocity.SetT(velocity.T()/LIGHT_SPEED_IS);
 
     const TLorentzVector newPosition = lastPosition + velocity * timeStep;
-    
+
     this->positions.push_back(newPosition);
     return newPosition;
 }

@@ -29,8 +29,8 @@ Simulation::Simulation():
     dataTree.Branch("id", &idBuffer);
 
     SetupFactory factory{};
-    const ExperimentalSetup experiment = factory.generateExperiment();
-    detectors = experiment.detectors;
+    const SimulationSetup experiment = factory.generateExperiment();
+    detectors = experiment.experimentalSetup.detectors;
     particleGun.setMaxColatitude(experiment.particleGun.getMaxColatitude());
     particleGun.setPosition(experiment.particleGun.getPosition());
 

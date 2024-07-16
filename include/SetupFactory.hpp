@@ -5,12 +5,17 @@
 
 struct ExperimentalSetup {
 public:
-    ParticleGun particleGun;
     std::vector<Detector> detectors;
+};
+
+struct SimulationSetup {
+public:
+    ParticleGun particleGun;
+    ExperimentalSetup experimentalSetup;
 };
 
 class SetupFactory {
 public:
     SetupFactory() {}
-    ExperimentalSetup generateExperiment() const;
+    SimulationSetup generateExperiment() const;
 };
