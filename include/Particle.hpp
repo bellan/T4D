@@ -13,7 +13,7 @@ struct ParticleState {
 public:
     TMatrixD state;
 
-}
+};
 
 
 /**

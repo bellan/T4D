@@ -19,9 +19,9 @@ private:
     double minTimeInterval;
     ParticleGun particleGun;
     std::vector<Detector> detectors;
-    
+
     std::unique_ptr<TFile> dataFile;
-    
+
     double tBuffer;
     double xBuffer;
     double yBuffer;

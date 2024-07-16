@@ -36,6 +36,8 @@ public:
     TMatrixD generateMeasureToStateMatrix() const;
     TMatrixD generateStateToMeasureMatrix() const;
 
+    TMatrixD getUncertaintyMatrix() const;
+
 
     static void resetCounter() { counter = 0; } //TODO Consider removing this. It can be useful to instanciate differente experiments (e.g. one for the sim and one for the reconstruction).
 
