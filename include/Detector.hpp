@@ -34,7 +34,6 @@ public:
     double getHeight() const { return height; }
 
     TMatrixD generateMeasureToStateMatrix() const;
-    TMatrixD generateStateToMeasureMatrix() const;
 
     TMatrixD getUncertaintyMatrix() const;
 

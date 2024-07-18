@@ -39,3 +39,29 @@ std::optional<Measurement> Detector::measure(TLorentzVector particlePosition) co
 
     return (xConstrain && yConstrain && zConstrain) ? std::optional<Measurement>{{particlePosition.T(), deltaX, deltaY, id}} : std::nullopt;
 }
+
+
+TMatrixD Detector::generateMeasureToStateMatrix() const {
+    // TODO: Fix the z position, undoable with matrix multiplication
+    TMatrixD measureToStateMatrix(8,3);
+    double data[24] = {1.,0.,0.,
+                       0.,1.,0.,
+                       0.,0.,1.,
+                       0.,0.,0.,
+                       0.,0.,0.,
+                       0.,0.,0.,
+                       0.,0.,0.,
+                       0.,0.,0.};
+    measureToStateMatrix.SetMatrixArray(data,"");
+    return measureToStateMatrix;
+}
+
+TMatrixD Detector::getUncertaintyMatrix() const {
+    // TODO: Set reasonable values to uncertainties
+    TMatrixD uncertaintyMatrix(3,3);
+    double data[24] = {1.,0.,0.,
+                       0.,1.,0.,
+                       0.,0.,1.};
+    uncertaintyMatrix.SetMatrixArray(data,"");
+    return uncertaintyMatrix;
+}
