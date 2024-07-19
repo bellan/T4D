@@ -6,7 +6,16 @@
 #include <vector>
 
 // Returns the states
-States Tracker::kalmanFilter(std::vector<Measurement> measurements) {
+std::vector<State> Tracker::fromMeasuresToStates(std::vector<Measurement> measurements) {
+    std::vector<State> states;
+    for (Measurement measure : measurements) {
+        states.push_back(experimentalSetup.detectors[measure.detectorID].fromMeasureToState(measure));
+    }
+
+    return states;
+}
+
+std::vector<State> Tracker::kalmanFilter(std::vector<State> unfilteredStates) {
     std::vector<TMatrixD> states(measurements.size() + 1);
     std::vector<TMatrixD> statesErrors(measurements.size() + 1);
 

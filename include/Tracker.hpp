@@ -16,7 +16,7 @@ public:
     ExperimentalSetup experimentalSetup;
 
     std::vector<std::vector<Measurement>> importMeasurements();
-    std::vector<State> fromMeasuresToStates();
+    std::vector<State> fromMeasuresToStates(std::vector<Measurement> measurements);
     std::vector<State> kalmanFilter(std::vector<State> unfilteredStates);
     std::vector<State> kalmanSmoother(std::vector<State> filteredStates);
 };

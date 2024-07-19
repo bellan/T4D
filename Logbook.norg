@@ -66,3 +66,4 @@
    - Now should also be faster because computation is done in a more efficient way
      It still needs to be finished (the traking part is to be done)
    - ( ) In the simulation use the SimulatonSetup class
+   - ( ) Convert from speed to energy

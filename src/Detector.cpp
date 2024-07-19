@@ -44,18 +44,17 @@ std::optional<Measurement> Detector::measure(TLorentzVector particlePosition) co
 
 State Detector::fromMeasureToState(Measurement measure) const {
     TMatrixD stateValue(7, 1);
-    double data[7] = {measure.t, measure.x, measure.y, bottomLeftPosition.Z(), 0., 0., 0.};
+    double data[6] = {measure.t, measure.x, measure.y, 0., 0., 0.};
     stateValue.SetMatrixArray(data);
 
-    TMatrixD stateUncertainty(7, 7);
+    TMatrixD stateUncertainty(6, 6);
     // TODO: Set reasonable values to uncertainties (maybe as a class data member)
-    double sdata[49] = {1., 0., 0., 0., 0., 0., 0.,
-                        0., 1., 0., 0., 0., 0., 0.,
-                        0., 0., 1., 0., 0., 0., 0.,
-                        0., 0., 0., 1., 0., 0., 0.,
-                        0., 0., 0., 0., 1.e18, 0., 0.,
-                        0., 0., 0., 0., 0., 1.e18, 0.,
-                        0., 0., 0., 0., 0., 0., 1.e18};
+    double sdata[49] = {1., 0., 0., 0., 0., 0.,
+                        0., 1., 0., 0., 0., 0.,
+                        0., 0., 1., 0., 0., 0.,
+                        0., 0., 0., 1.e18, 0., 0.,
+                        0., 0., 0., 0., 1.e18, 0.,
+                        0., 0., 0., 0., 0., 1.e18};
     stateUncertainty.SetMatrixArray(sdata);
 
 
@@ -67,15 +66,18 @@ State Detector::fromMeasureToState(Measurement currentMeasure, State preaviousSt
     TMatrixD stateValue(7, 1);
 
     const double deltaT = currentMeasure.t - preaviousState.value(0,0);
-    const double speedX = (currentMeasure.x - preaviousState.value(1,0)) / deltaT;
-    const double speedY = (currentMeasure.y - preaviousState.value(2,0)) / deltaT;
-    const double speedZ = (bottomLeftPosition.Z() - preaviousState.value(3,0)) / deltaT;
+    const double deltaX = (currentMeasure.x - preaviousState.value(1,0));
+    const double deltaY = (currentMeasure.y - preaviousState.value(2,0));
+    const double deltaZ = (bottomLeftPosition.Z() - preaviousState.value(3,0)) / deltaT;
+    const double speedX = deltaX / deltaT;
+    const double speedY = deltaY / deltaT;
+    const double speedZ = deltaZ / deltaT;
 
     const double speed = sqrt(speedX*speedX + speedY*speedY + speedZ*speedZ);
-    const double thetaXZ = atan(speedX/speedZ);
-    const double thetaYZ = atan(speedY/speedZ);
+    const double thetaXZ = atan(deltaX/deltaZ);
+    const double thetaYZ = atan(deltaY/deltaZ);
 
-    double data[7] = {currentMeasure.t, currentMeasure.x, currentMeasure.y, bottomLeftPosition.Z(), speed, thetaXZ, thetaXZ};
+    double data[7] = {currentMeasure.t, currentMeasure.x, currentMeasure.y, speed, thetaXZ, thetaXZ};
     stateValue.SetMatrixArray(data);
 
     TMatrixD stateUncertainty(7, 7);
@@ -99,13 +101,12 @@ State Detector::fromMeasureToState(Measurement currentMeasure, State preaviousSt
     const double sThetaXZ = 1./(1. + pow(speedX/speedZ,2)) * sqrt(pow(sSpeedX/speedZ,2) + pow(speedX*sSpeedZ/(speedZ*speedZ),2));
     const double sThetaYZ = 1./(1. + pow(speedY/speedZ,2)) * sqrt(pow(sSpeedY/speedZ,2) + pow(speedY*sSpeedZ/(speedZ*speedZ),2));
 
-    double sdata[49] = {sT, 0., 0., 0., 0., 0., 0.,
-                        0., sX, 0., 0., 0., 0., 0.,
-                        0., 0., sY, 0., 0., 0., 0.,
-                        0., 0., 0., sZ, 0., 0., 0.,
-                        0., 0., 0., 0., sSpeed, 0., 0.,
-                        0., 0., 0., 0., 0., sThetaXZ, 0.,
-                        0., 0., 0., 0., 0., 0., sThetaXZ};
+    double sdata[49] = {sT, 0., 0., 0., 0., 0.,
+                        0., sX, 0., 0., 0., 0.,
+                        0., 0., sY, 0., 0., 0.,
+                        0., 0., 0., sSpeed, 0., 0.,
+                        0., 0., 0., 0., sThetaXZ, 0.,
+                        0., 0., 0., 0., 0., sThetaXZ};
     stateUncertainty.SetMatrixArray(sdata);
 
     return State{stateValue, stateUncertainty};
