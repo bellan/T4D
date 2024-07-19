@@ -1,25 +1,78 @@
 @startuml
-class Detctor {
-  tPosition position
+class Measurement {
+   double t
+   double x
+   double y
+   int detectorID
+}
 
-  Measure generateMeasure(Position particlePosition)
+class State {
+   TMatrixD value
+   TMatrixD uncertainty
+}
+
+class Detctor {
+   int id
+   double width
+   double heigh
+   TVector3 bottomLeftPosition
+
+   Measure measure(TLorentzVector particlePosition)
+   State fromMeasureToState(Measurement measure)
+   State fromMeasureToState(Measurement currentMeasure, State preaviousState)
 }
 
 class ParticleCannon {
-   double zPosition
+   TVector3 position
+   double maxColatitude
+   TRandom1 randomGenerator
+   double timeCounter
 
    Particle generateParticle()
 }
 
 class Particle {
-   Momentum momentum
+   TLorentzVector momentum
    double charge
+   double mass
+   std::vector<TLorentzVector> position
+
+   TLorentzVector zSpaceEvolve(double finalZ)
+   TLorentzVector timeEvolve(double timeStep)
 }
 
-class Momentum {
-    double energy
-    double px
-    double py
-    double pz
-  }
+class ExperimentalSetup {
+   std::vector<Detector> detectors
+}
+
+class SimulationSetup {
+   ParticleGun particleGun
+   ExperimentalSetup experimentalSetup
+}
+
+class Simulation {
+   double minTimeInterval
+   ParticleGun particleGun
+   std::vector<Detector> detectors
+   std::unique_ptr<TFile> dataFile;
+
+   double tBuffer
+   double xBuffer
+   double yBuffer
+   int idBuffer
+
+   TTree dataTree
+
+   void simulate(int particleNumber)
+   bool saveData(Measuremnt measure)
+}
+
+class Tracker {
+   ExperimentalSetup experimentalSetup
+
+   std::vector<std::vector<Measurement>> importMeasurements()
+   std::vector<State> fromMeasureToState()
+   std::vector<State> kalmanFilter(std::vector<State> unfilteredStates)
+   std::vector<State> kalmanSmoother(std::vector<State> filteredStates)
+}
 @enduml
