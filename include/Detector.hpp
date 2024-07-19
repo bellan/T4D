@@ -18,6 +18,12 @@ struct Measurement {
     int detectorID;
 };
 
+struct State {
+public:
+    TMatrixD value;
+    TMatrixD uncertainty;
+};
+
 
 /**
  * The detector class.
@@ -33,14 +39,12 @@ public:
     double getWidth() const { return width; }
     double getHeight() const { return height; }
 
-    TMatrixD generateMeasureToStateMatrix() const;
-
-    TMatrixD getUncertaintyMatrix() const;
-
-
-    static void resetCounter() { counter = 0; } //TODO Consider removing this. It can be useful to instanciate differente experiments (e.g. one for the sim and one for the reconstruction).
+    static void resetCounter() { counter = 0; } // TODO: Consider removing this. It can be useful to instanciate differente experiments (e.g. one for the sim and one for the reconstruction).
 
     std::optional<Measurement> measure(TLorentzVector particlePosition) const;
+
+    State fromMeasureToState(Measurement measure) const;
+    State fromMeasureToState(Measurement currentMeasure, State preaviousState) const;
 
 private:
     static int counter;

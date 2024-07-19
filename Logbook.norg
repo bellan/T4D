@@ -60,3 +60,9 @@
 ** Finally solved problems with tree
 * 2024/07/12
   ** 
+* 2024/07/19
+** Started rewriting everything without using the measurement matrixes
+   - Since the conversion between measure and state, couldn't be done linearly
+   - Now should also be faster because computation is done in a more efficient way
+     It still needs to be finished (the traking part is to be done)
+
