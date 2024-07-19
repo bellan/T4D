@@ -11,87 +11,62 @@ std::vector<State> Tracker::fromMeasuresToStates(std::vector<Measurement> measur
     for (Measurement measure : measurements) {
         states.push_back(experimentalSetup.detectors[measure.detectorID].fromMeasureToState(measure));
     }
-
     return states;
 }
 
 std::vector<State> Tracker::kalmanFilter(std::vector<State> unfilteredStates) {
-    std::vector<TMatrixD> states(measurements.size() + 1);
-    std::vector<TMatrixD> statesErrors(measurements.size() + 1);
+    std::vector<State> filteredStates(unfilteredStates.size() + 1);
 
-    TMatrixD evolutionMatrix(8,8);
-    // TODO: This should be with time intervals
-    double evolutiondata[64] = {1.,0.,0.,0.,1.,0.,0.,0.,
-                                0.,1.,0.,0.,0.,1.,0.,0.,
-                                0.,0.,1.,0.,0.,0.,1.,0.,
-                                0.,0.,0.,1.,0.,0.,0.,1.,
-                                0.,0.,0.,0.,1.,0.,0.,0.,
-                                0.,0.,0.,0.,0.,1.,0.,0.,
-                                0.,0.,0.,0.,0.,0.,1.,0.,
-                                0.,0.,0.,0.,0.,0.,0.,1.};
-    evolutionMatrix.SetMatrixArray(evolutiondata);
+    TMatrixD evolutionMatrix(6,6);
 
     // Initializing the state at 0, that is at the particle cannon
-    TMatrixD initialState(8,1); // 8 dimentional vector (4 position and 4 momentum)
-    TMatrixD initialStateErrors(8,8);
-    double data[8] = {0.,0.,0.,0.,0.,0.,0.,0.};
-    double sdata[64] = {1.e8,0.,0.,0.,0.,0.,0.,0.,
-                        0.,1.e8,0.,0.,0.,0.,0.,0.,
-                        0.,0.,1.e8,0.,0.,0.,0.,0.,
-                        0.,0.,0.,1.e8,0.,0.,0.,0.,
-                        0.,0.,0.,0.,1.e8,0.,0.,0.,
-                        0.,0.,0.,0.,0.,1.e8,0.,0.,
-                        0.,0.,0.,0.,0.,0.,1.e8,0.,
-                        0.,0.,0.,0.,0.,0.,0.,1.e8};
-    initialState.SetMatrixArray(data,"");
-    initialStateErrors.SetMatrixArray(sdata, "");
-    states.push_back(initialState);
-    statesErrors.push_back(initialStateErrors);
+    TMatrixD initialStateValue(6,1); // 8 dimentional vector (4 position and 4 momentum)
+    TMatrixD initialStateError(6,6);
+    double data[8] = {0.,0.,0.,0.,0.,0.};
+    double sdata[64] = {1.e18,0.,0.,0.,0.,0.,0.,0.,
+                        0.,1.e18,0.,0.,0.,0.,0.,0.,
+                        0.,0.,1.e18,0.,0.,0.,0.,0.,
+                        0.,0.,0.,1.e18,0.,0.,0.,0.,
+                        0.,0.,0.,0.,1.e18,0.,0.,0.,
+                        0.,0.,0.,0.,0.,1.e18,0.,0.,
+                        0.,0.,0.,0.,0.,0.,1.e18,0.,
+                        0.,0.,0.,0.,0.,0.,0.,1.e18};
+    initialStateValue.SetMatrixArray(data,"");
+    initialStateError.SetMatrixArray(sdata, "");
+    filteredStates.push_back(State{initialStateError, initialStateError});
 
     // Initializing the first state
-    for (int i = 0; i< measurements.size(); i++) {
-        Measurement measure = measurements[i];
-        const int detectorIndex = measure.detectorID;
-        TMatrixD measureVector(3,1);
-        double data[3] = {measure.t, measure.x, measure.y};
-        measureVector.SetMatrixArray(data);
+    for (int i = 0; i< unfilteredStates.size(); i++) {
+        TMatrixD preaviousStateValue = filteredStates[i].value;
+        TMatrixD preaviousStateError = filteredStates[i].uncertainty;
 
-        TMatrixD measureToStateMatrix = experimentalSetup.detectors[detectorIndex].generateMeasureToStateMatrix();
-        TMatrixD measureUncertainty = experimentalSetup.detectors[detectorIndex].getUncertaintyMatrix();
+        const double deltaZ = experimentalSetup.detectors[i].getBottmLeftPosition().Z() - experimentalSetup.detectors[i-1].getBottmLeftPosition().Z() ?
+            i != 0 : experimentalSetup.detectors[i].getBottmLeftPosition().Z();
+        double evolutiondata[36] = {1.,0.,0.,0.,0.,0., // TODO: Fix this (it is not linear)
+                                    0.,1.,0.,0.,deltaZ,0.,
+                                    0.,0.,1.,0.,0.,deltaZ,
+                                    0.,0.,0.,1.,0.,0.,
+                                    0.,0.,0.,0.,1.,0.,
+                                    0.,0.,0.,0.,0.,1.};
+        evolutionMatrix.SetMatrixArray(evolutiondata);
 
-        TMatrixD measuredState = TMatrixD(measureToStateMatrix, TMatrixD::kMult, measureVector);
-        TMatrixD measuredStateError = TMatrixD(measureToStateMatrix, TMatrixD::kMult, measureUncertainty);
+        TMatrixD estimatedStateValue = TMatrixD(evolutionMatrix, TMatrixD::kMult, preaviousStateValue);
+        TMatrixD estimatedStateError = TMatrixD(evolutionMatrix, TMatrixD::kMult, TMatrixD(preaviousStateError, TMatrixD::kMultTranspose, evolutionMatrix));
 
-        // TODO: Maybe add the momentum measure?? 
+        TMatrixD kalmanGainDenominator = TMatrixD(estimatedStateError, TMatrixD::kPlus, preaviousStateError).Invert();
+        TMatrixD filteredStateValue = TMatrixD(unfilteredStates[i].value, TMatrixD::kMinus, estimatedStateValue);
+        filteredStateValue = TMatrixD(kalmanGainDenominator, TMatrixD::kMult, filteredStateValue);
+        filteredStateValue = TMatrixD(estimatedStateError, TMatrixD::kMult, filteredStateValue);
+        filteredStateValue += estimatedStateValue;
 
-        if (i == 0) {
-            states.push_back(measuredState);
-            statesErrors.push_back(measuredStateError);
-            continue;
-        }
+        TMatrixD filteredStateError = TMatrixD(kalmanGainDenominator, TMatrixD::kMult, estimatedStateError);
+        filteredStateError = TMatrixD(estimatedStateError, TMatrixD::kMult, filteredStateError);
+        filteredStateError = TMatrixD(estimatedStateError, TMatrixD::kMinus, filteredStateError);
 
-        TMatrixD predictedState = TMatrixD(evolutionMatrix, TMatrixD::kMult, states[i]); // NOTE: It's not i-1 because states has the cannon state at the beginning shifting everything by 1
-        TMatrixD predictedError = TMatrixD(evolutionMatrix, TMatrixD::kMult, TMatrixD(statesErrors[i], TMatrixD::kMultTranspose, evolutionMatrix));
-
-        TMatrixD kalmanGainDenominator = TMatrixD(measureToStateMatrix, TMatrixD::kMult, TMatrixD(predictedError, TMatrixD::kMultTranspose, measureToStateMatrix));
-        kalmanGainDenominator += measureUncertainty;
-
-        TMatrixD filteredState = measureVector;
-        filteredState -= TMatrixD(measureToStateMatrix, TMatrixD::kMult, predictedState);
-        filteredState = TMatrixD(kalmanGainDenominator.Invert(), TMatrixD::kMult, filteredState);
-        filteredState = TMatrixD(predictedError, TMatrixD::kMult, TMatrixD(TMatrixD(TMatrixD::kTransposed, measureToStateMatrix), TMatrixD::kMult, filteredState));
-        filteredState += predictedState;
-
-        TMatrix filteredError = predictedError;
-        filteredError = TMatrixD(kalmanGainDenominator.Invert(), TMatrixD::kMult, TMatrixD(measureToStateMatrix, TMatrixD::kMult, filteredError));
-        filteredError = TMatrixD(predictedError, TMatrixD::kMult, TMatrixD(TMatrixD(TMatrixD::kTransposed, measureToStateMatrix), TMatrixD::kMult, filteredError));
-        filteredError = TMatrixD(predictedError, TMatrixD::kMinus, filteredError);
-
-        states.push_back(filteredState);
-        statesErrors.push_back(filteredError);
+        filteredStates.push_back(State{filteredStateValue, filteredStateError});
     }
 
-    return States(states, statesErrors);
+    return filteredStates;
 }
 
 // States Tracker::kalmanSmoother(States filteredStates) {
