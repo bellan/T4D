@@ -65,3 +65,5 @@ void DataFile::SaveMultipleMeasures(std::vector<Measurement> measures) {
         dataTree.Fill();
     }
 }
+
+std::vector<Measurement> DataFile::readMeasures()

@@ -52,7 +52,7 @@ void Simulation::simulate(int particlesNumber) {
 
             std::optional<Measurement> measure = detector.measure(position);
             if (measure)
-                saveData(measure.value());
+                dataFile.SaveSingleMeasure(measure.value()); // TODO: Change this to vector memorization
         }
     }
 }
