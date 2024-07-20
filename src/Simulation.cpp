@@ -1,5 +1,6 @@
 #include "Simulation.hpp"
 
+#include <Rtypes.h>
 #include <TFile.h>
 #include <TLorentzVector.h>
 #include <iostream>
@@ -55,4 +56,6 @@ void Simulation::simulate(int particlesNumber) {
                 dataFile.SaveSingleMeasure(measure.value()); // TODO: Change this to vector memorization
         }
     }
+
+    dataFile.readMeasures();
 }

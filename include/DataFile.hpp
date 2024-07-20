@@ -6,10 +6,9 @@
 #include <TTree.h>
 #include <vector>
 
-// TODO: Make also readonly (now it rewrites every time)
 class DataFile {
 public:
-    DataFile(const char* fileName="../data/GeneratedData.root", const char* treeName="DataTree");
+    DataFile(const char* fileName="../data/GeneratedData.root", const char* treeName="DataTree", bool exist=false);
     ~DataFile();
 
     void SaveSingleMeasure(Measurement measure);
@@ -18,13 +17,14 @@ public:
     std::vector<Measurement> readMeasures();
 
 private:
-    std::unique_ptr<TFile> rootFile;
-    const char* treeName;
-
     double tBuffer;
     double xBuffer;
     double yBuffer;
     int idBuffer;
 
-    TTree dataTree;
+    const char* treeName;
+    bool writable;
+
+    TFile* rootFile;
+    TTree* dataTree;
 };
