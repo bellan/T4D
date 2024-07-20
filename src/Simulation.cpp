@@ -15,19 +15,8 @@
  */
 Simulation::Simulation():
     detectors(),
-    dataFile(TFile::Open("../data/prova.root","RECREATE")),
-    tBuffer(0),
-    xBuffer(0),
-    yBuffer(0),
-    idBuffer(1),
-    dataTree("DataTree", "DataTree")
+    dataFile()
 {
-
-    dataTree.Branch("t", &tBuffer);
-    dataTree.Branch("x", &xBuffer);
-    dataTree.Branch("y", &yBuffer);
-    dataTree.Branch("id", &idBuffer);
-
     SetupFactory factory{};
     const SimulationSetup experiment = factory.generateExperiment();
     detectors = experiment.experimentalSetup.detectors;
@@ -45,16 +34,6 @@ Simulation::Simulation():
     }
 
     minTimeInterval = minLen/3e8;
-}
-
-/**
- * The destructor
- *
- * Saves the tree in the file before closing.
- */
-Simulation::~Simulation() {
-    dataFile->WriteObject(&dataTree, "DataTree");
-    dataFile->Close();
 }
 
 /**
@@ -76,23 +55,4 @@ void Simulation::simulate(int particlesNumber) {
                 saveData(measure.value());
         }
     }
-}
-
-/**
- * Save the data
- *
- * Saves the data to the specified file.
- *
- * @param measure the measure to be saved.
- * @return true if everything succeded, false otherwise.
- */
-bool Simulation::saveData(Measurement measure) {
-    std::cout<<measure.detectorID<<" " << measure.t << " " <<measure.x<<" " <<measure.y << std::endl;
-    tBuffer = measure.t;
-    xBuffer = measure.x;
-    yBuffer = measure.y;
-    idBuffer = measure.detectorID;
-    dataTree.Fill();
-
-    return true;
 }
