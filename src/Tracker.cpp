@@ -20,28 +20,26 @@ std::vector<State> Tracker::kalmanFilter(std::vector<State> unfilteredStates) {
     TMatrixD evolutionMatrix(6,6);
 
     // Initializing the state at 0, that is at the particle cannon
-    TMatrixD initialStateValue(6,1); // 8 dimentional vector (4 position and 4 momentum)
+    TMatrixD initialStateValue(6,1); // 6 dimentional vector (t,x,y,speed,thetazx,thetazy)
     TMatrixD initialStateError(6,6);
-    double data[8] = {0.,0.,0.,0.,0.,0.};
-    double sdata[64] = {1.e18,0.,0.,0.,0.,0.,0.,0.,
-                        0.,1.e18,0.,0.,0.,0.,0.,0.,
-                        0.,0.,1.e18,0.,0.,0.,0.,0.,
-                        0.,0.,0.,1.e18,0.,0.,0.,0.,
-                        0.,0.,0.,0.,1.e18,0.,0.,0.,
-                        0.,0.,0.,0.,0.,1.e18,0.,0.,
-                        0.,0.,0.,0.,0.,0.,1.e18,0.,
-                        0.,0.,0.,0.,0.,0.,0.,1.e18};
+    double data[6] = {0.,0.,0.,0.,0.,0.};
+    double sdata[36] = {1.e18,0.,0.,0.,0.,0.,
+                        0.,1.e18,0.,0.,0.,0.,
+                        0.,0.,1.e18,0.,0.,0.,
+                        0.,0.,0.,1.e18,0.,0.,
+                        0.,0.,0.,0.,1.e18,0.,
+                        0.,0.,0.,0.,0.,1.e18};
     initialStateValue.SetMatrixArray(data,"");
     initialStateError.SetMatrixArray(sdata, "");
     filteredStates.push_back(State{initialStateError, initialStateError});
 
     // Initializing the first state
     for (int i = 0; i< unfilteredStates.size(); i++) {
-        TMatrixD preaviousStateValue = filteredStates[i].value;
-        TMatrixD preaviousStateError = filteredStates[i].uncertainty;
+        TMatrixD preaviousStateValue = TMatrixD(filteredStates[i].value);
+        TMatrixD preaviousStateError = TMatrixD(filteredStates[i].uncertainty);
 
-        const double deltaZ = experimentalSetup.detectors[i].getBottmLeftPosition().Z() - experimentalSetup.detectors[i-1].getBottmLeftPosition().Z() ?
-            i != 0 : experimentalSetup.detectors[i].getBottmLeftPosition().Z();
+        const double deltaZ = i != 0 ? experimentalSetup.detectors[i].getBottmLeftPosition().Z() - experimentalSetup.detectors[i-1].getBottmLeftPosition().Z()
+             : experimentalSetup.detectors[i].getBottmLeftPosition().Z();
         double evolutiondata[36] = {1.,0.,0.,0.,0.,0., // TODO: Fix this (it is not linear)
                                     0.,1.,0.,0.,deltaZ,0.,
                                     0.,0.,1.,0.,0.,deltaZ,
@@ -50,7 +48,13 @@ std::vector<State> Tracker::kalmanFilter(std::vector<State> unfilteredStates) {
                                     0.,0.,0.,0.,0.,1.};
         evolutionMatrix.SetMatrixArray(evolutiondata);
 
+        std::cout<<"Prima"<<std::endl;
+        std::cout<<evolutionMatrix.GetNrows()<<std::endl;
+        std::cout<<evolutionMatrix.GetNcols()<<std::endl;
+        std::cout<<filteredStates[i].value.GetNrows()<<std::endl;
+        std::cout<<filteredStates[i].value.GetNcols()<<std::endl;
         TMatrixD estimatedStateValue = TMatrixD(evolutionMatrix, TMatrixD::kMult, preaviousStateValue);
+        std::cout<<"Dopo"<<std::endl;
         TMatrixD estimatedStateError = TMatrixD(evolutionMatrix, TMatrixD::kMult, TMatrixD(preaviousStateError, TMatrixD::kMultTranspose, evolutionMatrix));
 
         TMatrixD kalmanGainDenominator = TMatrixD(estimatedStateError, TMatrixD::kPlus, preaviousStateError).Invert();

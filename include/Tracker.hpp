@@ -13,6 +13,9 @@ public:
 
 class Tracker {
 public:
+    Tracker() {};
+    Tracker(ExperimentalSetup experimentalSetup): experimentalSetup(experimentalSetup) {}
+
     ExperimentalSetup experimentalSetup;
 
     std::vector<std::vector<Measurement>> importMeasurements();

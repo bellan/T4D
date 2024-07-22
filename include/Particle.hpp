@@ -9,12 +9,6 @@
  */
 constexpr double LIGHT_SPEED_IS = 299792458.;
 
-struct ParticleState {
-public:
-    TMatrixD state;
-
-};
-
 
 /**
  * The particle class.

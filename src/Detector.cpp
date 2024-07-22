@@ -49,14 +49,13 @@ State Detector::fromMeasureToState(Measurement measure) const {
 
     TMatrixD stateUncertainty(6, 6);
     // TODO: Set reasonable values to uncertainties (maybe as a class data member)
-    double sdata[49] = {1., 0., 0., 0., 0., 0.,
+    double sdata[36] = {1., 0., 0., 0., 0., 0.,
                         0., 1., 0., 0., 0., 0.,
                         0., 0., 1., 0., 0., 0.,
                         0., 0., 0., 1.e18, 0., 0.,
                         0., 0., 0., 0., 1.e18, 0.,
                         0., 0., 0., 0., 0., 1.e18};
     stateUncertainty.SetMatrixArray(sdata);
-
 
     return State{stateValue, stateUncertainty};
 }
