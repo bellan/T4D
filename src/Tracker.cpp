@@ -31,7 +31,10 @@ std::vector<State> Tracker::kalmanFilter(std::vector<State> unfilteredStates) {
                         0.,0.,0.,0.,0.,1.e18};
     initialStateValue.SetMatrixArray(data,"");
     initialStateError.SetMatrixArray(sdata, "");
-    filteredStates.push_back(State{initialStateError, initialStateError});
+    filteredStates.push_back(State{initialStateValue, initialStateError});
+
+    std::cout<<filteredStates[0].value.GetNrows()<<std::endl;
+    std::cout<<filteredStates[0].value.GetNcols()<<std::endl;
 
     // Initializing the first state
     for (int i = 0; i< unfilteredStates.size(); i++) {

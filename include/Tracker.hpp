@@ -5,12 +5,6 @@
 #include <TMatrixDfwd.h>
 #include <vector>
 
-struct States {
-public:
-    std::vector<TMatrixD> values;
-    std::vector<TMatrixD> uncertainties;
-};
-
 class Tracker {
 public:
     Tracker() {};
