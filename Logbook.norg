@@ -67,3 +67,6 @@
      It still needs to be finished (the traking part is to be done)
    - ( ) In the simulation use the SimulatonSetup class
    - ( ) Convert from speed to energy
+* 2024/07/20
+** Migrated all file and tree handling to a separate class.
+

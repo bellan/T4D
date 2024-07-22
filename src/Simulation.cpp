@@ -42,7 +42,7 @@ Simulation::Simulation():
  *
  * TODO determine what actually does
  */
-void Simulation::simulate(int particlesNumber) {
+void Simulation::runSimulation(int particlesNumber) {
     for (int i=0; i<particlesNumber; i++) {
         Particle particle = particleGun.generateParticle();
         std::cout << " - " << particle.getPositions()[0].T() << " " << particle.getPositions()[0].X() << " " << particle.getPositions()[0].Y() << " " << particle.getPositions()[0].Z() << " " <<
@@ -58,4 +58,11 @@ void Simulation::simulate(int particlesNumber) {
     }
 
     dataFile.readMeasures();
+}
+
+std::vector<std::vector<Measurement>> Simulation::separateMeasuresInParticles(std::vector<Measurement> allMeasures) {
+    std::vector<std::vector<Measurement>> singleParticleMeasuresVectors;
+
+
+    return singleParticleMeasuresVectors;
 }

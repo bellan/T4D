@@ -9,7 +9,8 @@
 class Simulation {
 public:
     Simulation();
-    void simulate(int particlesNumber);
+    void runSimulation(int particlesNumber);
+    std::vector<std::vector<Measurement>> separateMeasuresInParticles(std::vector<Measurement> allMeasures);
 
 private:
     double minTimeInterval;

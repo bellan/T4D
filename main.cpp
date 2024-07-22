@@ -4,7 +4,7 @@ int main ()
 {
 
     auto simulation = Simulation();
-    simulation.simulate(15);
+    simulation.runSimulation(15);
 
 
     return 0;
