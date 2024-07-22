@@ -3,8 +3,6 @@
 
 #include <TFile.h>
 #include <TTree.h>
-#include <iterator>
-#include <memory>
 #include <stdexcept>
 #include <vector>
 
