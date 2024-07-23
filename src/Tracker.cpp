@@ -1,8 +1,6 @@
 #include "Tracker.hpp"
 #include "Detector.hpp"
-#include <TMatrix.h>
-#include <TMatrixDBasefwd.h>
-#include <TMatrixDfwd.h>
+#include <TMatrixD.h>
 #include <vector>
 
 // Returns the states
@@ -15,7 +13,7 @@ std::vector<State> Tracker::fromMeasuresToStates(std::vector<Measurement> measur
 }
 
 std::vector<State> Tracker::kalmanFilter(std::vector<State> unfilteredStates) {
-    std::vector<State> filteredStates(unfilteredStates.size() + 1);
+    std::vector<State> filteredStates;
 
     TMatrixD evolutionMatrix(6,6);
 
@@ -31,13 +29,12 @@ std::vector<State> Tracker::kalmanFilter(std::vector<State> unfilteredStates) {
                         0.,0.,0.,0.,0.,1.e18};
     initialStateValue.SetMatrixArray(data,"");
     initialStateError.SetMatrixArray(sdata, "");
-    filteredStates.push_back(State{initialStateValue, initialStateError});
+    State state{initialStateValue, initialStateError};
 
-    std::cout<<filteredStates[0].value.GetNrows()<<std::endl;
-    std::cout<<filteredStates[0].value.GetNcols()<<std::endl;
+    filteredStates.push_back(state);
 
     // Initializing the first state
-    for (int i = 0; i< unfilteredStates.size(); i++) {
+    for (int i = 0; i < (int)unfilteredStates.size(); i++) {
         TMatrixD preaviousStateValue = TMatrixD(filteredStates[i].value);
         TMatrixD preaviousStateError = TMatrixD(filteredStates[i].uncertainty);
 
@@ -51,13 +48,7 @@ std::vector<State> Tracker::kalmanFilter(std::vector<State> unfilteredStates) {
                                     0.,0.,0.,0.,0.,1.};
         evolutionMatrix.SetMatrixArray(evolutiondata);
 
-        std::cout<<"Prima"<<std::endl;
-        std::cout<<evolutionMatrix.GetNrows()<<std::endl;
-        std::cout<<evolutionMatrix.GetNcols()<<std::endl;
-        std::cout<<filteredStates[i].value.GetNrows()<<std::endl;
-        std::cout<<filteredStates[i].value.GetNcols()<<std::endl;
         TMatrixD estimatedStateValue = TMatrixD(evolutionMatrix, TMatrixD::kMult, preaviousStateValue);
-        std::cout<<"Dopo"<<std::endl;
         TMatrixD estimatedStateError = TMatrixD(evolutionMatrix, TMatrixD::kMult, TMatrixD(preaviousStateError, TMatrixD::kMultTranspose, evolutionMatrix));
 
         TMatrixD kalmanGainDenominator = TMatrixD(estimatedStateError, TMatrixD::kPlus, preaviousStateError).Invert();

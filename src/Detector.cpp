@@ -1,6 +1,6 @@
 #include "Detector.hpp"
 
-#include <TMatrixDfwd.h>
+#include <TMatrixD.h>
 #include <cmath>
 #include <optional>
 #include <TLorentzVector.h>

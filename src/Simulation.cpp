@@ -3,7 +3,7 @@
 #include <Rtypes.h>
 #include <TFile.h>
 #include <TLorentzVector.h>
-#include <TMatrixDfwd.h>
+#include <TMatrixD.h>
 #include <algorithm>
 #include <iostream>
 #include <stdexcept>
@@ -62,13 +62,17 @@ void Simulation::runSimulation(int particlesNumber) {
 
     std::cout<<"\n\n\n\n\n\n\n"<<std::endl;
     int particleCounter = 1;
+    int externalCounter = 0;
     for (auto misureParticellaSingola : misureParticelle) {
         std::cout<<"\n\nParticella "<<particleCounter<<std::endl;
         auto statiDaMisure = tracker.fromMeasuresToStates(misureParticellaSingola);
         std::vector<State> statiFiltrati = tracker.kalmanFilter(statiDaMisure);
-        for (int i = 0; i < statiDaMisure.size(); i++) {
-            std::cout<<"Atteso: "<<statiGenerati[i].t<<" "<<statiGenerati[i].x<<std::endl;
-            std::cout<<"Ottenuto: "<<statiFiltrati[i].value(0,0)<<" "<<statiFiltrati[i].value(0,1)<<std::endl;
+
+        std::cout<<"        t        x"<<std::endl;
+        for (int i = 0; i < (int)statiDaMisure.size(); i++) {
+            std::cout<<"Exp: "<<statiGenerati[externalCounter].t<<" "<<statiGenerati[externalCounter].x<<std::endl;
+            std::cout<<"Obt: "<<statiFiltrati[i].value(0,0)<<" "<<statiFiltrati[i].value(1,0)<<std::endl;
+            externalCounter++;
         }
         particleCounter++;
     }

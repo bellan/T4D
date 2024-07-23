@@ -2,7 +2,7 @@
 
 #include "Detector.hpp"
 #include "SetupFactory.hpp"
-#include <TMatrixDfwd.h>
+#include <TMatrixD.h>
 #include <vector>
 
 class Tracker {
