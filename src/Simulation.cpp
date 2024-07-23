@@ -67,11 +67,13 @@ void Simulation::runSimulation(int particlesNumber) {
         std::cout<<"\n\nParticella "<<particleCounter<<std::endl;
         auto statiDaMisure = tracker.fromMeasuresToStates(misureParticellaSingola);
         std::vector<State> statiFiltrati = tracker.kalmanFilter(statiDaMisure);
+        std::vector<State> statiSmoothed = tracker.kalmanSmoother(statiFiltrati);
 
         std::cout<<"        t        x"<<std::endl;
         for (int i = 0; i < (int)statiDaMisure.size(); i++) {
             std::cout<<"Exp: "<<statiGenerati[externalCounter].t<<" "<<statiGenerati[externalCounter].x<<std::endl;
             std::cout<<"Obt: "<<statiFiltrati[i].value(0,0)<<" "<<statiFiltrati[i].value(1,0)<<std::endl;
+            std::cout<<"Smo: "<<statiSmoothed[i].value(0,0)<<" "<<statiSmoothed[i].value(1,0)<<std::endl;
             externalCounter++;
         }
         particleCounter++;
