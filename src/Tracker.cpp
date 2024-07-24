@@ -1,6 +1,7 @@
 #include "Tracker.hpp"
 #include "Detector.hpp"
 #include <TMatrixD.h>
+#include <TMatrixDfwd.h>
 #include <vector>
 
 // Returns the states
@@ -69,6 +70,7 @@ std::vector<State> Tracker::kalmanFilter(std::vector<State> unfilteredStates) {
 
 std::vector<State> Tracker::kalmanSmoother(std::vector<State> filteredStates) {
     std::vector<State> smoothedStates;
+    std::cout<<"filtrato Ultimo"<<filteredStates.back().value(1,0)<<std::endl;
 
     TMatrixD evolutionMatrix(6,6);
 
@@ -78,9 +80,10 @@ std::vector<State> Tracker::kalmanSmoother(std::vector<State> filteredStates) {
     for (int i = (int)filteredStates.size() - 2; i > -1; i--) {
         TMatrixD smoothedNextStateValue = TMatrixD(smoothedStates.back().value);
         TMatrixD smoothedNextStateError = TMatrixD(smoothedStates.back().uncertainty);
-        std::cout<<"Ok0"<<std::endl;
 
-        const double deltaZ = experimentalSetup.detectors[i+1].getBottmLeftPosition().Z() - experimentalSetup.detectors[i].getBottmLeftPosition().Z();
+        // NOTE: This indexes are like this because filteredStates has an element corresponding to the initial state (i.e. at z=0)
+        const double deltaZ = i != 0 ? experimentalSetup.detectors[i].getBottmLeftPosition().Z() - experimentalSetup.detectors[i-1].getBottmLeftPosition().Z() :
+            experimentalSetup.detectors[i].getBottmLeftPosition().Z();
         double evolutiondata[36] = {1.,0.,0.,0.,0.,0., // TODO: Fix this (it is not linear)
                                     0.,1.,0.,0.,deltaZ,0.,
                                     0.,0.,1.,0.,0.,deltaZ,
@@ -88,28 +91,26 @@ std::vector<State> Tracker::kalmanSmoother(std::vector<State> filteredStates) {
                                     0.,0.,0.,0.,1.,0.,
                                     0.,0.,0.,0.,0.,1.};
         evolutionMatrix.SetMatrixArray(evolutiondata);
-        std::cout<<"Ok1"<<std::endl;
 
         TMatrixD estimatedNextStateValue = TMatrixD(evolutionMatrix, TMatrixD::kMult, filteredStates[i].value);
         TMatrixD estimatedNextStateError = TMatrixD(evolutionMatrix, TMatrixD::kMult, TMatrixD(filteredStates[i].uncertainty, TMatrixD::kMultTranspose, evolutionMatrix));
+        TMatrixD estimatedNextStateErrorInverted = TMatrixD(estimatedNextStateError).Invert();
 
         TMatrixD smoothedStateValue = TMatrixD(smoothedNextStateValue, TMatrixD::kMinus, estimatedNextStateValue);
-        smoothedStateValue = TMatrixD(TMatrixD(estimatedNextStateError.Invert()), TMatrixD::kMult, smoothedStateValue);
+        smoothedStateValue = TMatrixD(estimatedNextStateErrorInverted, TMatrixD::kMult, smoothedStateValue);
         smoothedStateValue = TMatrixD(TMatrixD(TMatrixD::kTransposed, evolutionMatrix), TMatrixD::kMult, smoothedStateValue);
         smoothedStateValue = TMatrixD(filteredStates[i].uncertainty, TMatrixD::kMult, smoothedStateValue);
         smoothedStateValue += filteredStates[i].value;
-        std::cout<<"Ok2"<<std::endl;
 
         TMatrixD smoothedStateError = TMatrixD(evolutionMatrix, TMatrixD::kMult, TMatrixD(TMatrixD::kTransposed, filteredStates[i].uncertainty));
-        smoothedStateError = TMatrixD(TMatrixD(TMatrixD::kTransposed, TMatrixD(estimatedNextStateError.Invert())), TMatrixD::kMult, smoothedStateError);
+        smoothedStateError = TMatrixD(TMatrixD(TMatrixD::kTransposed, estimatedNextStateErrorInverted), TMatrixD::kMult, smoothedStateError);
         smoothedStateError = TMatrixD(TMatrixD(smoothedNextStateError, TMatrixD::kMinus, estimatedNextStateError), TMatrixD::kMult, smoothedStateError);
-        smoothedStateError = TMatrixD(TMatrixD(estimatedNextStateError.Invert()), TMatrixD::kMult, smoothedStateError);
+        smoothedStateError = TMatrixD(estimatedNextStateErrorInverted, TMatrixD::kMult, smoothedStateError);
         smoothedStateError = TMatrixD(TMatrixD(TMatrixD::kTransposed, evolutionMatrix), TMatrixD::kMult, smoothedStateError);
         smoothedStateError = TMatrixD(filteredStates[i].uncertainty, TMatrixD::kMult, smoothedStateError);
         smoothedStateError += filteredStates[i].uncertainty;
 
         smoothedStates.push_back(State{smoothedStateValue, smoothedStateError});
-        std::cout<<"Ok3"<<std::endl;
     }
 
     std::reverse(smoothedStates.begin(), smoothedStates.end());
