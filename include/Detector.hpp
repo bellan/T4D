@@ -23,7 +23,6 @@ public:
     TMatrixD uncertainty;
 };
 
-
 /**
  * The detector class.
  *
@@ -42,8 +41,7 @@ public:
 
     std::optional<Measurement> measure(TLorentzVector particlePosition) const;
 
-    State fromMeasureToState(Measurement measure) const;
-    State fromMeasureToState(Measurement currentMeasure, State preaviousState) const;
+    TMatrixD getMeasureUncertainty ();
 
 private:
     static int counter;

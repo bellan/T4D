@@ -60,13 +60,13 @@ void Simulation::runSimulation(int particlesNumber) {
             std::cout<<"Id: "<<misura.detectorID<<"      Misura: "<<misura.t<<" "<<misura.x<<" "<<misura.y<<std::endl;
     }
 
-    std::cout<<"\n\n\n\n\n\n\n"<<std::endl;
+    std::cout<<"\n\n"<<std::endl;
     int particleCounter = 1;
     int externalCounter = 0;
     for (auto misureParticellaSingola : misureParticelle) {
         std::cout<<"\n\nParticella "<<particleCounter<<std::endl;
-        auto statiDaMisure = tracker.fromMeasuresToStates(misureParticellaSingola);
-        std::vector<State> statiFiltrati = tracker.kalmanFilter(statiDaMisure);
+        std::vector<State> predizioni;
+        std::vector<State> statiFiltrati = tracker.kalmanFilter(misureParticellaSingola, predizioni);
         std::vector<State> statiSmoothed = tracker.kalmanSmoother(statiFiltrati);
         std::cout<<"filtered_size="<<statiFiltrati.size()<<" smoothed_size="<<statiSmoothed.size()<<std::endl;
 
@@ -75,8 +75,9 @@ void Simulation::runSimulation(int particlesNumber) {
         std::cout<<"Exp:  "<<std::endl;
         std::cout<<"Obt: "<<statiFiltrati[0].value(0,0)<<" "<<statiFiltrati[0].value(1,0)<<std::endl;
         std::cout<<"Smo: "<<statiSmoothed[0].value(0,0)<<" "<<statiSmoothed[0].value(1,0)<<"\n"<<std::endl;
-        for (int i = 0; i < (int)statiDaMisure.size(); i++) {
+        for (int i = 0; i < (int)statiFiltrati.size() - 1; i++) {
             std::cout<<"Exp: "<<statiGenerati[externalCounter].t<<" "<<statiGenerati[externalCounter].x<<std::endl;
+            std::cout<<"Pre: "<<predizioni[i].value(0,0)<<" "<<predizioni[i].value(1,0)<<std::endl;
             std::cout<<"Obt: "<<statiFiltrati[i+1].value(0,0)<<" "<<statiFiltrati[i+1].value(1,0)<<std::endl;
             std::cout<<"Smo: "<<statiSmoothed[i+1].value(0,0)<<" "<<statiSmoothed[i+1].value(1,0)<<"\n"<<std::endl;
             externalCounter++;
