@@ -2,6 +2,7 @@
 
 #include "Detector.hpp"
 #include "Particle.hpp"
+#include "PhisicalParameters.hpp"
 
 #include <TLorentzVector.h>
 #include <TRandom1.h>
@@ -76,17 +77,15 @@ Particle ParticleGun::generateParticle() {
     const double vx = sin(theta)*cos(phy);
     const double vy = sin(theta)*sin(phy);
     const double vz = cos(theta);
-    const double mass = randomGenerator.Uniform(0.,50.);    //TODO set range and units;
-    const double kineticEnergy = randomGenerator.Uniform(0.,50.);
-    const double charge = randomGenerator.Uniform(-50.,50.);
+    const double mass = randomGenerator.Uniform(MIN_PARTICLE_MASS, MAX_PARTICLE_MASS);
+    const double charge = FOUNDAMENTAL_CHARGE;
+    const double speed = randomGenerator.Uniform(MIN_BETA, MAX_BETA) * LIGHT_SPEED;
 
-    const double momentumModulus = std::sqrt(2*mass*kineticEnergy + kineticEnergy*kineticEnergy/(LIGHT_SPEED_IS*LIGHT_SPEED_IS));
+    const TVector3 velocity(speed*TVector3{vx,vy,vz});
 
-    const TLorentzVector momentum(momentumModulus*TVector3{vx,vy,vz},mass*LIGHT_SPEED_IS);
-
-    const Particle newParticle({position, timeCounter}, momentum, charge);
+    const Particle newParticle({position, timeCounter}, velocity, mass, charge);
 
     timeCounter += randomGenerator.Uniform(0.,50.);
-    
+
     return newParticle;
 }

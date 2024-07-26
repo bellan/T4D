@@ -11,7 +11,7 @@
 struct ParticleState {
     int detectorId;
     double t, x, y, z;
-    TLorentzVector momentum;
+    TVector3 velocity;
 };
 
 class Simulation {

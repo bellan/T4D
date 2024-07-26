@@ -1,14 +1,8 @@
 #pragma once
 
 #include <TLorentzVector.h>
-#include <TMatrixDfwd.h>
+#include <TVector3.h>
 #include <vector>
-
-/**
- * The speed of light in international system of measurements.
- */
-constexpr double LIGHT_SPEED_IS = 299792458.;
-
 
 /**
  * The particle class.
@@ -18,18 +12,17 @@ constexpr double LIGHT_SPEED_IS = 299792458.;
  */
 class Particle {
 public:
-    Particle(TLorentzVector initialPosition, TLorentzVector momentum, double charge=0.);
+    Particle(TLorentzVector initialPosition, TVector3 velocity, double mass, double charge=0.);
 
     TLorentzVector zSpaceEvolve(double finalZ);
-    TLorentzVector timeEvolve(double timeStep);
 
     std::vector<TLorentzVector> getPositions() { return positions; }
-    TLorentzVector getMomentum() { return momentum; }
+    TVector3 getVelocity() { return velocity; }
 
 private:
-    TLorentzVector momentum;
+    TVector3 velocity;
     std::vector<TLorentzVector> positions;
 
-    const double charge;
     const double mass;
+    const double charge;
 };

@@ -1,14 +1,17 @@
 #include "SetupFactory.hpp"
+
 #include "Detector.hpp"
 #include "ParticleGun.hpp"
+#include "PhisicalParameters.hpp"
+
 #include <vector>
 
 SimulationSetup SetupFactory::generateExperiment() const {
     std::vector<Detector> detectors = {};
-    for (int i = 1; i < 13; i++) {
-        detectors.push_back(Detector(i* 5., 50, 50));
+    for (int i = 1; i < NUMBER_OF_DETECTORS+1; i++) {
+        detectors.push_back(Detector(i* DISTANCE_BETWEEN_DETECTORS, DETECTOR_DIMENSION, DETECTOR_DIMENSION));
     }
 
     const ParticleGun gun({0,0,0}, detectors);
-    return {gun, detectors};
+    return SimulationSetup{gun, ExperimentalSetup{detectors}};
 }

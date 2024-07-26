@@ -99,7 +99,7 @@ std::vector<Measurement> Simulation::generateMeasures(int particlesNumber) {
     for (int i=0; i<particlesNumber; i++) {
         Particle particle = particleGun.generateParticle();
         std::cout << " - " << particle.getPositions()[0].T() << " " << particle.getPositions()[0].X() << " " << particle.getPositions()[0].Y() << " " << particle.getPositions()[0].Z() << " " <<
-             " - " << particle.getMomentum().E() << " " << particle.getMomentum().X() << " " << particle.getMomentum().Y() << " " << particle.getMomentum().Z() << " " << std::endl;
+             " - " << particle.getVelocity().Mag() << " " << particle.getVelocity().X() << " " << particle.getVelocity().Y() << " " << particle.getVelocity().Z() << " " << std::endl;
 
         for (auto detector : detectors) {
             auto position = particle.zSpaceEvolve(detector.getBottmLeftPosition().z());
@@ -119,14 +119,14 @@ std::vector<ParticleState> Simulation::generateStatesObjects(int particlesNumber
     for (int i=0; i<particlesNumber; i++) {
         Particle particle = particleGun.generateParticle();
         std::cout << " - " << particle.getPositions()[0].T() << " " << particle.getPositions()[0].X() << " " << particle.getPositions()[0].Y() << " " << particle.getPositions()[0].Z() << " " <<
-             " - " << particle.getMomentum().E() << " " << particle.getMomentum().X() << " " << particle.getMomentum().Y() << " " << particle.getMomentum().Z() << " " << std::endl;
+             " - " << particle.getVelocity().Mag() << " " << particle.getVelocity().X() << " " << particle.getVelocity().Y() << " " << particle.getVelocity().Z() << " " << std::endl;
 
         for (auto detector : detectors) {
             auto position = particle.zSpaceEvolve(detector.getBottmLeftPosition().z());
 
             std::optional<Measurement> measure = detector.measure(position);
             if (measure)
-                stateVector.push_back(ParticleState{measure->detectorID ,measure->t, measure->x, measure->y, detector.getBottmLeftPosition().z(), particle.getMomentum()});
+                stateVector.push_back(ParticleState{measure->detectorID ,measure->t, measure->x, measure->y, detector.getBottmLeftPosition().z(), particle.getVelocity()});
         }
     }
     return stateVector;

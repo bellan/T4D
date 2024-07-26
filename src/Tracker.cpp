@@ -41,7 +41,7 @@ std::vector<State> Tracker::kalmanFilter(std::vector<State> unfilteredStates) {
 
         const double deltaZ = i != 0 ? experimentalSetup.detectors[i].getBottmLeftPosition().Z() - experimentalSetup.detectors[i-1].getBottmLeftPosition().Z()
              : experimentalSetup.detectors[i].getBottmLeftPosition().Z();
-        double evolutiondata[36] = {1.,0.,0.,0.,0.,0., // TODO: Fix this (it is not linear)
+        double evolutiondata[36] = {1.,0.,0.,deltaZ,0.,0., // TODO: Fix this (it is not linear)
                                     0.,1.,0.,0.,deltaZ,0.,
                                     0.,0.,1.,0.,0.,deltaZ,
                                     0.,0.,0.,1.,0.,0.,
