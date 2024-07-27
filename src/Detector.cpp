@@ -43,6 +43,24 @@ std::optional<Measurement> Detector::measure(TLorentzVector particlePosition) co
     return (xConstrain && yConstrain && zConstrain) ? std::optional<Measurement>{{particlePosition.T(), deltaX, deltaY, id}} : std::nullopt;
 }
 
+/**
+ * Creates a Measurement from a particlePosition, if the particle is inside the area of the detector.
+ *
+ * @param particlePosition the position of the particle.
+ *
+ * @return an optional measurement. It contains the measure if the particle was inside, nullopt otherwise.
+ */
+std::optional<Measurement> Detector::measure(TMatrixD particleState) const {
+    const double t = particleState(0, 0);
+    const double x = particleState(1, 0);
+    const double y = particleState(2, 0);
+
+    const bool xConstrain = x > bottomLeftPosition.x() && x < bottomLeftPosition.x() + width;
+    const bool yConstrain = y > bottomLeftPosition.y() && y < bottomLeftPosition.y() + height;
+
+    return (xConstrain && yConstrain) ? std::optional<Measurement>{{t, x, y, id}} : std::nullopt;
+}
+
 TMatrixD Detector::getMeasureUncertainty() {
     double sdata[36] = {DETECTOR_TIME_UNCERTAINTY, 0., 0.,
                         0., DETECTOR_SPACE_UNCERTAINTY, 0.,

@@ -1,17 +1,18 @@
 #include "Simulation.hpp"
 
-#include <Rtypes.h>
 #include <TFile.h>
 #include <TLorentzVector.h>
 #include <TMatrixD.h>
 #include <algorithm>
 #include <iostream>
+#include <optional>
 #include <stdexcept>
 #include <vector>
 
 #include "Detector.hpp"
 #include "Particle.hpp"
 #include "ParticleGun.hpp"
+#include "PhisicalParameters.hpp"
 #include "SetupFactory.hpp"
 #include "Tracker.hpp"
 
@@ -33,13 +34,7 @@ Simulation::Simulation():
         throw std::invalid_argument("No detector");
     }
 
-    double minLen = detectors[0].getWidth();
-    for (auto detector : detectors) {
-        if (detector.getWidth() < minLen)
-            minLen  = detector.getWidth();
-    }
-
-    minTimeInterval = minLen/3e8;
+    minTimeInterval = MIN_TIME_BETWEEN_PARTICLE;
 }
 
 /**
@@ -48,9 +43,24 @@ Simulation::Simulation():
  * TODO: determine what actually does
  */
 void Simulation::runSimulation(int particlesNumber) {
-    std::vector<ParticleState> statiGenerati = generateStatesObjects(particlesNumber);
-    auto misureGenerate = fromStatesToMeasures(statiGenerati);
-    dataFile.SaveMultipleMeasures(misureGenerate);
+    std::vector<Particle> evolvedParticles = generateParticlesAndEvolve(particlesNumber);
+    std::cout<<evolvedParticles.size()<<std::endl;
+    std::vector<std::vector<TMatrixD>> generatedParticlesStates;
+    std::vector<Measurement> generatedMeasures;
+    for (Particle particle: evolvedParticles) {
+        std::vector<TMatrixD> registeredParticleStates;
+        std::vector<TMatrixD> generatedParticleStates = particle.getStates();
+        registeredParticleStates.push_back(generatedParticleStates[0]);
+        for (int i = 0; i < (int)detectors.size(); i++) {
+            std::optional<Measurement> measure = detectors[i].measure(generatedParticleStates[i+1]);
+            if (measure) {
+                generatedMeasures.push_back(measure.value());
+                registeredParticleStates.push_back(generatedParticleStates[i+1]);
+            }
+        }
+        generatedParticlesStates.push_back(registeredParticleStates);
+    }
+    dataFile.SaveMultipleMeasures(generatedMeasures);
 
     auto misure = dataFile.readMeasures();
     auto misureParticelle = separateMeasuresInParticles(misure);
@@ -61,31 +71,27 @@ void Simulation::runSimulation(int particlesNumber) {
     }
 
     std::cout<<"\n\n"<<std::endl;
-    int particleCounter = 1;
-    int externalCounter = 0;
-    for (auto misureParticellaSingola : misureParticelle) {
-        std::cout<<"\n\nParticella "<<particleCounter<<std::endl;
+    if (misureParticelle.size() != generatedParticlesStates.size()) std::cout<<"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"<<std::endl;
+    for (int j = 0; j < (int)generatedParticlesStates.size(); j++) {
+        std::cout<<"\n\nParticella "<<j+1<<std::endl;
+        auto misureParticellaSingola = misureParticelle[j];
+        auto statiParticellaSingola = generatedParticlesStates[j];
         std::vector<State> predizioni;
         std::vector<State> statiFiltrati = tracker.kalmanFilter(misureParticellaSingola, predizioni);
         std::vector<State> statiSmoothed = tracker.kalmanSmoother(statiFiltrati);
-        std::cout<<"filtered_size="<<statiFiltrati.size()<<" smoothed_size="<<statiSmoothed.size()<<std::endl;
 
         std::cout<<"        t        x"<<std::endl;
 
-        std::cout<<"Exp:  "<<std::endl;
+        std::cout<<"Exp: "<<statiParticellaSingola[0](0,0)<<" "<<statiParticellaSingola[0](1,0)<<std::endl;
         std::cout<<"Obt: "<<statiFiltrati[0].value(0,0)<<" "<<statiFiltrati[0].value(1,0)<<std::endl;
         std::cout<<"Smo: "<<statiSmoothed[0].value(0,0)<<" "<<statiSmoothed[0].value(1,0)<<"\n"<<std::endl;
         for (int i = 0; i < (int)statiFiltrati.size() - 1; i++) {
-            std::cout<<"Exp: "<<statiGenerati[externalCounter].t<<" "<<statiGenerati[externalCounter].x<<std::endl;
+            std::cout<<"Exp: "<<statiParticellaSingola[i+1](0,0)<<" "<<statiParticellaSingola[i+1](1,0)<<std::endl;
             std::cout<<"Pre: "<<predizioni[i].value(0,0)<<" "<<predizioni[i].value(1,0)<<std::endl;
             std::cout<<"Obt: "<<statiFiltrati[i+1].value(0,0)<<" "<<statiFiltrati[i+1].value(1,0)<<std::endl;
             std::cout<<"Smo: "<<statiSmoothed[i+1].value(0,0)<<" "<<statiSmoothed[i+1].value(1,0)<<"\n"<<std::endl;
-            externalCounter++;
         }
-        particleCounter++;
     }
-
-
 }
 
 /**
@@ -102,7 +108,7 @@ std::vector<Measurement> Simulation::generateMeasures(int particlesNumber) {
         std::cout << " - " << particle.getPositions()[0].T() << " " << particle.getPositions()[0].X() << " " << particle.getPositions()[0].Y() << " " << particle.getPositions()[0].Z() << " " <<
              " - " << particle.getVelocity().Mag() << " " << particle.getVelocity().X() << " " << particle.getVelocity().Y() << " " << particle.getVelocity().Z() << " " << std::endl;
 
-        for (auto detector : detectors) {
+        for (Detector detector : detectors) {
             auto position = particle.zSpaceEvolve(detector.getBottmLeftPosition().z());
 
             std::optional<Measurement> measure = detector.measure(position);
@@ -114,31 +120,23 @@ std::vector<Measurement> Simulation::generateMeasures(int particlesNumber) {
     return measureVector;
 }
 
-// TODO: documentation or delete
-std::vector<ParticleState> Simulation::generateStatesObjects(int particlesNumber) {
-    std::vector<ParticleState> stateVector;
+/**
+ * Generate a set of particles and make them evolve
+ *
+ * @param particleNumber the number of particles to be generated
+ * @return a vector containing the particles
+ */
+std::vector<Particle> Simulation::generateParticlesAndEvolve(int particlesNumber) {
+    std::vector<Particle> particlesVector;
     for (int i=0; i<particlesNumber; i++) {
         Particle particle = particleGun.generateParticle();
-        std::cout << " - " << particle.getPositions()[0].T() << " " << particle.getPositions()[0].X() << " " << particle.getPositions()[0].Y() << " " << particle.getPositions()[0].Z() << " " <<
-             " - " << particle.getVelocity().Mag() << " " << particle.getVelocity().X() << " " << particle.getVelocity().Y() << " " << particle.getVelocity().Z() << " " << std::endl;
-
-        for (auto detector : detectors) {
-            auto position = particle.zSpaceEvolve(detector.getBottmLeftPosition().z());
-
-            std::optional<Measurement> measure = detector.measure(position);
-            if (measure)
-                stateVector.push_back(ParticleState{measure->detectorID ,measure->t, measure->x, measure->y, detector.getBottmLeftPosition().z(), particle.getVelocity()});
+        for (Detector detector : detectors) {
+            particle.zSpaceEvolve(detector.getBottmLeftPosition().z());
         }
+        particlesVector.push_back(particle);
     }
-    return stateVector;
-}
 
-std::vector<Measurement> Simulation::fromStatesToMeasures(std::vector<ParticleState> states) {
-    std::vector<Measurement> measureVector;
-    for (ParticleState state : states)
-        measureVector.push_back(Measurement{state.t, state.x, state.y, state.detectorId});
-
-    return measureVector;
+    return particlesVector;
 }
 
 

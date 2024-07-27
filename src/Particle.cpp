@@ -1,6 +1,7 @@
 #include "Particle.hpp"
 
 #include <TLorentzVector.h>
+#include <TMatrixD.h>
 #include <TVector3.h>
 #include <stdexcept>
 
@@ -53,4 +54,17 @@ TLorentzVector Particle::zSpaceEvolve(const double finalZ) {
 
     this->positions.push_back(newPosition);
     return newPosition;
+}
+
+std::vector<TMatrixD> Particle::getStates() {
+    std::vector<TMatrixD> statesVector;
+    double speedInverse = 1/velocity.Mag();
+    double tanThetaxz = velocity.x() / velocity.z();
+    double tanThetayz = velocity.y() / velocity.z();
+    for(auto position: positions) {
+        double data[6] = {position.T(), position.X(), position.Y(), speedInverse, tanThetaxz, tanThetayz};
+        statesVector.push_back(TMatrixD(6,1,data));
+    }
+
+    return statesVector;
 }

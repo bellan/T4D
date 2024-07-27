@@ -59,7 +59,6 @@ timeCounter(0.) {
         thetaMax = std::min(thetaMax, std::min(thetaBL, std::min(thetaBR, std::min(thetaTL, thetaTR)))); //TODO consider changing to max (change also initialization)
     }
     maxColatitude = thetaMax;
-    std::cout<<thetaMax<<std::endl;
 }
 
 /**

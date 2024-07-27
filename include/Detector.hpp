@@ -40,6 +40,7 @@ public:
     static void resetCounter() { counter = 0; } // TODO: Consider removing this. It can be useful to instanciate differente experiments (e.g. one for the sim and one for the reconstruction).
 
     std::optional<Measurement> measure(TLorentzVector particlePosition) const;
+    std::optional<Measurement> measure(TMatrixD particleState) const;
 
     TMatrixD getMeasureUncertainty ();
 

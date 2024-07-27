@@ -1,6 +1,7 @@
 #pragma once
 
 #include <TLorentzVector.h>
+#include <TMatrixD.h>
 #include <TVector3.h>
 #include <vector>
 
@@ -18,6 +19,7 @@ public:
 
     std::vector<TLorentzVector> getPositions() { return positions; }
     TVector3 getVelocity() { return velocity; }
+    std::vector<TMatrixD> getStates();
 
 private:
     TVector3 velocity;

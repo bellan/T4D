@@ -8,19 +8,12 @@
 #include "ParticleGun.hpp"
 #include "Tracker.hpp"
 
-struct ParticleState {
-    int detectorId;
-    double t, x, y, z;
-    TVector3 velocity;
-};
-
 class Simulation {
 public:
     Simulation();
     void runSimulation(int particlesNumber);
     std::vector<Measurement> generateMeasures(int particlesNumber);
-    std::vector<ParticleState> generateStatesObjects(int particlesNumber);
-    std::vector<Measurement> fromStatesToMeasures(std::vector<ParticleState> states);
+    std::vector<Particle> generateParticlesAndEvolve(int particlesNumber);
     std::vector<std::vector<Measurement>> separateMeasuresInParticles(std::vector<Measurement> allMeasures);
 
 private:
