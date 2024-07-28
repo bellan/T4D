@@ -1,5 +1,7 @@
 #include "Tracker.hpp"
 #include "Detector.hpp"
+#include "PhisicalParameters.hpp"
+#include "Utils.hpp"
 #include <TMatrixD.h>
 #include <ostream>
 #include <vector>
@@ -23,18 +25,21 @@ std::vector<State> Tracker::kalmanFilter(std::vector<Measurement> measures, std:
     TMatrixD initialStateValue(6,1); // 6 dimentional vector (t,x,y,1/speed,thetazx,thetazy)
     TMatrixD initialStateError(6,6);
     double data[6] = {0.,0.,0.,0.,0.,0.};
-    double sdata[36] = {1.e18,0.,0.,0.,0.,0.,
-                        0.,1.e18,0.,0.,0.,0.,
-                        0.,0.,1.e18,0.,0.,0.,
-                        0.,0.,0.,1.e18,0.,0.,
-                        0.,0.,0.,0.,1.e18,0.,
-                        0.,0.,0.,0.,0.,1.e18};
+    constexpr double bigT = VERY_HIGH_TIME_ERROR * VERY_HIGH_TIME_ERROR;
+    constexpr double bigX = VERY_HIGH_SPACE_ERROR * VERY_HIGH_SPACE_ERROR;
+    double sdata[36] = {bigT,0.,0.,0.,0.,0.,
+                        0.,bigX,0.,0.,0.,0.,
+                        0.,0.,bigX,0.,0.,0.,
+                        0.,0.,0.,bigX,0.,0.,
+                        0.,0.,0.,0.,bigX,0.,
+                        0.,0.,0.,0.,0.,bigX};
     initialStateValue.SetMatrixArray(data,"");
     initialStateError.SetMatrixArray(sdata, "");
     State state{initialStateValue, initialStateError};
 
 
     filteredStates.push_back(state);
+    predictions.push_back(state);
 
     // Initializing the first state
     for (int i = 0; i < (int)measures.size(); i++) {
@@ -42,6 +47,8 @@ std::vector<State> Tracker::kalmanFilter(std::vector<Measurement> measures, std:
 
         TMatrixD measure(3, 1, data);
         TMatrixD measureError = experimentalSetup.detectors[i].getMeasureUncertainty();
+        std::cout<<std::endl;
+
 
         TMatrixD preaviousStateValue = TMatrixD(filteredStates[i].value);
         TMatrixD preaviousStateError = TMatrixD(filteredStates[i].uncertainty);
@@ -77,6 +84,7 @@ std::vector<State> Tracker::kalmanFilter(std::vector<Measurement> measures, std:
         TMatrixD filteredStateError = TMatrixD(kalmanGain, TMatrixD::kMult, TMatrixD(projectionMatrix, TMatrixD::kMult, estimatedStateError));
         filteredStateError = TMatrixD(estimatedStateError, TMatrixD::kMinus, filteredStateError);
 
+        printMatrix(filteredStateError);
         predictions.push_back(State{estimatedStateValue, estimatedStateError});
         filteredStates.push_back(State{filteredStateValue, filteredStateError});
     }

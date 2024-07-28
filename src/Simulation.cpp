@@ -3,10 +3,13 @@
 #include <TFile.h>
 #include <TLorentzVector.h>
 #include <TMatrixD.h>
+#include <TMatrixDfwd.h>
 #include <algorithm>
+#include <fstream>
 #include <iostream>
 #include <optional>
 #include <stdexcept>
+#include <string>
 #include <vector>
 
 #include "Detector.hpp"
@@ -70,8 +73,10 @@ void Simulation::runSimulation(int particlesNumber) {
             std::cout<<"Id: "<<misura.detectorID<<"      Misura: "<<misura.t<<" "<<misura.x<<" "<<misura.y<<std::endl;
     }
 
+    std::vector<std::vector<State>> predictedStates;
+    std::vector<std::vector<State>> filteredStates;
+    std::vector<std::vector<State>> smoothedStates;
     std::cout<<"\n\n"<<std::endl;
-    if (misureParticelle.size() != generatedParticlesStates.size()) std::cout<<"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"<<std::endl;
     for (int j = 0; j < (int)generatedParticlesStates.size(); j++) {
         std::cout<<"\n\nParticella "<<j+1<<std::endl;
         auto misureParticellaSingola = misureParticelle[j];
@@ -79,19 +84,12 @@ void Simulation::runSimulation(int particlesNumber) {
         std::vector<State> predizioni;
         std::vector<State> statiFiltrati = tracker.kalmanFilter(misureParticellaSingola, predizioni);
         std::vector<State> statiSmoothed = tracker.kalmanSmoother(statiFiltrati);
-
-        std::cout<<"        t        x"<<std::endl;
-
-        std::cout<<"Exp: "<<statiParticellaSingola[0](0,0)<<" "<<statiParticellaSingola[0](1,0)<<std::endl;
-        std::cout<<"Obt: "<<statiFiltrati[0].value(0,0)<<" "<<statiFiltrati[0].value(1,0)<<std::endl;
-        std::cout<<"Smo: "<<statiSmoothed[0].value(0,0)<<" "<<statiSmoothed[0].value(1,0)<<"\n"<<std::endl;
-        for (int i = 0; i < (int)statiFiltrati.size() - 1; i++) {
-            std::cout<<"Exp: "<<statiParticellaSingola[i+1](0,0)<<" "<<statiParticellaSingola[i+1](1,0)<<std::endl;
-            std::cout<<"Pre: "<<predizioni[i].value(0,0)<<" "<<predizioni[i].value(1,0)<<std::endl;
-            std::cout<<"Obt: "<<statiFiltrati[i+1].value(0,0)<<" "<<statiFiltrati[i+1].value(1,0)<<std::endl;
-            std::cout<<"Smo: "<<statiSmoothed[i+1].value(0,0)<<" "<<statiSmoothed[i+1].value(1,0)<<"\n"<<std::endl;
-        }
+        predictedStates.push_back(predizioni);
+        filteredStates.push_back(statiFiltrati);
+        smoothedStates.push_back(statiSmoothed);
     }
+
+    saveDataToCSV(generatedParticlesStates, filteredStates, smoothedStates, predictedStates);
 }
 
 /**
@@ -172,4 +170,76 @@ std::vector<std::vector<Measurement>> Simulation::separateMeasuresInParticles(st
     }
 
     return singleParticleMeasuresVectors;
+}
+
+// TODO: document
+void Simulation::saveDataToCSV(std::vector<std::vector<TMatrixD>> generatedStates, std::vector<std::vector<State>> filteredStates, std::vector<std::vector<State>> smoothedStates, std::vector<std::vector<State>> predictedStates) {
+    if (filteredStates.size() != generatedStates.size() || filteredStates.size() != smoothedStates.size() || smoothedStates.size() != predictedStates.size()) std::cout<<"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"<<std::endl;
+    for (int j = 0; j < (int)generatedStates.size(); j++) {
+        std::string filename("../data/Particle ");
+        filename += std::to_string(j);
+        filename += ".csv";
+        std::ofstream csvFile;
+        csvFile.open(filename);
+        csvFile << "z | generated   |  predicted |   filtered | smoothed\n";
+        csvFile << "z,t,x,y,speeed,xz,yz,t,st,x,sx,y,sy,speeed,sspeed,xz,sxz,yz,syz,t,st,x,sx,y,sy,speeed,sspeed,xz,sxz,yz,syz,t,st,x,sx,y,sy,speeed,sspeed,xz,sxz,yz,syz\n";
+        for (int i = 0; i < (int)generatedStates[j].size(); i++) {
+            if (i == 0)
+                csvFile << "0.,";
+            else
+                csvFile << detectors[i-1].getBottmLeftPosition().z() << ",";
+
+            TMatrixD gen = generatedStates[j][i];
+            State pre = predictedStates[j][i];
+            State fil = filteredStates[j][i];
+            State smo = smoothedStates[j][i];
+
+            csvFile << gen(0,0) << ",";
+            csvFile << gen(1,0) << ",";
+            csvFile << gen(2,0) << ",";
+            csvFile << gen(3,0) << ",";
+            csvFile << gen(4,0) << ",";
+            csvFile << gen(5,0) << ",";
+
+            csvFile << pre.value(0,0) << ",";
+            csvFile << sqrt(pre.uncertainty(0,0)) << ",";
+            csvFile << pre.value(1,0) << ",";
+            csvFile << sqrt(pre.uncertainty(1,1)) << ",";
+            csvFile << pre.value(2,0) << ",";
+            csvFile << sqrt(pre.uncertainty(2,2)) << ",";
+            csvFile << pre.value(3,0) << ",";
+            csvFile << sqrt(pre.uncertainty(3,3)) << ",";
+            csvFile << pre.value(4,0) << ",";
+            csvFile << sqrt(pre.uncertainty(4,4)) << ",";
+            csvFile << pre.value(5,0) << ",";
+            csvFile << sqrt(pre.uncertainty(5,5)) << ",";
+
+            csvFile << fil.value(0,0) << ",";
+            csvFile << sqrt(fil.uncertainty(0,0)) << ",";
+            csvFile << fil.value(1,0) << ",";
+            csvFile << sqrt(fil.uncertainty(1,1)) << ",";
+            csvFile << fil.value(2,0) << ",";
+            csvFile << sqrt(fil.uncertainty(2,2)) << ",";
+            csvFile << fil.value(3,0) << ",";
+            csvFile << sqrt(fil.uncertainty(3,3)) << ",";
+            csvFile << fil.value(4,0) << ",";
+            csvFile << sqrt(fil.uncertainty(4,4)) << ",";
+            csvFile << fil.value(5,0) << ",";
+            csvFile << sqrt(fil.uncertainty(5,5)) << ",";
+
+            csvFile << smo.value(0,0) << ",";
+            csvFile << sqrt(smo.uncertainty(0,0)) << ",";
+            csvFile << smo.value(1,0) << ",";
+            csvFile << sqrt(smo.uncertainty(1,1)) << ",";
+            csvFile << smo.value(2,0) << ",";
+            csvFile << sqrt(smo.uncertainty(2,2)) << ",";
+            csvFile << smo.value(3,0) << ",";
+            csvFile << sqrt(smo.uncertainty(3,3)) << ",";
+            csvFile << smo.value(4,0) << ",";
+            csvFile << sqrt(smo.uncertainty(4,4)) << ",";
+            csvFile << smo.value(5,0) << ",";
+            csvFile << sqrt(smo.uncertainty(5,5)) << "\n";
+        }
+        csvFile.close();
+    }
 }
