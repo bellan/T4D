@@ -181,7 +181,7 @@ void Simulation::saveDataToCSV(std::vector<std::vector<TMatrixD>> generatedState
         filename += ".csv";
         std::ofstream csvFile;
         csvFile.open(filename);
-        csvFile << "z | generated   |  predicted |   filtered | smoothed\n";
+        csvFile << "z,generated,,,,,,predicted,,,,,,,,,,,,filtered,,,,,,,,,,,,smoothed,,,,,,,,,,,\n";
         csvFile << "z,t,x,y,speeed,xz,yz,t,st,x,sx,y,sy,speeed,sspeed,xz,sxz,yz,syz,t,st,x,sx,y,sy,speeed,sspeed,xz,sxz,yz,syz,t,st,x,sx,y,sy,speeed,sspeed,xz,sxz,yz,syz\n";
         for (int i = 0; i < (int)generatedStates[j].size(); i++) {
             if (i == 0)

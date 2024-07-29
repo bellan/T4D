@@ -41,6 +41,7 @@ std::vector<State> Tracker::kalmanFilter(std::vector<Measurement> measures, std:
     State state{initialStateValue, initialStateError};
 
 
+    predictions.push_back(state);
     filteredStates.push_back(state);
 
     // Initializing the first state
@@ -57,7 +58,6 @@ std::vector<State> Tracker::kalmanFilter(std::vector<Measurement> measures, std:
                                 0.,0.,0.,0.,bigDirection,0.,
                                 0.,0.,0.,0.,0.,bigDirection};
             TMatrixD stateError(6,6,sdata);
-            printMatrix(stateError);
             predictions.push_back(State{initialStateValue, initialStateError});
             filteredStates.push_back(State{stateValue, stateError});
             continue;
@@ -86,7 +86,6 @@ std::vector<State> Tracker::kalmanFilter(std::vector<Measurement> measures, std:
                                 0.,0.,0.,0.,sDeltaX2/(deltaZ*deltaZ),0.,
                                 0.,0.,0.,0.,0.,sDeltaY2/(deltaZ*deltaZ)};
             TMatrixD stateError(6,6,sdata);
-            printMatrix(stateError);
             predictions.push_back(State{initialStateValue, initialStateError});
             filteredStates.push_back(State{stateValue, stateError});
             continue;
@@ -96,7 +95,6 @@ std::vector<State> Tracker::kalmanFilter(std::vector<Measurement> measures, std:
 
         TMatrixD measure(3, 1, data);
         TMatrixD measureError = experimentalSetup.detectors[i].getMeasureUncertainty();
-        std::cout<<std::endl;
 
 
         TMatrixD preaviousStateValue = TMatrixD(filteredStates[i].value);
@@ -128,23 +126,19 @@ std::vector<State> Tracker::kalmanFilter(std::vector<Measurement> measures, std:
         TMatrixD estimatedStateValue = TMatrixD(evolutionMatrix, TMatrixD::kMult, preaviousStateValue);
         TMatrixD estimatedStateError = TMatrixD(evolutionMatrix, TMatrixD::kMult, TMatrixD(preaviousStateError, TMatrixD::kMultTranspose, evolutionMatrix));
 
-        printMatrix(estimatedStateError);
         TMatrixD residual = TMatrixD(measure, TMatrixD::kMinus, TMatrixD(projectionMatrix, TMatrixD::kMult, estimatedStateValue));
         TMatrixD kalmanGainDenominator = TMatrixD(projectionMatrix, TMatrixD::kMult, TMatrixD(estimatedStateError, TMatrixD::kMultTranspose, projectionMatrix));
         kalmanGainDenominator += measureError;
-        printMatrix(kalmanGainDenominator);
         kalmanGainDenominator.SetTol(DETERMINANT_TOLERANCE);
+        kalmanGainDenominator.Invert();
 
         TMatrixD kalmanGain = TMatrixD(TMatrixD(estimatedStateError, TMatrixD::kMultTranspose, projectionMatrix), TMatrixD::kMult, kalmanGainDenominator);
         TMatrixD filteredStateValue = TMatrixD(kalmanGain, TMatrixD::kMult, residual);
         filteredStateValue += estimatedStateValue;
 
-        // printMatrix(kalmanGain);
-        // printMatrix(TMatrixD(identity, TMatrixD::kMinus, TMatrixD(kalmanGain, TMatrixD::kMult, projectionMatrix)));
         TMatrixD filteredStateError = TMatrixD(kalmanGain, TMatrixD::kMult, TMatrixD(projectionMatrix, TMatrixD::kMult, estimatedStateError));
         filteredStateError = TMatrixD(estimatedStateError, TMatrixD::kMinus, filteredStateError);
 
-        printMatrix(filteredStateError);
         predictions.push_back(State{estimatedStateValue, estimatedStateError});
         filteredStates.push_back(State{filteredStateValue, filteredStateError});
     }
