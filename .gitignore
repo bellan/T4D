@@ -37,3 +37,4 @@ compile_commands.json
 # Compiling folders
 build/
 .cache/
+DataVisualization/*.pdf

@@ -5,8 +5,11 @@ constexpr int NUMBER_OF_PARTICLES = 1;
 // Program parameters
 // NOTE: this paramater should be chosen such that the standard detector uncertainty is much smaller but wont be erased by this
 // (6 orders of magnitude bigger should be ok)
-constexpr double VERY_HIGH_TIME_ERROR = 1e-5;
+constexpr double VERY_HIGH_TIME_ERROR = 1e-6;
 constexpr double VERY_HIGH_SPACE_ERROR = 1;
+constexpr double VERY_HIGH_VELOCITY_INVERSE_ERROR = 1e-1;
+constexpr double VERY_HIGH_DIRECTION_ERROR = 1e4;
+constexpr double DETERMINANT_TOLERANCE = 1e-55;
 
 // Phisical costants
 constexpr double FOUNDAMENTAL_CHARGE = 1.602176634e-19;
