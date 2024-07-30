@@ -1,5 +1,6 @@
 #pragma once
 
+#include "MeasuresAndStates.hpp"
 #include <TLorentzVector.h>
 #include <TMatrixD.h>
 #include <TVector3.h>
@@ -17,13 +18,10 @@ public:
 
     TLorentzVector zSpaceEvolve(double finalZ);
 
-    std::vector<TLorentzVector> getPositions() { return positions; }
-    TVector3 getVelocity() { return velocity; }
-    std::vector<TMatrixD> getStates();
+    std::vector<ParticleState> getStates() { return states; };
 
 private:
-    TVector3 velocity;
-    std::vector<TLorentzVector> positions;
+    std::vector<ParticleState> states;
 
     const double mass;
     const double charge;

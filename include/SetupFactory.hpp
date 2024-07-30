@@ -3,15 +3,12 @@
 #include "Detector.hpp"
 #include "ParticleGun.hpp"
 
-struct ExperimentalSetup {
-public:
-    std::vector<Detector> detectors;
-};
+#include <vector>
 
 struct SimulationSetup {
 public:
     ParticleGun particleGun;
-    ExperimentalSetup experimentalSetup;
+    std::vector<Detector> detectors;
 };
 
 class SetupFactory {

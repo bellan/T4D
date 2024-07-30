@@ -4,20 +4,19 @@
 #include <TLorentzVector.h>
 #include <TMatrixD.h>
 #include <TMatrixDfwd.h>
-#include <algorithm>
-#include <fstream>
 #include <iostream>
 #include <optional>
 #include <stdexcept>
-#include <string>
 #include <vector>
 
 #include "Detector.hpp"
+#include "MeasuresAndStates.hpp"
 #include "Particle.hpp"
 #include "ParticleGun.hpp"
 #include "PhisicalParameters.hpp"
 #include "SetupFactory.hpp"
 #include "Tracker.hpp"
+#include "Utils.hpp"
 
 /**
  * The default constructor TODO sobstitude with a factory that creates the experiment settings
@@ -28,8 +27,8 @@ Simulation::Simulation():
 {
     SetupFactory factory{};
     const SimulationSetup experiment = factory.generateExperiment();
-    detectors = experiment.experimentalSetup.detectors;
-    tracker = Tracker(experiment.experimentalSetup);
+    detectors = experiment.detectors;
+    tracker = Tracker(experiment.detectors);
     particleGun.setMaxColatitude(experiment.particleGun.getMaxColatitude());
     particleGun.setPosition(experiment.particleGun.getPosition());
 
@@ -47,12 +46,11 @@ Simulation::Simulation():
  */
 void Simulation::runSimulation(int particlesNumber) {
     std::vector<Particle> evolvedParticles = generateParticlesAndEvolve(particlesNumber);
-    std::cout<<evolvedParticles.size()<<std::endl;
-    std::vector<std::vector<TMatrixD>> generatedParticlesStates;
+    std::vector<std::vector<ParticleState>> generatedParticlesStates;
     std::vector<Measurement> generatedMeasures;
     for (Particle particle: evolvedParticles) {
-        std::vector<TMatrixD> registeredParticleStates;
-        std::vector<TMatrixD> generatedParticleStates = particle.getStates();
+        std::vector<ParticleState> registeredParticleStates;
+        std::vector<ParticleState> generatedParticleStates = particle.getStates();
         registeredParticleStates.push_back(generatedParticleStates[0]);
         for (int i = 0; i < (int)detectors.size(); i++) {
             std::optional<Measurement> measure = detectors[i].measure(generatedParticleStates[i+1]);
@@ -73,23 +71,21 @@ void Simulation::runSimulation(int particlesNumber) {
             std::cout<<"Id: "<<misura.detectorID<<"      Misura: "<<misura.t<<" "<<misura.x<<" "<<misura.y<<std::endl;
     }
 
-    std::vector<std::vector<State>> predictedStates;
-    std::vector<std::vector<State>> filteredStates;
-    std::vector<std::vector<State>> smoothedStates;
-    std::cout<<"\n\n"<<std::endl;
+    std::vector<std::vector<MatrixStateEstimate>> predictedStates;
+    std::vector<std::vector<MatrixStateEstimate>> filteredStates;
+    std::vector<std::vector<MatrixStateEstimate>> smoothedStates;
     for (int j = 0; j < (int)generatedParticlesStates.size(); j++) {
-        std::cout<<"\n\nParticella "<<j+1<<std::endl;
         auto misureParticellaSingola = misureParticelle[j];
         auto statiParticellaSingola = generatedParticlesStates[j];
-        std::vector<State> predizioni;
-        std::vector<State> statiFiltrati = tracker.kalmanFilter(misureParticellaSingola, predizioni);
-        std::vector<State> statiSmoothed = tracker.kalmanSmoother(statiFiltrati);
+        std::vector<MatrixStateEstimate> predizioni;
+        std::vector<MatrixStateEstimate> statiFiltrati = tracker.kalmanFilter(misureParticellaSingola, predizioni);
+        std::vector<MatrixStateEstimate> statiSmoothed = tracker.kalmanSmoother(statiFiltrati);
         predictedStates.push_back(predizioni);
         filteredStates.push_back(statiFiltrati);
         smoothedStates.push_back(statiSmoothed);
     }
 
-    saveDataToCSV(generatedParticlesStates, filteredStates, smoothedStates, predictedStates);
+    saveDataToCSV(detectors, generatedParticlesStates, filteredStates, smoothedStates, predictedStates);
 }
 
 /**
@@ -103,8 +99,8 @@ std::vector<Measurement> Simulation::generateMeasures(int particlesNumber) {
     std::vector<Measurement> measureVector;
     for (int i=0; i<particlesNumber; i++) {
         Particle particle = particleGun.generateParticle();
-        std::cout << " - " << particle.getPositions()[0].T() << " " << particle.getPositions()[0].X() << " " << particle.getPositions()[0].Y() << " " << particle.getPositions()[0].Z() << " " <<
-             " - " << particle.getVelocity().Mag() << " " << particle.getVelocity().X() << " " << particle.getVelocity().Y() << " " << particle.getVelocity().Z() << " " << std::endl;
+        std::cout << " - " << particle.getStates()[0].position.T() << " " << particle.getStates()[0].position.X() << " " << particle.getStates()[0].position.Y() << " " << particle.getStates()[0].position.Z() << " " <<
+             " - " << particle.getStates()[0].velocity.Mag() << " " << particle.getStates()[0].velocity.X() << " " << particle.getStates()[0].velocity.Y() << " " << particle.getStates()[0].velocity.Z() << " " << std::endl;
 
         for (Detector detector : detectors) {
             auto position = particle.zSpaceEvolve(detector.getBottmLeftPosition().z());
@@ -170,76 +166,4 @@ std::vector<std::vector<Measurement>> Simulation::separateMeasuresInParticles(st
     }
 
     return singleParticleMeasuresVectors;
-}
-
-// TODO: document
-void Simulation::saveDataToCSV(std::vector<std::vector<TMatrixD>> generatedStates, std::vector<std::vector<State>> filteredStates, std::vector<std::vector<State>> smoothedStates, std::vector<std::vector<State>> predictedStates) {
-    if (filteredStates.size() != generatedStates.size() || filteredStates.size() != smoothedStates.size() || smoothedStates.size() != predictedStates.size()) std::cout<<"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"<<std::endl;
-    for (int j = 0; j < (int)generatedStates.size(); j++) {
-        std::string filename("../data/Particle ");
-        filename += std::to_string(j);
-        filename += ".csv";
-        std::ofstream csvFile;
-        csvFile.open(filename);
-        csvFile << "z,generated,,,,,,predicted,,,,,,,,,,,,filtered,,,,,,,,,,,,smoothed,,,,,,,,,,,\n";
-        csvFile << "z,t,x,y,speeed,xz,yz,t,st,x,sx,y,sy,speeed,sspeed,xz,sxz,yz,syz,t,st,x,sx,y,sy,speeed,sspeed,xz,sxz,yz,syz,t,st,x,sx,y,sy,speeed,sspeed,xz,sxz,yz,syz\n";
-        for (int i = 0; i < (int)generatedStates[j].size(); i++) {
-            if (i == 0)
-                csvFile << "0.,";
-            else
-                csvFile << detectors[i-1].getBottmLeftPosition().z() << ",";
-
-            TMatrixD gen = generatedStates[j][i];
-            State pre = predictedStates[j][i];
-            State fil = filteredStates[j][i];
-            State smo = smoothedStates[j][i];
-
-            csvFile << gen(0,0) << ",";
-            csvFile << gen(1,0) << ",";
-            csvFile << gen(2,0) << ",";
-            csvFile << gen(3,0) << ",";
-            csvFile << gen(4,0) << ",";
-            csvFile << gen(5,0) << ",";
-
-            csvFile << pre.value(0,0) << ",";
-            csvFile << sqrt(pre.uncertainty(0,0)) << ",";
-            csvFile << pre.value(1,0) << ",";
-            csvFile << sqrt(pre.uncertainty(1,1)) << ",";
-            csvFile << pre.value(2,0) << ",";
-            csvFile << sqrt(pre.uncertainty(2,2)) << ",";
-            csvFile << pre.value(3,0) << ",";
-            csvFile << sqrt(pre.uncertainty(3,3)) << ",";
-            csvFile << pre.value(4,0) << ",";
-            csvFile << sqrt(pre.uncertainty(4,4)) << ",";
-            csvFile << pre.value(5,0) << ",";
-            csvFile << sqrt(pre.uncertainty(5,5)) << ",";
-
-            csvFile << fil.value(0,0) << ",";
-            csvFile << sqrt(fil.uncertainty(0,0)) << ",";
-            csvFile << fil.value(1,0) << ",";
-            csvFile << sqrt(fil.uncertainty(1,1)) << ",";
-            csvFile << fil.value(2,0) << ",";
-            csvFile << sqrt(fil.uncertainty(2,2)) << ",";
-            csvFile << fil.value(3,0) << ",";
-            csvFile << sqrt(fil.uncertainty(3,3)) << ",";
-            csvFile << fil.value(4,0) << ",";
-            csvFile << sqrt(fil.uncertainty(4,4)) << ",";
-            csvFile << fil.value(5,0) << ",";
-            csvFile << sqrt(fil.uncertainty(5,5)) << ",";
-
-            csvFile << smo.value(0,0) << ",";
-            csvFile << sqrt(smo.uncertainty(0,0)) << ",";
-            csvFile << smo.value(1,0) << ",";
-            csvFile << sqrt(smo.uncertainty(1,1)) << ",";
-            csvFile << smo.value(2,0) << ",";
-            csvFile << sqrt(smo.uncertainty(2,2)) << ",";
-            csvFile << smo.value(3,0) << ",";
-            csvFile << sqrt(smo.uncertainty(3,3)) << ",";
-            csvFile << smo.value(4,0) << ",";
-            csvFile << sqrt(smo.uncertainty(4,4)) << ",";
-            csvFile << smo.value(5,0) << ",";
-            csvFile << sqrt(smo.uncertainty(5,5)) << "\n";
-        }
-        csvFile.close();
-    }
 }

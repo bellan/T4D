@@ -13,5 +13,5 @@ SimulationSetup SetupFactory::generateExperiment() const {
     }
 
     const ParticleGun gun({0,0,0}, detectors);
-    return SimulationSetup{gun, ExperimentalSetup{detectors}};
+    return SimulationSetup{gun, detectors};
 }

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Detector.hpp"
+#include "MeasuresAndStates.hpp"
 
 #include <TFile.h>
 #include <TTree.h>

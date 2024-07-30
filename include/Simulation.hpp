@@ -17,7 +17,6 @@ public:
     std::vector<Measurement> generateMeasures(int particlesNumber);
     std::vector<Particle> generateParticlesAndEvolve(int particlesNumber);
     std::vector<std::vector<Measurement>> separateMeasuresInParticles(std::vector<Measurement> allMeasures);
-    void saveDataToCSV(std::vector<std::vector<TMatrixD>> generatedStates, std::vector<std::vector<State>> filteredStates, std::vector<std::vector<State>> smoothedStates, std::vector<std::vector<State>> predictedStates);
 
 private:
     double minTimeInterval;

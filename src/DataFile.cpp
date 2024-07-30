@@ -1,8 +1,8 @@
 #include "DataFile.hpp"
-#include "Detector.hpp"
 
 #include <TFile.h>
 #include <TTree.h>
+#include <iostream>
 #include <stdexcept>
 #include <vector>
 

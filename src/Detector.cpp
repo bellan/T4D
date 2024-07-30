@@ -1,4 +1,5 @@
 #include "Detector.hpp"
+#include "MeasuresAndStates.hpp"
 #include "PhisicalParameters.hpp"
 
 #include <TMatrixD.h>
@@ -54,6 +55,24 @@ std::optional<Measurement> Detector::measure(TMatrixD particleState) const {
     const double t = particleState(0, 0);
     const double x = particleState(1, 0);
     const double y = particleState(2, 0);
+
+    const bool xConstrain = x > bottomLeftPosition.x() && x < bottomLeftPosition.x() + width;
+    const bool yConstrain = y > bottomLeftPosition.y() && y < bottomLeftPosition.y() + height;
+
+    return (xConstrain && yConstrain) ? std::optional<Measurement>{{t, x, y, id}} : std::nullopt;
+}
+
+/**
+ * Creates a Measurement from a ParticleState, if the particle is inside the area of the detector.
+ *
+ * @param particlePosition the position of the particle.
+ *
+ * @return an optional measurement. It contains the measure if the particle was inside, nullopt otherwise.
+ */
+std::optional<Measurement> Detector::measure(ParticleState particleState) const {
+    const double t = particleState.position.T();
+    const double x = particleState.position.X();
+    const double y = particleState.position.Y();
 
     const bool xConstrain = x > bottomLeftPosition.x() && x < bottomLeftPosition.x() + width;
     const bool yConstrain = y > bottomLeftPosition.y() && y < bottomLeftPosition.y() + height;

@@ -1,27 +1,11 @@
 #pragma once
 
+#include "MeasuresAndStates.hpp"
+
 #include <TLorentzVector.h>
 #include <TMatrixD.h>
 #include <TVector3.h>
 #include <optional>
-
-/**
- * The measuremnt struct.
- *
- * It contains the data produced by the detector.
- */
-struct Measurement {
-    double t;
-    double x;
-    double y;
-    int detectorID;
-};
-
-struct State {
-public:
-    TMatrixD value;
-    TMatrixD uncertainty;
-};
 
 /**
  * The detector class.
@@ -41,6 +25,7 @@ public:
 
     std::optional<Measurement> measure(TLorentzVector particlePosition) const;
     std::optional<Measurement> measure(TMatrixD particleState) const;
+    std::optional<Measurement> measure(ParticleState particleState) const;
 
     TMatrixD getMeasureUncertainty ();
 

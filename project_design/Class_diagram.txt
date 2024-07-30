@@ -41,13 +41,9 @@ class Particle {
    TLorentzVector timeEvolve(double timeStep)
 }
 
-class ExperimentalSetup {
-   std::vector<Detector> detectors
-}
-
 class SimulationSetup {
    ParticleGun particleGun
-   ExperimentalSetup experimentalSetup
+   std::vecto<Detector> experimentalSetup
 }
 
 class Simulation {
@@ -68,7 +64,7 @@ class Simulation {
 }
 
 class Tracker {
-   ExperimentalSetup experimentalSetup
+   std::vector<Detector> experimentalSetup
 
    std::vector<std::vector<Measurement>> importMeasurements()
    std::vector<State> fromMeasureToState()

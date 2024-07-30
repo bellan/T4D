@@ -1,24 +1,14 @@
 #include "Tracker.hpp"
-#include "Detector.hpp"
+
+#include "MeasuresAndStates.hpp"
 #include "PhisicalParameters.hpp"
-#include "Utils.hpp"
+
 #include <TMatrixD.h>
-#include <TMatrixDfwd.h>
-#include <ostream>
 #include <vector>
 
-// Returns the states
-// std::vector<State> Tracker::fromMeasuresToStates(std::vector<Measurement> measurements) {
-//     std::vector<State> states;
-//     for (Measurement measure : measurements) {
-//         states.push_back(experimentalSetup.detectors[measure.detectorID].fromMeasureToState(measure));
-//     }
-//     return states;
-// }
-
-std::vector<State> Tracker::kalmanFilter(std::vector<Measurement> measures, std::vector<State> &predictions) {
-    std::vector<State> filteredStates;
-    predictions = std::vector<State>();
+std::vector<MatrixStateEstimate> Tracker::kalmanFilter(std::vector<Measurement> measures, std::vector<MatrixStateEstimate> &predictions) {
+    std::vector<MatrixStateEstimate> filteredStates;
+    predictions = std::vector<MatrixStateEstimate>();
 
     TMatrixD evolutionMatrix(6,6);
 
@@ -38,11 +28,11 @@ std::vector<State> Tracker::kalmanFilter(std::vector<Measurement> measures, std:
                         0.,0.,0.,0.,0.,bigDirection};
     initialStateValue.SetMatrixArray(data,"");
     initialStateError.SetMatrixArray(sdata, "");
-    State state{initialStateValue, initialStateError};
+    MatrixStateEstimate initialState{initialStateValue, initialStateError};
 
 
-    predictions.push_back(state);
-    filteredStates.push_back(state);
+    predictions.push_back(initialState);
+    filteredStates.push_back(initialState);
 
     // Initializing the first state
     for (int i = 0; i < (int)measures.size(); i++) {
@@ -50,7 +40,7 @@ std::vector<State> Tracker::kalmanFilter(std::vector<Measurement> measures, std:
             double data[6] = {measures[i].t, measures[i].x, measures[i].y, 0., 0., 0.};
             TMatrixD stateValue(6,1,data);
 
-            TMatrixD measureError = experimentalSetup.detectors[i].getMeasureUncertainty();
+            TMatrixD measureError = detectors[i].getMeasureUncertainty();
             double sdata[36] = {measureError(0,0),0.,0.,0.,0.,0.,
                                 0.,measureError(1,1),0.,0.,0.,0.,
                                 0.,0.,measureError(2,2),0.,0.,0.,
@@ -58,11 +48,11 @@ std::vector<State> Tracker::kalmanFilter(std::vector<Measurement> measures, std:
                                 0.,0.,0.,0.,bigDirection,0.,
                                 0.,0.,0.,0.,0.,bigDirection};
             TMatrixD stateError(6,6,sdata);
-            predictions.push_back(State{initialStateValue, initialStateError});
-            filteredStates.push_back(State{stateValue, stateError});
+            predictions.push_back(MatrixStateEstimate{initialStateValue, initialStateError});
+            filteredStates.push_back(MatrixStateEstimate{stateValue, stateError});
             continue;
         } else if (i == 1) {
-            const double deltaZ = experimentalSetup.detectors[i].getBottmLeftPosition().Z() - experimentalSetup.detectors[i-1].getBottmLeftPosition().Z();
+            const double deltaZ = detectors[i].getBottmLeftPosition().Z() - detectors[i-1].getBottmLeftPosition().Z();
             const double t = measures[i].t;
             const double x = measures[i].x;
             const double y = measures[i].y;
@@ -73,7 +63,7 @@ std::vector<State> Tracker::kalmanFilter(std::vector<Measurement> measures, std:
             double data[6] = {measures[i].t, measures[i].x, measures[i].y, deltaT/deltaZ, deltaX/deltaZ, deltaY/deltaZ};
             TMatrixD stateValue(6,1,data);
 
-            TMatrixD measureError = experimentalSetup.detectors[i].getMeasureUncertainty();
+            TMatrixD measureError = detectors[i].getMeasureUncertainty();
             TMatrixD preaviousStateError = TMatrixD(filteredStates[i].uncertainty);
             const double sDeltaT2 = measureError(0,0) + preaviousStateError(0,0);
             const double sDeltaX2 = measureError(1,1) + preaviousStateError(1,1);
@@ -86,21 +76,21 @@ std::vector<State> Tracker::kalmanFilter(std::vector<Measurement> measures, std:
                                 0.,0.,0.,0.,sDeltaX2/(deltaZ*deltaZ),0.,
                                 0.,0.,0.,0.,0.,sDeltaY2/(deltaZ*deltaZ)};
             TMatrixD stateError(6,6,sdata);
-            predictions.push_back(State{initialStateValue, initialStateError});
-            filteredStates.push_back(State{stateValue, stateError});
+            predictions.push_back(MatrixStateEstimate{initialStateValue, initialStateError});
+            filteredStates.push_back(MatrixStateEstimate{stateValue, stateError});
             continue;
         }
 
         double data[3] = {measures[i].t, measures[i].x, measures[i].y};
 
         TMatrixD measure(3, 1, data);
-        TMatrixD measureError = experimentalSetup.detectors[i].getMeasureUncertainty();
+        TMatrixD measureError = detectors[i].getMeasureUncertainty();
 
 
         TMatrixD preaviousStateValue = TMatrixD(filteredStates[i].value);
         TMatrixD preaviousStateError = TMatrixD(filteredStates[i].uncertainty);
 
-        const double deltaZ = experimentalSetup.detectors[i].getBottmLeftPosition().Z() - experimentalSetup.detectors[i-1].getBottmLeftPosition().Z();
+        const double deltaZ = detectors[i].getBottmLeftPosition().Z() - detectors[i-1].getBottmLeftPosition().Z();
         double evolutiondata[36] = {1.,0.,0.,deltaZ,0.,0.,
                                     0.,1.,0.,0.,deltaZ,0.,
                                     0.,0.,1.,0.,0.,deltaZ,
@@ -139,15 +129,15 @@ std::vector<State> Tracker::kalmanFilter(std::vector<Measurement> measures, std:
         TMatrixD filteredStateError = TMatrixD(kalmanGain, TMatrixD::kMult, TMatrixD(projectionMatrix, TMatrixD::kMult, estimatedStateError));
         filteredStateError = TMatrixD(estimatedStateError, TMatrixD::kMinus, filteredStateError);
 
-        predictions.push_back(State{estimatedStateValue, estimatedStateError});
-        filteredStates.push_back(State{filteredStateValue, filteredStateError});
+        predictions.push_back(MatrixStateEstimate{estimatedStateValue, estimatedStateError});
+        filteredStates.push_back(MatrixStateEstimate{filteredStateValue, filteredStateError});
     }
 
     return filteredStates;
 }
 
-std::vector<State> Tracker::kalmanSmoother(std::vector<State> filteredStates) {
-    std::vector<State> smoothedStates;
+std::vector<MatrixStateEstimate> Tracker::kalmanSmoother(std::vector<MatrixStateEstimate> filteredStates) {
+    std::vector<MatrixStateEstimate> smoothedStates;
 
     TMatrixD evolutionMatrix(6,6);
 
@@ -159,8 +149,8 @@ std::vector<State> Tracker::kalmanSmoother(std::vector<State> filteredStates) {
         TMatrixD smoothedNextStateError = TMatrixD(smoothedStates.back().uncertainty);
 
         // NOTE: This indexes are like this because filteredStates has an element corresponding to the initial state (i.e. at z=0)
-        const double deltaZ = i != 0 ? experimentalSetup.detectors[i].getBottmLeftPosition().Z() - experimentalSetup.detectors[i-1].getBottmLeftPosition().Z() :
-            experimentalSetup.detectors[i].getBottmLeftPosition().Z();
+        const double deltaZ = i != 0 ? detectors[i].getBottmLeftPosition().Z() - detectors[i-1].getBottmLeftPosition().Z() :
+            detectors[i].getBottmLeftPosition().Z();
         double evolutiondata[36] = {1.,0.,0.,deltaZ,0.,0.,
                                     0.,1.,0.,0.,deltaZ,0.,
                                     0.,0.,1.,0.,0.,deltaZ,
@@ -188,7 +178,7 @@ std::vector<State> Tracker::kalmanSmoother(std::vector<State> filteredStates) {
         smoothedStateError = TMatrixD(smootherGain, TMatrixD::kMult, smoothedStateError);
         smoothedStateError += filteredStates[i].uncertainty;
 
-        smoothedStates.push_back(State{smoothedStateValue, smoothedStateError});
+        smoothedStates.push_back(MatrixStateEstimate{smoothedStateValue, smoothedStateError});
     }
 
     std::reverse(smoothedStates.begin(), smoothedStates.end());

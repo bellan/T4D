@@ -1,7 +1,7 @@
 #include "Particle.hpp"
+#include "MeasuresAndStates.hpp"
 
 #include <TLorentzVector.h>
-#include <TMatrixD.h>
 #include <TVector3.h>
 #include <stdexcept>
 
@@ -16,11 +16,10 @@
  * @param charge the charge of the particle.
  */
 Particle::Particle(const TLorentzVector initialPosition, const TVector3 velocity, const double mass, const double charge):
-velocity{velocity},
-positions{},
+states{},
 mass{mass},
 charge{charge} {
-    positions.push_back(initialPosition);
+    states.push_back(ParticleState{initialPosition, velocity});
 }
 
 /**
@@ -34,37 +33,27 @@ charge{charge} {
  * @return the new position after the evolution.
  */
 TLorentzVector Particle::zSpaceEvolve(const double finalZ) {
-    const TLorentzVector lastPosition = this->positions.back();
-    const double deltaZ = finalZ - lastPosition.Z();
+    const ParticleState lastState = states.back();
+    const TLorentzVector lastPosition = lastState.position;
+    const TVector3 lastVelocity = lastState.velocity;
+
+    const double deltaZ = finalZ - lastState.position.Z();
     if (deltaZ <= 0)
         throw std::invalid_argument("Invalid final Z position. It is before the last position.");
 
-    const double vZ = velocity.z();
-    const double deltaT = deltaZ/vZ;
+    const double lastVZ = lastState.velocity.z();
+    const double lastXZ = lastState.velocity.x() / lastVZ;
+    const double lastYZ = lastState.velocity.y() / lastVZ;
 
-    const double vX = velocity.x();
-    const double vY = velocity.y();
+    const double deltaT = deltaZ/lastVZ;
 
     const TLorentzVector newPosition{
-        lastPosition.X() + vX * deltaT,
-        lastPosition.Y() + vY * deltaT,
+        lastPosition.X() + lastXZ * deltaZ,
+        lastPosition.Y() + lastYZ * deltaZ,
         finalZ,
         lastPosition.T() + deltaT
     };
 
-    this->positions.push_back(newPosition);
+    states.push_back(ParticleState{newPosition, TVector3{lastVelocity}});
     return newPosition;
-}
-
-std::vector<TMatrixD> Particle::getStates() {
-    std::vector<TMatrixD> statesVector;
-    double speedInverse = 1/velocity.Mag();
-    double tanThetaxz = velocity.x() / velocity.z();
-    double tanThetayz = velocity.y() / velocity.z();
-    for(auto position: positions) {
-        double data[6] = {position.T(), position.X(), position.Y(), speedInverse, tanThetaxz, tanThetayz};
-        statesVector.push_back(TMatrixD(6,1,data));
-    }
-
-    return statesVector;
 }
