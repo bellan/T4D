@@ -59,7 +59,6 @@
 * 2024/05/04
 ** Finally solved problems with tree
 * 2024/07/12
-  ** 
 * 2024/07/19
 ** Started rewriting everything without using the measurement matrixes
    - Since the conversion between measure and state, couldn't be done linearly

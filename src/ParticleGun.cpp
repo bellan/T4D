@@ -3,14 +3,11 @@
 #include "Detector.hpp"
 #include "Particle.hpp"
 #include "PhisicalParameters.hpp"
+#include "RandomGenerator.hpp"
 
 #include <TLorentzVector.h>
-#include <TRandom1.h>
 #include <TVector3.h>
-#include <algorithm>
 #include <cmath>
-#include <ctime>
-#include <iostream>
 #include <vector>
 
 /**
@@ -23,7 +20,6 @@
 ParticleGun::ParticleGun(TVector3 position):
 position{position},
 maxColatitude(M_PI/2.),
-randomGenerator(std::time(NULL)),
 timeCounter(0.) {}
 
 /**
@@ -36,7 +32,6 @@ timeCounter(0.) {}
  */
 ParticleGun::ParticleGun(TVector3 position, std::vector<Detector> detectors):
 position(position),
-randomGenerator(std::time(NULL)),
 timeCounter(0.) {
     double thetaMax = M_PI;
     for (auto &detector : detectors) {
@@ -70,21 +65,21 @@ timeCounter(0.) {
  * @return the particle generated
  */
 Particle ParticleGun::generateParticle() {
-    const double phy = randomGenerator.Uniform(0.,2*M_PI);
-    const double uniform_theta = randomGenerator.Uniform(0.,1.);
-    const double theta = 2.*asin(sqrt(uniform_theta*(1-cos(maxColatitude))/2.));
+    RandomGenerator &randomGenerator = RandomGenerator::getInstance();
+    const double phy = randomGenerator.generateLongitude(0., 2.*M_PI);
+    const double theta = randomGenerator.generateColatitude(0., maxColatitude);
     const double vx = sin(theta)*cos(phy);
     const double vy = sin(theta)*sin(phy);
     const double vz = cos(theta);
-    const double mass = randomGenerator.Uniform(MIN_PARTICLE_MASS, MAX_PARTICLE_MASS);
+    const double mass = randomGenerator.generateUniform(MIN_PARTICLE_MASS, MAX_PARTICLE_MASS);
     const double charge = FOUNDAMENTAL_CHARGE;
-    const double speed = randomGenerator.Uniform(MIN_BETA, MAX_BETA) * LIGHT_SPEED;
+    const double speed = randomGenerator.generateUniform(MIN_BETA, MAX_BETA) * LIGHT_SPEED;
 
     const TVector3 velocity(speed*TVector3{vx,vy,vz});
 
     const Particle newParticle({position, timeCounter}, velocity, mass, charge);
 
-    timeCounter += randomGenerator.Uniform(0.,50.);
+    timeCounter += randomGenerator.generateUniform(0.,50.);
 
     return newParticle;
 }

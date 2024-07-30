@@ -28,6 +28,5 @@ private:
 
     double maxColatitude;
 
-    TRandom1 randomGenerator;
     double timeCounter;
 };
