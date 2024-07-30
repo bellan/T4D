@@ -1,5 +1,7 @@
 #include "Particle.hpp"
 #include "MeasuresAndStates.hpp"
+#include "PhisicalParameters.hpp"
+#include "RandomGenerator.hpp"
 
 #include <TLorentzVector.h>
 #include <TVector3.h>
@@ -47,13 +49,28 @@ TLorentzVector Particle::zSpaceEvolve(const double finalZ) {
 
     const double deltaT = deltaZ/lastVZ;
 
+    RandomGenerator &randomGenerator = RandomGenerator::getInstance();
+    const double variationT = randomGenerator.generateGaussian(0., TIME_EVOLUTION_SIGMA);
+    const double variationX = randomGenerator.generateGaussian(0., SPACE_EVOLUTION_SIGMA);
+    const double variationY = randomGenerator.generateGaussian(0., SPACE_EVOLUTION_SIGMA);
+    const double variationVZ = - fabs(randomGenerator.generateGaussian(0., VELOCITY_EVOLUTION_SIGMA));
+    const double variationXZ = randomGenerator.generateGaussian(0., DIRECTION_EVOLUTION_SIGMA);
+    const double variationYZ = randomGenerator.generateGaussian(0., DIRECTION_EVOLUTION_SIGMA);
+
     const TLorentzVector newPosition{
-        lastPosition.X() + lastXZ * deltaZ,
-        lastPosition.Y() + lastYZ * deltaZ,
+        lastPosition.X() + lastXZ * deltaZ + variationT,
+        lastPosition.Y() + lastYZ * deltaZ + variationT,
         finalZ,
         lastPosition.T() + deltaT
     };
 
-    states.push_back(ParticleState{newPosition, TVector3{lastVelocity}});
+    double newVZ = lastVZ + variationVZ;
+    const TVector3 newVelocity{
+        (lastXZ + variationXZ) * newVZ,
+        (lastYZ + variationYZ) * newVZ,
+        newVZ
+    };
+
+    states.push_back(ParticleState{newPosition, newVelocity});
     return newPosition;
 }

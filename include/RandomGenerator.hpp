@@ -12,6 +12,7 @@ public:
     RandomGenerator operator = (const RandomGenerator&&) = delete;
 
     double generateUniform(double minimumValue, double maximumuValue);
+    double generateGaussian(double mean=0., double sigma=1.);
     double generateLongitude(double minimumAngle, double maximumAngle);
     double generateColatitude(double minimumAngle, double maximumAngle);
 

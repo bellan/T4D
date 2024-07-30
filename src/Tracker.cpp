@@ -104,17 +104,21 @@ std::vector<MatrixStateEstimate> Tracker::kalmanFilter(std::vector<Measurement> 
                                      0., 0., 1., 0., 0., 0.};
         TMatrixD projectionMatrix(3, 6, projectiondata);
 
-        double identityData[36] = {1.,0.,0.,0.,0.,0.,
-                                    0.,1.,0.,0.,0.,0.,
-                                    0.,0.,1.,0.,0.,0.,
-                                    0.,0.,0.,1.,0.,0.,
-                                    0.,0.,0.,0.,1.,0.,
-                                    0.,0.,0.,0.,0.,1.};
-        TMatrixD identity(6,6,identityData);
+        // TODO: Check if this is correct
+        constexpr double inverse_velocity_sigma = DIRECTION_EVOLUTION_SIGMA / (LIGHT_SPEED * LIGHT_SPEED);
+        double evolutionUncertaintyData[36] = {pow(TIME_EVOLUTION_SIGMA,2),0.,0.,0.,0.,0.,
+                                                0.,pow(SPACE_EVOLUTION_SIGMA,2),0.,0.,0.,0.,
+                                                0.,0.,pow(SPACE_EVOLUTION_SIGMA,2),0.,0.,0.,
+                                                0.,0.,0.,pow(inverse_velocity_sigma,2),0.,0.,
+                                                0.,0.,0.,0.,pow(DIRECTION_EVOLUTION_SIGMA,2),0.,
+                                                0.,0.,0.,0.,0.,pow(DIRECTION_EVOLUTION_SIGMA,2)};
+        TMatrixD evolutionUncertainty(6, 6, evolutionUncertaintyData);
+
 
         // NOTE: see https://arxiv.org/abs/2101.12040 for the math
         TMatrixD estimatedStateValue = TMatrixD(evolutionMatrix, TMatrixD::kMult, preaviousStateValue);
         TMatrixD estimatedStateError = TMatrixD(evolutionMatrix, TMatrixD::kMult, TMatrixD(preaviousStateError, TMatrixD::kMultTranspose, evolutionMatrix));
+        estimatedStateError += evolutionUncertainty;
 
         TMatrixD residual = TMatrixD(measure, TMatrixD::kMinus, TMatrixD(projectionMatrix, TMatrixD::kMult, estimatedStateValue));
         TMatrixD kalmanGainDenominator = TMatrixD(projectionMatrix, TMatrixD::kMult, TMatrixD(estimatedStateError, TMatrixD::kMultTranspose, projectionMatrix));

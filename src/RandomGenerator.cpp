@@ -24,6 +24,10 @@ double RandomGenerator::generateUniform(double minimumValue, double maximumValue
     return rootGenerator.Uniform(minimumValue, maximumValue);
 }
 
+double RandomGenerator::generateGaussian(double mean, double sigma) {
+    return rootGenerator.Gaus(mean, sigma);
+}
+
 double RandomGenerator::generateLongitude(double minimumAngle, double maximumAngle) {
     return rootGenerator.Uniform(minimumAngle, maximumAngle);
 }

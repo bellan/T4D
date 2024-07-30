@@ -61,6 +61,8 @@ for particle_index in range(PARTICLE_NUMBER):
     ax_xz.grid()
     ax_xz.set_xlabel("Z [m]")
     ax_xz.set_ylabel("xz [s]")
+    xz_max = np.max(np.abs(gen_xz))
+    ax_xz.set_ylim([-xz_max*1.3,xz_max*1.3])
     ax_xz.errorbar(z, gen_xz, ls=" ", fmt="o", elinewidth=1, capsize=1, label="generated", color="black")
     ax_xz.errorbar(z, pre_xz, yerr=pre_sxz, ls=" ", fmt="o", elinewidth=1, capsize=1, label="predicted", color="red")
     ax_xz.errorbar(z, fil_xz, yerr=fil_sxz, ls=" ", fmt="o", elinewidth=1, capsize=1, label="filtered", color="blue")
