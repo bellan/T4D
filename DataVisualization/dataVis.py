@@ -49,6 +49,8 @@ for particle_index in range(PARTICLE_NUMBER):
     ax_v.grid()
     ax_v.set_xlabel("Z [m]")
     ax_v.set_ylabel("v [m/s]")
+    v_max = np.max(np.abs(gen_v))
+    ax_v.set_ylim([-v_max*1.3,v_max*1.3])
     ax_v.errorbar(z, gen_v, ls=" ", fmt="o", elinewidth=1, capsize=1, label="generated", color="black")
     ax_v.errorbar(z, pre_v, yerr=pre_sv, ls=" ", fmt="o", elinewidth=1, capsize=1, label="predicted", color="red")
     ax_v.errorbar(z, fil_v, yerr=fil_sv, ls=" ", fmt="o", elinewidth=1, capsize=1, label="filtered", color="blue")

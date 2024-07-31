@@ -58,13 +58,14 @@ TLorentzVector Particle::zSpaceEvolve(const double finalZ) {
     const double variationYZ = randomGenerator.generateGaussian(0., DIRECTION_EVOLUTION_SIGMA);
 
     const TLorentzVector newPosition{
-        lastPosition.X() + lastXZ * deltaZ + variationT,
-        lastPosition.Y() + lastYZ * deltaZ + variationT,
+        lastPosition.X() + lastXZ * deltaZ + variationX,
+        lastPosition.Y() + lastYZ * deltaZ + variationY,
         finalZ,
-        lastPosition.T() + deltaT
+        lastPosition.T() + deltaT + variationT
     };
 
     double newVZ = lastVZ + variationVZ;
+    std::cout<<variationVZ<<" "<<newVZ<<std::endl;
     const TVector3 newVelocity{
         (lastXZ + variationXZ) * newVZ,
         (lastYZ + variationYZ) * newVZ,
