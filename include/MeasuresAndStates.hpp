@@ -3,6 +3,7 @@
 #include <TLorentzVector.h>
 #include <TMatrixD.h>
 #include <TVector3.h>
+#include <optional>
 
 /**
  * The measuremnt struct.
@@ -25,6 +26,7 @@ struct MatrixStateEstimate {
 public:
   TMatrixD value;
   TMatrixD uncertainty;
+  std::optional<int> detectorID = std::nullopt;
 };
 
 /**
@@ -35,4 +37,5 @@ public:
 struct ParticleState {
   TLorentzVector position;
   TVector3 velocity;
+  std::optional<int> detectorID = std::nullopt;
 };
