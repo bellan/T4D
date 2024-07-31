@@ -7,11 +7,12 @@
 #include <vector>
 
 SimulationSetup SetupFactory::generateExperiment() const {
-    std::vector<Detector> detectors = {};
-    for (int i = 1; i < NUMBER_OF_DETECTORS+1; i++) {
-        detectors.push_back(Detector(i* DISTANCE_BETWEEN_DETECTORS, DETECTOR_DIMENSION, DETECTOR_DIMENSION));
-    }
+  std::vector<Detector> detectors = {};
+  for (int i = 1; i < NUMBER_OF_DETECTORS + 1; i++) {
+    detectors.push_back(Detector(i * DISTANCE_BETWEEN_DETECTORS,
+                                 DETECTOR_DIMENSION, DETECTOR_DIMENSION));
+  }
 
-    const ParticleGun gun({0,0,0}, detectors);
-    return SimulationSetup{gun, detectors};
+  const ParticleGun gun({0, 0, 0}, detectors);
+  return SimulationSetup{gun, detectors};
 }

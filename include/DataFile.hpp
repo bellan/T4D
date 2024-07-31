@@ -8,23 +8,24 @@
 
 class DataFile {
 public:
-    DataFile(const char* fileName="../data/GeneratedData.root", const char* treeName="DataTree", bool exist=false);
-    ~DataFile();
+  DataFile(const char *fileName = "../data/GeneratedData.root",
+           const char *treeName = "DataTree", bool exist = false);
+  ~DataFile();
 
-    void SaveSingleMeasure(Measurement measure);
-    void SaveMultipleMeasures(std::vector<Measurement> measuremets);
+  void SaveSingleMeasure(Measurement measure);
+  void SaveMultipleMeasures(std::vector<Measurement> measuremets);
 
-    std::vector<Measurement> readMeasures();
+  std::vector<Measurement> readMeasures();
 
 private:
-    double tBuffer;
-    double xBuffer;
-    double yBuffer;
-    int idBuffer;
+  double tBuffer;
+  double xBuffer;
+  double yBuffer;
+  int idBuffer;
 
-    const char* treeName;
-    bool writable;
+  const char *treeName;
+  bool writable;
 
-    TFile* rootFile;
-    TTree* dataTree;
+  TFile *rootFile;
+  TTree *dataTree;
 };

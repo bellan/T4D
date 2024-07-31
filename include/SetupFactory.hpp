@@ -7,12 +7,12 @@
 
 struct SimulationSetup {
 public:
-    ParticleGun particleGun;
-    std::vector<Detector> detectors;
+  ParticleGun particleGun;
+  std::vector<Detector> detectors;
 };
 
 class SetupFactory {
 public:
-    SetupFactory() {}
-    SimulationSetup generateExperiment() const;
+  SetupFactory() {}
+  SimulationSetup generateExperiment() const;
 };

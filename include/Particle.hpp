@@ -14,15 +14,16 @@
  */
 class Particle {
 public:
-    Particle(TLorentzVector initialPosition, TVector3 velocity, double mass, double charge=0.);
+  Particle(TLorentzVector initialPosition, TVector3 velocity, double mass,
+           double charge = 0.);
 
-    TLorentzVector zSpaceEvolve(double finalZ);
+  TLorentzVector zSpaceEvolve(double finalZ);
 
-    std::vector<ParticleState> getStates() { return states; };
+  std::vector<ParticleState> getStates() { return states; };
 
 private:
-    std::vector<ParticleState> states;
+  std::vector<ParticleState> states;
 
-    const double mass;
-    const double charge;
+  const double mass;
+  const double charge;
 };

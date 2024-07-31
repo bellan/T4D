@@ -10,10 +10,10 @@
  * It contains the data produced by the detector.
  */
 struct Measurement {
-    double t;
-    double x;
-    double y;
-    int detectorID;
+  double t;
+  double x;
+  double y;
+  int detectorID;
 };
 
 /**
@@ -23,8 +23,8 @@ struct Measurement {
  */
 struct MatrixStateEstimate {
 public:
-    TMatrixD value;
-    TMatrixD uncertainty;
+  TMatrixD value;
+  TMatrixD uncertainty;
 };
 
 /**
@@ -33,6 +33,6 @@ public:
  * It contains the data produced by the detector.
  */
 struct ParticleState {
-    TLorentzVector position;
-    TVector3 velocity;
+  TLorentzVector position;
+  TVector3 velocity;
 };

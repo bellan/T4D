@@ -17,10 +17,8 @@
  *
  * @param position the position of the gun.
  */
-ParticleGun::ParticleGun(TVector3 position):
-position{position},
-maxColatitude(M_PI/2.),
-timeCounter(0.) {}
+ParticleGun::ParticleGun(TVector3 position)
+    : position{position}, maxColatitude(M_PI / 2.), timeCounter(0.) {}
 
 /**
  * constructor with specified shooting angle
@@ -28,58 +26,66 @@ timeCounter(0.) {}
  * It generates the particle gun determining the angles to shoot at.
  *
  * @param position the position of the gun.
- * @param detector a vector of all the detectors used to determine the valid angles.
+ * @param detector a vector of all the detectors used to determine the valid
+ * angles.
  */
-ParticleGun::ParticleGun(TVector3 position, std::vector<Detector> detectors):
-position(position),
-timeCounter(0.) {
-    double thetaMax = M_PI;
-    for (auto &detector : detectors) {
-        const TVector3 bottomLeft = detector.getBottmLeftPosition();
-        const double width = detector.getWidth();
-        const double height = detector.getHeight();
-        const TVector3 bottomRight = bottomLeft + TVector3({width, 0, 0});
-        const TVector3 topLeft = bottomLeft + TVector3({0, height, 0});
-        const TVector3 topRight = bottomLeft + TVector3({width, height, 0});
-        const TVector3 vBL = bottomLeft - position;
-        const TVector3 vBR = bottomRight - position;
-        const TVector3 vTL = topLeft - position;
-        const TVector3 vTR = topRight - position;
+ParticleGun::ParticleGun(TVector3 position, std::vector<Detector> detectors)
+    : position(position), timeCounter(0.) {
+  double thetaMax = M_PI;
+  for (auto &detector : detectors) {
+    const TVector3 bottomLeft = detector.getBottmLeftPosition();
+    const double width = detector.getWidth();
+    const double height = detector.getHeight();
+    const TVector3 bottomRight = bottomLeft + TVector3({width, 0, 0});
+    const TVector3 topLeft = bottomLeft + TVector3({0, height, 0});
+    const TVector3 topRight = bottomLeft + TVector3({width, height, 0});
+    const TVector3 vBL = bottomLeft - position;
+    const TVector3 vBR = bottomRight - position;
+    const TVector3 vTL = topLeft - position;
+    const TVector3 vTR = topRight - position;
 
-        const double thetaBL = vBL.Angle({0,0,1});
-        const double thetaBR = vBR.Angle({0,0,1});
-        const double thetaTL = vTL.Angle({0,0,1});
-        const double thetaTR = vTR.Angle({0,0,1});
+    const double thetaBL = vBL.Angle({0, 0, 1});
+    const double thetaBR = vBR.Angle({0, 0, 1});
+    const double thetaTL = vTL.Angle({0, 0, 1});
+    const double thetaTR = vTR.Angle({0, 0, 1});
 
-        thetaMax = std::min(thetaMax, std::min(thetaBL, std::min(thetaBR, std::min(thetaTL, thetaTR)))); //TODO consider changing to max (change also initialization)
-    }
-    maxColatitude = thetaMax;
+    thetaMax = std::min(
+        thetaMax,
+        std::min(thetaBL,
+                 std::min(thetaBR,
+                          std::min(thetaTL,
+                                   thetaTR)))); // TODO consider changing to max
+                                                // (change also initialization)
+  }
+  maxColatitude = thetaMax;
 }
 
 /**
  * Generate a random particle
  *
- * It generates a particle in the position of the gun with a momentum directed to a random angle
- * in the range of valid angles.
+ * It generates a particle in the position of the gun with a momentum directed
+ * to a random angle in the range of valid angles.
  *
  * @return the particle generated
  */
 Particle ParticleGun::generateParticle() {
-    RandomGenerator &randomGenerator = RandomGenerator::getInstance();
-    const double phy = randomGenerator.generateLongitude(0., 2.*M_PI);
-    const double theta = randomGenerator.generateColatitude(0., maxColatitude);
-    const double vx = sin(theta)*cos(phy);
-    const double vy = sin(theta)*sin(phy);
-    const double vz = cos(theta);
-    const double mass = randomGenerator.generateUniform(MIN_PARTICLE_MASS, MAX_PARTICLE_MASS);
-    const double charge = FOUNDAMENTAL_CHARGE;
-    const double speed = randomGenerator.generateUniform(MIN_BETA, MAX_BETA) * LIGHT_SPEED;
+  RandomGenerator &randomGenerator = RandomGenerator::getInstance();
+  const double phy = randomGenerator.generateLongitude(0., 2. * M_PI);
+  const double theta = randomGenerator.generateColatitude(0., maxColatitude);
+  const double vx = sin(theta) * cos(phy);
+  const double vy = sin(theta) * sin(phy);
+  const double vz = cos(theta);
+  const double mass =
+      randomGenerator.generateUniform(MIN_PARTICLE_MASS, MAX_PARTICLE_MASS);
+  const double charge = FOUNDAMENTAL_CHARGE;
+  const double speed =
+      randomGenerator.generateUniform(MIN_BETA, MAX_BETA) * LIGHT_SPEED;
 
-    const TVector3 velocity(speed*TVector3{vx,vy,vz});
+  const TVector3 velocity(speed * TVector3{vx, vy, vz});
 
-    const Particle newParticle({position, timeCounter}, velocity, mass, charge);
+  const Particle newParticle({position, timeCounter}, velocity, mass, charge);
 
-    timeCounter += randomGenerator.generateUniform(0.,50.);
+  timeCounter += randomGenerator.generateUniform(0., 50.);
 
-    return newParticle;
+  return newParticle;
 }

@@ -4,20 +4,20 @@
 
 class RandomGenerator {
 public:
-    static RandomGenerator& getInstance();
+  static RandomGenerator &getInstance();
 
-    RandomGenerator(const RandomGenerator&) = delete;
-    RandomGenerator(const RandomGenerator&&) = delete;
-    RandomGenerator operator = (const RandomGenerator&) = delete;
-    RandomGenerator operator = (const RandomGenerator&&) = delete;
+  RandomGenerator(const RandomGenerator &) = delete;
+  RandomGenerator(const RandomGenerator &&) = delete;
+  RandomGenerator operator=(const RandomGenerator &) = delete;
+  RandomGenerator operator=(const RandomGenerator &&) = delete;
 
-    double generateUniform(double minimumValue, double maximumuValue);
-    double generateGaussian(double mean=0., double sigma=1.);
-    double generateLongitude(double minimumAngle, double maximumAngle);
-    double generateColatitude(double minimumAngle, double maximumAngle);
+  double generateUniform(double minimumValue, double maximumuValue);
+  double generateGaussian(double mean = 0., double sigma = 1.);
+  double generateLongitude(double minimumAngle, double maximumAngle);
+  double generateColatitude(double minimumAngle, double maximumAngle);
 
 private:
-    RandomGenerator();
+  RandomGenerator();
 
-    TRandom1 rootGenerator;
+  TRandom1 rootGenerator;
 };

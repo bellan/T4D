@@ -68,7 +68,6 @@
    - ( ) Convert from speed to energy
 * 2024/07/20
 ** Migrated all file and tree handling to a separate class.
-
 * 2024/07/27
   Need to change how measures are generated.
   Consider outputting the measure when the evolution takes place

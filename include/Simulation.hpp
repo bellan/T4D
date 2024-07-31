@@ -12,17 +12,18 @@
 
 class Simulation {
 public:
-    Simulation();
-    void runSimulation(int particlesNumber);
-    std::vector<Measurement> generateMeasures(int particlesNumber);
-    std::vector<Particle> generateParticlesAndEvolve(int particlesNumber);
-    std::vector<std::vector<Measurement>> separateMeasuresInParticles(std::vector<Measurement> allMeasures);
+  Simulation();
+  void runSimulation(int particlesNumber);
+  std::vector<Measurement> generateMeasures(int particlesNumber);
+  std::vector<Particle> generateParticlesAndEvolve(int particlesNumber);
+  std::vector<std::vector<Measurement>>
+  separateMeasuresInParticles(std::vector<Measurement> allMeasures);
 
 private:
-    double minTimeInterval;
-    ParticleGun particleGun;
-    std::vector<Detector> detectors;
+  double minTimeInterval;
+  ParticleGun particleGun;
+  std::vector<Detector> detectors;
 
-    DataFile dataFile;
-    Tracker tracker;
+  DataFile dataFile;
+  Tracker tracker;
 };
