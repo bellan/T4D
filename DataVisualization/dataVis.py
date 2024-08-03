@@ -33,9 +33,9 @@ for particle_index in range(PARTICLE_NUMBER):
         ax.set_ylabel(ylabel)
         s = smoothed_initial_index[yfilename]
         ax.errorbar(z, y_g, ls=" ", fmt="o", elinewidth=1, capsize=1, label="generated", color="black")
-        ax.errorbar(z[3:], y_p[3:], yerr=sy_p[3:], ls=" ", fmt="o", elinewidth=1, capsize=1, label="predicted", color="red")
-        ax.errorbar(z[2:], y_f[2:], yerr=sy_f[2:], ls=" ", fmt="o", elinewidth=1, capsize=1, label="filtered", color="blue")
-        ax.errorbar(z[s:], y_s[s:], yerr=sy_s[s:], ls=" ", fmt="o", elinewidth=1, capsize=1, label="smoothed", color="green")
+        ax.errorbar(z[3:], y_p[3:], yerr=sy_p[3:], fmt="o", elinewidth=1, capsize=1, label="predicted", color="red")
+        ax.errorbar(z[2:], y_f[2:], yerr=sy_f[2:], fmt=".-.", elinewidth=1, capsize=1, label="filtered", color="blue")
+        ax.errorbar(z[s:], y_s[s:], yerr=sy_s[s:], fmt=".:", elinewidth=1, capsize=1, label="smoothed", color="green")
         ax.legend()
         figure.savefig(f"Particle {particle_index} {yfilename}.pdf")
         plt.close(figure)
