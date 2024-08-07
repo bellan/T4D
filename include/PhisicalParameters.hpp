@@ -37,7 +37,7 @@ constexpr double MIN_TIME_BETWEEN_PARTICLE =
     (NUMBER_OF_DETECTORS * DISTANCE_BETWEEN_DETECTORS * 1.1) / LIGHT_SPEED;
 
 // Evolution parameters
-constexpr double TIME_EVOLUTION_SIGMA = 1e-12;
-constexpr double SPACE_EVOLUTION_SIGMA = 1e-7;
+constexpr double TIME_EVOLUTION_SIGMA = 1e-11;
+constexpr double SPACE_EVOLUTION_SIGMA = 1e-6;
 constexpr double VELOCITY_EVOLUTION_SIGMA = 0.01 * LIGHT_SPEED;
 constexpr double DIRECTION_EVOLUTION_SIGMA = 1e-6;

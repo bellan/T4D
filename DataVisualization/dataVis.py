@@ -24,7 +24,7 @@ for particle_index in range(PARTICLE_NUMBER):
     ylabels = ["t [s]", "x [m]", "y [m]", "v [m/s]", "xz []", "yz []"]
     yfilenames = ["t", "x", "y", "v", "xz", "yz"]
 
-    smoothed_initial_index = {"t": 0, "x": 1, "y": 0, "v": 1, "xz": 1, "yz": 1}
+    smoothed_initial_index = {"t": 0, "x": 1, "y": 0, "v": 1, "xz": 2, "yz": 2}
 
     for (y_g, y_f, y_p, y_s, sy_f, sy_p, sy_s, ylabel, yfilename) in zip(ys_g, ys_f, ys_p, ys_s, sys_f, sys_p, sys_s, ylabels, yfilenames):
         figure, ax = plt.subplots()

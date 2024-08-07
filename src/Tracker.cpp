@@ -18,7 +18,7 @@ Tracker::kalmanFilter(std::vector<Measurement> measures,
   TMatrixD initialStateValue(
       6, 1); // 6 dimentional vector (t,x,y,1/speed,thetazx,thetazy)
   TMatrixD initialStateError(6, 6);
-  double data[6] = {0., 0., 0., 0., 0., 0.};
+  double data[6] = {0., 0., 0., 1. / LIGHT_SPEED, 0., 0.};
   constexpr double bigT = VERY_HIGH_TIME_ERROR * VERY_HIGH_TIME_ERROR;
   constexpr double bigX = VERY_HIGH_SPACE_ERROR * VERY_HIGH_SPACE_ERROR;
   constexpr double bigVInv =
@@ -39,8 +39,12 @@ Tracker::kalmanFilter(std::vector<Measurement> measures,
   // Initializing the first state
   for (int i = 0; i < (int)measures.size(); i++) {
     if (i == 0) {
-      double data[6] = {
-          measures[i].t, measures[i].x, measures[i].y, 0., 0., 0.};
+      double data[6] = {measures[i].t,
+                        measures[i].x,
+                        measures[i].y,
+                        1. / LIGHT_SPEED,
+                        0.,
+                        0.};
       TMatrixD stateValue(6, 1, data);
 
       TMatrixD measureError = detectors[i].getMeasureUncertainty();
@@ -98,14 +102,17 @@ Tracker::kalmanFilter(std::vector<Measurement> measures,
 
     const double deltaZ = detectors[i].getBottmLeftPosition().Z() -
                           detectors[i - 1].getBottmLeftPosition().Z();
-    double evolutiondata[36] = {1., 0.,     0., deltaZ, 0., 0., 0., 1., 0.,
-                                0., deltaZ, 0., 0.,     0., 1., 0., 0., deltaZ,
-                                0., 0.,     0., 1.,     0., 0., 0., 0., 0.,
-                                0., 1.,     0., 0.,     0., 0., 0., 0., 1.};
+    double evolutiondata[36] = {1., 0., 0., deltaZ, 0., 0.,
+                                0., 1., 0., 0., deltaZ, 0.,
+                                0., 0., 1., 0., 0., deltaZ,
+                                0., 0., 0., 1., 0., 0.,
+                                0., 0., 0., 0., 1., 0.,
+                                0., 0., 0., 0., 0., 1.};
     evolutionMatrix.SetMatrixArray(evolutiondata);
 
-    double projectiondata[18] = {1., 0., 0., 0., 0., 0., 0., 1., 0.,
-                                 0., 0., 0., 0., 0., 1., 0., 0., 0.};
+    double projectiondata[18] = {1., 0., 0., 0., 0., 0.,
+                                 0., 1., 0., 0., 0., 0.,
+                                 0., 0., 1., 0., 0., 0.};
     TMatrixD projectionMatrix(3, 6, projectiondata);
 
     // TODO: Check if this is correct
