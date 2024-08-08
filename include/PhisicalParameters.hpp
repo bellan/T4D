@@ -40,4 +40,4 @@ constexpr double MIN_TIME_BETWEEN_PARTICLE =
 constexpr double TIME_EVOLUTION_SIGMA = 1e-11;
 constexpr double SPACE_EVOLUTION_SIGMA = 1e-6;
 constexpr double VELOCITY_EVOLUTION_SIGMA = 0.01 * LIGHT_SPEED;
-constexpr double DIRECTION_EVOLUTION_SIGMA = 1e-6;
+constexpr double DIRECTION_EVOLUTION_SIGMA = 1e-4;
