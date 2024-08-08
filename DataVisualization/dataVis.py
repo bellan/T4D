@@ -21,7 +21,7 @@ for particle_index in range(PARTICLE_NUMBER):
     sys_f = [fil_st, fil_sx, fil_sy, fil_sv, fil_sxz, fil_syz]
     sys_p = [pre_st, pre_sx, pre_sy, pre_sv, pre_sxz, pre_syz]
     sys_s = [smo_st, smo_sx, smo_sy, smo_sv, smo_sxz, smo_syz]
-    ylabels = ["t [s]", "x [m]", "y [m]", "v [m/s]", "xz []", "yz []"]
+    ylabels = ["t [s]", "x [m]", "y [m]", "1/(v_z) [s/m]", "(v_x/v_z) []", "(v_y/v_z) []"]
     yfilenames = ["t", "x", "y", "v", "xz", "yz"]
 
     smoothed_initial_index = {"t": 0, "x": 1, "y": 0, "v": 1, "xz": 2, "yz": 2}
