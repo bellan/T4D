@@ -19,7 +19,7 @@
 #include "Utils.hpp"
 
 /**
- * The default constructor TODO sobstitude with a factory that creates the
+ * The default constructor TODO: sobstitude with a factory that creates the
  * experiment settings
  */
 Simulation::Simulation() : detectors(), dataFile() {
@@ -46,31 +46,30 @@ void Simulation::runSimulation(int particlesNumber) {
   std::vector<Particle> evolvedParticles =
       generateParticlesAndEvolve(particlesNumber);
   std::vector<std::vector<ParticleState>> generatedParticlesStates;
-  std::vector<Measurement> generatedMeasures;
+  std::vector<std::vector<Measurement>> generatedParticlesMeasures;
+  std::vector<Measurement> allMeasures;
   for (Particle particle : evolvedParticles) {
     std::vector<ParticleState> registeredParticleStates;
     std::vector<ParticleState> generatedParticleStates = particle.getStates();
+    std::vector<Measurement> generatedParticleMeasures;
+    generatedParticleMeasures.push_back(Measurement{0, 0, 0, 0});
     registeredParticleStates.push_back(generatedParticleStates[0]);
     for (int i = 0; i < (int)detectors.size(); i++) {
       std::optional<Measurement> measure =
           detectors[i].measure(generatedParticleStates[i + 1]);
       if (measure) {
-        generatedMeasures.push_back(measure.value());
+        allMeasures.push_back(measure.value());
         registeredParticleStates.push_back(generatedParticleStates[i + 1]);
+        generatedParticleMeasures.push_back(measure.value());
       }
     }
     generatedParticlesStates.push_back(registeredParticleStates);
+    generatedParticlesMeasures.push_back(generatedParticleMeasures);
   }
-  dataFile.SaveMultipleMeasures(generatedMeasures);
+  dataFile.SaveMultipleMeasures(allMeasures);
 
   auto misure = dataFile.readMeasures();
   auto misureParticelle = separateMeasuresInParticles(misure);
-  for (auto particella : misureParticelle) {
-    std::cout << "PARTICELLA" << std::endl;
-    for (auto misura : particella)
-      std::cout << "Id: " << misura.detectorID << "      Misura: " << misura.t
-                << " " << misura.x << " " << misura.y << std::endl;
-  }
 
   std::vector<std::vector<MatrixStateEstimate>> predictedStates;
   std::vector<std::vector<MatrixStateEstimate>> filteredStates;
@@ -88,7 +87,7 @@ void Simulation::runSimulation(int particlesNumber) {
     smoothedStates.push_back(statiSmoothed);
   }
 
-  saveDataToCSV(detectors, generatedParticlesStates, filteredStates,
+  saveDataToCSV(detectors, generatedParticlesStates, generatedParticlesMeasures, filteredStates,
                 smoothedStates, predictedStates);
 }
 
@@ -98,19 +97,10 @@ void Simulation::runSimulation(int particlesNumber) {
  * @param particleNumber the number of particles to be generated
  * @return a vector containing the measurements generated
  */
-// TODO: Remove printing
 std::vector<Measurement> Simulation::generateMeasures(int particlesNumber) {
   std::vector<Measurement> measureVector;
   for (int i = 0; i < particlesNumber; i++) {
     Particle particle = particleGun.generateParticle();
-    std::cout << " - " << particle.getStates()[0].position.T() << " "
-              << particle.getStates()[0].position.X() << " "
-              << particle.getStates()[0].position.Y() << " "
-              << particle.getStates()[0].position.Z() << " " << " - "
-              << particle.getStates()[0].velocity.Mag() << " "
-              << particle.getStates()[0].velocity.X() << " "
-              << particle.getStates()[0].velocity.Y() << " "
-              << particle.getStates()[0].velocity.Z() << " " << std::endl;
 
     for (Detector detector : detectors) {
       auto position =

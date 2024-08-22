@@ -91,8 +91,6 @@ std::vector<Measurement> DataFile::readMeasures() {
 
     // measures.push_back(Measurement{t, x, y, id});
     measures.push_back(Measurement{tBuffer, xBuffer, yBuffer, idBuffer});
-    std::cout << idBuffer << " " << tBuffer << " " << xBuffer << " " << yBuffer
-              << std::endl;
   }
   return measures;
 }

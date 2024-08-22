@@ -24,6 +24,7 @@ void printMatrix(TMatrixD matrix) {
 void saveDataToCSV(
     std::vector<Detector> detectors,
     std::vector<std::vector<ParticleState>> generatedStates,
+    std::vector<std::vector<Measurement>> generatedMeasures,
     std::vector<std::vector<MatrixStateEstimate>> filteredStates,
     std::vector<std::vector<MatrixStateEstimate>> smoothedStates,
     std::vector<std::vector<MatrixStateEstimate>> predictedStates) {
@@ -37,16 +38,22 @@ void saveDataToCSV(
     filename += ".csv";
     std::ofstream csvFile;
     csvFile.open(filename);
-    csvFile << "z,generated,,,,,,predicted,,,,,,,,,,,,filtered,,,,,,,,,,,,"
+    csvFile << "z,generated,,,,,,measured,,,predicted,,,,,,,,,,,,filtered,,,,,,"
+               ",,,,,,"
                "smoothed,,,,,,,,,,,\n";
-    csvFile << "z,t,x,y,speeed,xz,yz,t,st,x,sx,y,sy,speeed,sspeed,xz,sxz,yz,"
-               "syz,t,st,x,sx,y,sy,speeed,sspeed,xz,sxz,yz,syz,t,st,x,sx,y,sy,"
-               "speeed,sspeed,xz,sxz,yz,syz\n";
+    csvFile
+        << "z,t,x,y,speeed,xz,yz,t,x,y,t,st,x,sx,y,sy,speeed,sspeed,xz,sxz,yz,"
+           "syz,t,st,x,sx,y,sy,speeed,sspeed,xz,sxz,yz,syz,t,st,x,sx,y,sy,"
+           "speeed,sspeed,xz,sxz,yz,syz\n";
     for (int i = 0; i < (int)generatedStates[j].size(); i++) {
-      if (i == 0)
+      Measurement meas;
+      if (i == 0) {
         csvFile << "0.,";
-      else
+        meas = Measurement{0, 0, 0, 1};
+      } else {
         csvFile << detectors[i - 1].getBottmLeftPosition().z() << ",";
+        meas = generatedMeasures[j][i];
+      }
 
       ParticleState gen = generatedStates[j][i];
       MatrixStateEstimate pre = predictedStates[j][i];
@@ -59,6 +66,10 @@ void saveDataToCSV(
       csvFile << 1. / gen.velocity.Z() << ",";
       csvFile << gen.velocity.X() / gen.velocity.Z() << ",";
       csvFile << gen.velocity.Y() / gen.velocity.Z() << ",";
+
+      csvFile << meas.t << ",";
+      csvFile << meas.x << ",";
+      csvFile << meas.y << ",";
 
       csvFile << pre.value(0, 0) << ",";
       csvFile << sqrt(pre.uncertainty(0, 0)) << ",";

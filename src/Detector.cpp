@@ -1,6 +1,7 @@
 #include "Detector.hpp"
 #include "MeasuresAndStates.hpp"
 #include "PhisicalParameters.hpp"
+#include "RandomGenerator.hpp"
 
 #include <TLorentzVector.h>
 #include <TMatrixD.h>
@@ -45,9 +46,15 @@ Detector::measure(TLorentzVector particlePosition) const {
                           deltaY < bottomLeftPosition.y() + height;
   const bool zConstrain = deltaZ == 0;
 
+  RandomGenerator &randomGenerator = RandomGenerator::getInstance();
+  const double measuredT = randomGenerator.generateGaussian(
+      particlePosition.T(), DETECTOR_TIME_UNCERTAINTY);
+  const double measuredX =
+      randomGenerator.generateGaussian(deltaX, DETECTOR_SPACE_UNCERTAINTY);
+  const double measuredY =
+      randomGenerator.generateGaussian(deltaX, DETECTOR_SPACE_UNCERTAINTY);
   return (xConstrain && yConstrain && zConstrain)
-             ? std::optional<Measurement>{{particlePosition.T(), deltaX, deltaY,
-                                           id}}
+             ? std::optional<Measurement>{{measuredT, measuredX, measuredY, id}}
              : std::nullopt;
 }
 

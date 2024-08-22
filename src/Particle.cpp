@@ -70,7 +70,6 @@ TLorentzVector Particle::zSpaceEvolve(const double finalZ) {
       lastPosition.T() + deltaT + variationT};
 
   double newVZ = lastVZ + variationVZ;
-  std::cout << variationVZ << " " << newVZ << std::endl;
   const TVector3 newVelocity{(lastXZ + variationXZ) * newVZ,
                              (lastYZ + variationYZ) * newVZ, newVZ};
 
