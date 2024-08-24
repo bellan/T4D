@@ -27,7 +27,9 @@ constexpr double MAX_BETA = 1.;
 
 // Detector parameters
 constexpr int NUMBER_OF_DETECTORS = 6;
-constexpr double DISTANCE_BETWEEN_DETECTORS = 5e-3;
+constexpr double DISTANCE_BETWEEN_DETECTORS = 1.e-2;
+// NOTE: This parameter should be used to limit the movement along
+// the x and y axes. It can be smaller than the real dimension
 constexpr double DETECTOR_DIMENSION = 1.;
 constexpr double DETECTOR_SPACE_UNCERTAINTY = 1e-6;
 constexpr double DETECTOR_TIME_UNCERTAINTY = 1e-11;
@@ -40,4 +42,4 @@ constexpr double MIN_TIME_BETWEEN_PARTICLE =
 constexpr double TIME_EVOLUTION_SIGMA = 1e-11;
 constexpr double SPACE_EVOLUTION_SIGMA = 1e-6;
 constexpr double VELOCITY_EVOLUTION_SIGMA = 0.01 * LIGHT_SPEED;
-constexpr double DIRECTION_EVOLUTION_SIGMA = 1e-4;
+constexpr double DIRECTION_EVOLUTION_SIGMA = 0.5e-4;

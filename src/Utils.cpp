@@ -8,7 +8,12 @@
 #include <iostream>
 #include <stdexcept>
 
-void printMatrix(TMatrixD matrix) {
+/**
+ * Print a TMatrixD to stdout.
+ *
+ * @param matrix the matrix to be printed.
+ */
+void Utils::printMatrix(TMatrixD matrix) {
   std::cout << std::scientific << std::setprecision(2);
   const int nrows = matrix.GetNrows();
   const int ncols = matrix.GetNcols();
@@ -40,8 +45,8 @@ void printMatrix(TMatrixD matrix) {
  *
  * @return a vector of vector each one representing a single particle
  */
-std::vector<std::vector<Measurement>>
-separateMeasuresInParticles(const std::vector<Measurement> &allMeasures) {
+std::vector<std::vector<Measurement>> Utils::separateMeasuresInParticles(
+    const std::vector<Measurement> &allMeasures) {
   if (allMeasures.empty())
     throw std::invalid_argument("No measures given");
 
@@ -64,6 +69,20 @@ separateMeasuresInParticles(const std::vector<Measurement> &allMeasures) {
 }
 
 /**
+ * Concatenates a vector of vectors into one single vector.
+ *
+ * @param separateMeasures the vector of vectors to be concatenated.
+ */
+std::vector<Measurement> Utils::concatenateMeasures(
+    const std::vector<std::vector<Measurement>> &separateMeasures) {
+  std::vector<Measurement> allMeasures;
+  for (const std::vector<Measurement> &singleVector : separateMeasures)
+    allMeasures.insert(allMeasures.end(), singleVector.begin(),
+                       singleVector.end());
+  return allMeasures;
+}
+
+/**
  * Save all the produced and filtered data to a csv file.
  *
  * @param detectors the detectors of the experiment.
@@ -76,7 +95,7 @@ separateMeasuresInParticles(const std::vector<Measurement> &allMeasures) {
  * @param filteredStates the states filtered by the kalman filter.
  * @param smoothedStates the states smoothed by the kalman smoother.
  */
-void saveDataToCSV(
+void Utils::saveDataToCSV(
     const std::vector<Detector> &detectors,
     const std::vector<std::vector<ParticleState>> &theoreticalStates,
     const std::vector<std::vector<ParticleState>> &realStates,
@@ -91,6 +110,7 @@ void saveDataToCSV(
       theoreticalStates.size() == filteredStates.size() &&
       theoreticalStates.size() == smoothedStates.size() &&
       theoreticalStates.size() == measures.size();
+    std::cout<<measures[0].size()<<std::endl;
   if (!particleLengthCheck)
     throw std::invalid_argument("saveDataToCSV: vectors of different size");
 
@@ -113,6 +133,9 @@ void saveDataToCSV(
       if (i == 0) {
         csvFile << "0.,";
         meas = Measurement{0, 0, 0, 1};
+      } else if (i > (int)measures[j].size()) {
+                std::cout<<"Cond"<<std::endl;
+        break;
       } else {
         csvFile << detectors[i - 1].getBottmLeftPosition().z() << ",";
         meas = measures[j][i - 1];

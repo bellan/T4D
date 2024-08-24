@@ -39,7 +39,7 @@ for particle_index in range(PARTICLE_NUMBER):
         s = smoothed_initial_index[yfilename]
         # ax.errorbar(z, y_t, ls=" ", fmt="o", elinewidth=1, capsize=1, label="theoretical", color="yellow")
         ax.plot(z, y_t, label="theoretical", color="yellow")
-        ax.errorbar(z, y_r, ls=" ", fmt="o", elinewidth=1, capsize=1, label="real", color="black")
+        ax.errorbar(z, y_r, fmt=".:", elinewidth=1, capsize=1, label="real", color="black")
         if y_m.size != 0:
             ax.errorbar(z, y_m, yerr=sy_m, ls=" ", fmt="o", elinewidth=1, capsize=1, label="measured", color="grey")
         ax.errorbar(z[3:], y_p[3:], yerr=sy_p[3:], fmt="o", elinewidth=1, capsize=1, label="predicted", color="red")

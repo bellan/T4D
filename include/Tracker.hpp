@@ -17,10 +17,10 @@ public:
   Tracker(const std::vector<Detector> &detectors) : detectors(detectors) {}
 
   kalmanFilterResult
-  kalmanFilter(const std::vector<Measurement> &measures) const;
+  kalmanFilter(const std::vector<Measurement> &measures, bool logging=false) const;
 
   std::vector<MatrixStateEstimate>
-  kalmanSmoother(const std::vector<MatrixStateEstimate> &filteredStates) const;
+  kalmanSmoother(const std::vector<MatrixStateEstimate> &filteredStates, bool looging=false) const;
 
 private:
   std::vector<Detector> detectors;

@@ -6,6 +6,12 @@
 
 #include <vector>
 
+struct GeneratedData {
+  std::vector<std::vector<ParticleState>> allParticlesTheoreticalStates;
+  std::vector<std::vector<ParticleState>> allParticlesRealStates;
+  std::vector<std::vector<Measurement>> allParticlesMeasures;
+};
+
 class DataGenerator {
 public:
   DataGenerator(){};
@@ -22,6 +28,11 @@ public:
   std::vector<Measurement>
   generateParticleMeasures(std::vector<ParticleState> &ParticleStates) const;
 
+  GeneratedData generateAllData(int numberOfParticles, bool logging = false,
+                                bool useMultipleScattering = true);
+
 private:
   SimulationSetup simulationSetup;
+
+  void logData(const GeneratedData &generatedData) const;
 };

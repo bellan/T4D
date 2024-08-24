@@ -5,10 +5,14 @@
 
 #include <TMatrixD.h>
 
+namespace Utils {
 void printMatrix(TMatrixD matrix);
 
 std::vector<std::vector<Measurement>>
 separateMeasuresInParticles(const std::vector<Measurement> &allMeasures);
+
+std::vector<Measurement> concatenateMeasures(
+    const std::vector<std::vector<Measurement>> &separateMeasures);
 
 void saveDataToCSV(
     const std::vector<Detector> &detectors,
@@ -18,3 +22,4 @@ void saveDataToCSV(
     const std::vector<std::vector<MatrixStateEstimate>> &predictedStates,
     const std::vector<std::vector<MatrixStateEstimate>> &filteredStates,
     const std::vector<std::vector<MatrixStateEstimate>> &smoothedStates);
+} // namespace Utils

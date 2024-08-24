@@ -7,6 +7,7 @@
 #include <stdexcept>
 #include <vector>
 
+#include "DataGenerator.hpp"
 #include "MeasuresAndStates.hpp"
 #include "Particle.hpp"
 #include "SetupFactory.hpp"
@@ -36,53 +37,38 @@ Simulation::Simulation() : detectors(), dataFile() {
  */
 void Simulation::runSimulation(int particlesNumber) {
   // DATA CREATION
-  std::vector<std::vector<ParticleState>> allParticlesTheoreticalStates;
-  std::vector<std::vector<ParticleState>> allParticlesRealStates;
-  std::vector<std::vector<Measurement>> allParticlesMeasures;
-  std::vector<Measurement> allMeasures;
+  GeneratedData generatedData =
+      dataGenerator.generateAllData(particlesNumber, false, true);
+  std::vector<Measurement> allMeasures =
+      Utils::concatenateMeasures(generatedData.allParticlesMeasures);
 
-  for (int i = 0; i < particlesNumber; i++) {
-    Particle particle = dataGenerator.generateParticle();
-    std::vector<ParticleState> theoreticalParticleStates =
-        dataGenerator.generateParticleStates(particle, false);
-    std::vector<ParticleState> realParticleStates =
-        dataGenerator.generateParticleStates(particle, true);
-    std::vector<Measurement> particleMeasures =
-        dataGenerator.generateParticleMeasures(realParticleStates);
-
-    for (Measurement measure : particleMeasures) {
-      allMeasures.push_back(measure);
-    }
-
-    allParticlesTheoreticalStates.push_back(theoreticalParticleStates);
-    allParticlesRealStates.push_back(realParticleStates);
-    allParticlesMeasures.push_back(particleMeasures);
-  }
+  // DATA SAVING
   dataFile.SaveMultipleMeasures(allMeasures);
 
   // DATA ELABORATION
   allMeasures = dataFile.readMeasures();
-  allParticlesMeasures = separateMeasuresInParticles(allMeasures);
+  std::vector<std::vector<Measurement>> allParticlesMeasures =
+      Utils::separateMeasuresInParticles(allMeasures);
 
   std::vector<std::vector<MatrixStateEstimate>> allParticlesPredictedStates;
   std::vector<std::vector<MatrixStateEstimate>> allParticlesFilteredStates;
   std::vector<std::vector<MatrixStateEstimate>> allParticlesSmoothedStates;
   for (std::vector<Measurement> particleMeasures : allParticlesMeasures) {
-    kalmanFilterResult filterResults = tracker.kalmanFilter(particleMeasures);
+    kalmanFilterResult filterResults = tracker.kalmanFilter(particleMeasures, false);
     std::vector<MatrixStateEstimate> predictedStates =
         filterResults.predictedStates;
     std::vector<MatrixStateEstimate> filteredStates =
         filterResults.filteredStates;
 
     std::vector<MatrixStateEstimate> smoothedStates =
-        tracker.kalmanSmoother(filteredStates);
+        tracker.kalmanSmoother(filteredStates, false);
     allParticlesPredictedStates.push_back(predictedStates);
     allParticlesFilteredStates.push_back(filteredStates);
     allParticlesSmoothedStates.push_back(smoothedStates);
   }
 
-  saveDataToCSV(detectors, allParticlesTheoreticalStates,
-                allParticlesRealStates, allParticlesMeasures,
-                allParticlesPredictedStates, allParticlesFilteredStates,
-                allParticlesSmoothedStates);
+  Utils::saveDataToCSV(detectors, generatedData.allParticlesTheoreticalStates,
+                       generatedData.allParticlesRealStates,
+                       allParticlesMeasures, allParticlesPredictedStates,
+                       allParticlesFilteredStates, allParticlesSmoothedStates);
 }
