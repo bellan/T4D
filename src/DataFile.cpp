@@ -67,7 +67,7 @@ void DataFile::SaveSingleMeasure(Measurement measure) {
  *
  * @param measures the vector of measures to be saved.
  */
-void DataFile::SaveMultipleMeasures(std::vector<Measurement> measures) {
+void DataFile::SaveMultipleMeasures(const std::vector<Measurement> &measures) {
   if (!writable)
     throw std::invalid_argument("You cannot write data to a readonly file");
   for (const Measurement measure : measures) {

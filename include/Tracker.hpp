@@ -6,17 +6,22 @@
 #include <TMatrixD.h>
 #include <vector>
 
+struct kalmanFilterResult {
+  std::vector<MatrixStateEstimate> predictedStates;
+  std::vector<MatrixStateEstimate> filteredStates;
+};
+
 class Tracker {
 public:
   Tracker(){};
-  Tracker(std::vector<Detector> detectors) : detectors(detectors) {}
+  Tracker(const std::vector<Detector> &detectors) : detectors(detectors) {}
 
+  kalmanFilterResult
+  kalmanFilter(const std::vector<Measurement> &measures) const;
+
+  std::vector<MatrixStateEstimate>
+  kalmanSmoother(const std::vector<MatrixStateEstimate> &filteredStates) const;
+
+private:
   std::vector<Detector> detectors;
-
-  std::vector<std::vector<Measurement>> importMeasurements();
-  std::vector<MatrixStateEstimate>
-  kalmanFilter(std::vector<Measurement> measures,
-               std::vector<MatrixStateEstimate> &predictions);
-  std::vector<MatrixStateEstimate>
-  kalmanSmoother(std::vector<MatrixStateEstimate> filteredStates);
 };

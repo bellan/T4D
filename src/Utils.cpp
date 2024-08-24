@@ -6,6 +6,7 @@
 #include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <stdexcept>
 
 void printMatrix(TMatrixD matrix) {
   std::cout << std::scientific << std::setprecision(2);
@@ -20,95 +21,141 @@ void printMatrix(TMatrixD matrix) {
   }
 }
 
-// TODO: document
+/**
+ * Divide the measurement Vector into a vector of vectors containing measures
+ * from a single particle for each vector.
+ *
+ * It first orders the measures based on the time they occour. Then devides them
+ * based on the detector id: if the detector of a measure is lower than that of
+ * the preavious measure, this is registered as a new particle.
+ *
+ * NOTE: This algorithm assumes that before a particle is shot the preavious one
+ * has already passed through all the detectors
+ * TODO: Implement the above (increasing the spees should be enough) and
+ * uncomment the line in the code. Othewise change the description.
+ *
+ * @param allMeasures the vector containing the complete sequence of
+ * measurements.
+ * @param (out)(optional) particlesNumber the number of the particles
+ *
+ * @return a vector of vector each one representing a single particle
+ */
+std::vector<std::vector<Measurement>>
+separateMeasuresInParticles(const std::vector<Measurement> &allMeasures) {
+  if (allMeasures.empty())
+    throw std::invalid_argument("No measures given");
+
+  // std::sort(allMeasures.begin(), allMeasures.end(), [](Measurement a,
+  // Measurement b){return a.t < b.t;});
+
+  std::vector<std::vector<Measurement>> singleParticleMeasuresVectors;
+
+  for (Measurement measure : allMeasures) {
+    if (singleParticleMeasuresVectors.empty()) {
+      singleParticleMeasuresVectors.push_back(std::vector<Measurement>());
+    } else if (measure.detectorID <
+               singleParticleMeasuresVectors.back().back().detectorID) {
+      singleParticleMeasuresVectors.push_back(std::vector<Measurement>());
+    }
+    singleParticleMeasuresVectors.back().push_back(measure);
+  }
+
+  return singleParticleMeasuresVectors;
+}
+
+/**
+ * Save all the produced and filtered data to a csv file.
+ *
+ * @param detectors the detectors of the experiment.
+ * @param theoreticalStates the theoretical states of the particles (i.e. the
+ * states if multiple scattering was inactive).
+ * @param realStates the states of the particles with multiple scattering
+ * active.
+ * @param measures the registered measures.
+ * @param predictedStates the states predicted by the kalman filter.
+ * @param filteredStates the states filtered by the kalman filter.
+ * @param smoothedStates the states smoothed by the kalman smoother.
+ */
 void saveDataToCSV(
-    std::vector<Detector> detectors,
-    std::vector<std::vector<ParticleState>> generatedStates,
-    std::vector<std::vector<Measurement>> generatedMeasures,
-    std::vector<std::vector<MatrixStateEstimate>> filteredStates,
-    std::vector<std::vector<MatrixStateEstimate>> smoothedStates,
-    std::vector<std::vector<MatrixStateEstimate>> predictedStates) {
-  if (filteredStates.size() != generatedStates.size() ||
-      filteredStates.size() != smoothedStates.size() ||
-      smoothedStates.size() != predictedStates.size())
-    std::cout << "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" << std::endl;
-  for (int j = 0; j < (int)generatedStates.size(); j++) {
+    const std::vector<Detector> &detectors,
+    const std::vector<std::vector<ParticleState>> &theoreticalStates,
+    const std::vector<std::vector<ParticleState>> &realStates,
+    const std::vector<std::vector<Measurement>> &measures,
+    const std::vector<std::vector<MatrixStateEstimate>> &predictedStates,
+    const std::vector<std::vector<MatrixStateEstimate>> &filteredStates,
+    const std::vector<std::vector<MatrixStateEstimate>> &smoothedStates) {
+
+  const bool particleLengthCheck =
+      theoreticalStates.size() == realStates.size() &&
+      theoreticalStates.size() == predictedStates.size() &&
+      theoreticalStates.size() == filteredStates.size() &&
+      theoreticalStates.size() == smoothedStates.size() &&
+      theoreticalStates.size() == measures.size();
+  if (!particleLengthCheck)
+    throw std::invalid_argument("saveDataToCSV: vectors of different size");
+
+  // Particles loop
+  for (int j = 0; j < (int)theoreticalStates.size(); j++) {
     std::string filename("../data/Particle ");
     filename += std::to_string(j);
     filename += ".csv";
     std::ofstream csvFile;
     csvFile.open(filename);
-    csvFile << "z,generated,,,,,,measured,,,predicted,,,,,,,,,,,,filtered,,,,,,"
-               ",,,,,,"
-               "smoothed,,,,,,,,,,,\n";
-    csvFile
-        << "z,t,x,y,speeed,xz,yz,t,x,y,t,st,x,sx,y,sy,speeed,sspeed,xz,sxz,yz,"
-           "syz,t,st,x,sx,y,sy,speeed,sspeed,xz,sxz,yz,syz,t,st,x,sx,y,sy,"
-           "speeed,sspeed,xz,sxz,yz,syz\n";
-    for (int i = 0; i < (int)generatedStates[j].size(); i++) {
+    csvFile << "z,theoretical,,,,,,real,,,,,,measured,,,predicted,,,,,,,,,,,,"
+               "filtered,,,,,,"
+               ",,,,,,smoothed,,,,,,,,,,,\n";
+    csvFile << "z,t,x,y,speeed,xz,yz,t,x,y,speeed,xz,yz,t,x,y,t,st,x,sx,y,sy,"
+               "speeed,sspeed,xz,sxz,yz,"
+               "syz,t,st,x,sx,y,sy,speeed,sspeed,xz,sxz,yz,syz,t,st,x,sx,y,sy,"
+               "speeed,sspeed,xz,sxz,yz,syz\n";
+    for (int i = 0; i < (int)theoreticalStates[j].size(); i++) {
       Measurement meas;
       if (i == 0) {
         csvFile << "0.,";
         meas = Measurement{0, 0, 0, 1};
       } else {
         csvFile << detectors[i - 1].getBottmLeftPosition().z() << ",";
-        meas = generatedMeasures[j][i];
+        meas = measures[j][i - 1];
       }
 
-      ParticleState gen = generatedStates[j][i];
+      ParticleState the = theoreticalStates[j][i];
+      ParticleState rea = realStates[j][i];
       MatrixStateEstimate pre = predictedStates[j][i];
       MatrixStateEstimate fil = filteredStates[j][i];
       MatrixStateEstimate smo = smoothedStates[j][i];
 
-      csvFile << gen.position.T() << ",";
-      csvFile << gen.position.X() << ",";
-      csvFile << gen.position.Y() << ",";
-      csvFile << 1. / gen.velocity.Z() << ",";
-      csvFile << gen.velocity.X() / gen.velocity.Z() << ",";
-      csvFile << gen.velocity.Y() / gen.velocity.Z() << ",";
+      csvFile << the.position.T() << "," << the.position.X() << ","
+              << the.position.Y() << "," << 1. / the.velocity.Z() << ","
+              << the.velocity.X() / the.velocity.Z() << ","
+              << the.velocity.Y() / the.velocity.Z() << ",";
 
-      csvFile << meas.t << ",";
-      csvFile << meas.x << ",";
-      csvFile << meas.y << ",";
+      csvFile << rea.position.T() << "," << rea.position.X() << ","
+              << rea.position.Y() << "," << 1. / rea.velocity.Z() << ","
+              << rea.velocity.X() / rea.velocity.Z() << ","
+              << rea.velocity.Y() / rea.velocity.Z() << ",";
 
-      csvFile << pre.value(0, 0) << ",";
-      csvFile << sqrt(pre.uncertainty(0, 0)) << ",";
-      csvFile << pre.value(1, 0) << ",";
-      csvFile << sqrt(pre.uncertainty(1, 1)) << ",";
-      csvFile << pre.value(2, 0) << ",";
-      csvFile << sqrt(pre.uncertainty(2, 2)) << ",";
-      csvFile << pre.value(3, 0) << ",";
-      csvFile << sqrt(pre.uncertainty(3, 3)) << ",";
-      csvFile << pre.value(4, 0) << ",";
-      csvFile << sqrt(pre.uncertainty(4, 4)) << ",";
-      csvFile << pre.value(5, 0) << ",";
-      csvFile << sqrt(pre.uncertainty(5, 5)) << ",";
+      csvFile << meas.t << "," << meas.x << "," << meas.y << ",";
 
-      csvFile << fil.value(0, 0) << ",";
-      csvFile << sqrt(fil.uncertainty(0, 0)) << ",";
-      csvFile << fil.value(1, 0) << ",";
-      csvFile << sqrt(fil.uncertainty(1, 1)) << ",";
-      csvFile << fil.value(2, 0) << ",";
-      csvFile << sqrt(fil.uncertainty(2, 2)) << ",";
-      csvFile << fil.value(3, 0) << ",";
-      csvFile << sqrt(fil.uncertainty(3, 3)) << ",";
-      csvFile << fil.value(4, 0) << ",";
-      csvFile << sqrt(fil.uncertainty(4, 4)) << ",";
-      csvFile << fil.value(5, 0) << ",";
-      csvFile << sqrt(fil.uncertainty(5, 5)) << ",";
+      csvFile << pre.value(0, 0) << "," << sqrt(pre.uncertainty(0, 0)) << ","
+              << pre.value(1, 0) << "," << sqrt(pre.uncertainty(1, 1)) << ","
+              << pre.value(2, 0) << "," << sqrt(pre.uncertainty(2, 2)) << ","
+              << pre.value(3, 0) << "," << sqrt(pre.uncertainty(3, 3)) << ","
+              << pre.value(4, 0) << "," << sqrt(pre.uncertainty(4, 4)) << ","
+              << pre.value(5, 0) << "," << sqrt(pre.uncertainty(5, 5)) << ",";
 
-      csvFile << smo.value(0, 0) << ",";
-      csvFile << sqrt(smo.uncertainty(0, 0)) << ",";
-      csvFile << smo.value(1, 0) << ",";
-      csvFile << sqrt(smo.uncertainty(1, 1)) << ",";
-      csvFile << smo.value(2, 0) << ",";
-      csvFile << sqrt(smo.uncertainty(2, 2)) << ",";
-      csvFile << smo.value(3, 0) << ",";
-      csvFile << sqrt(smo.uncertainty(3, 3)) << ",";
-      csvFile << smo.value(4, 0) << ",";
-      csvFile << sqrt(smo.uncertainty(4, 4)) << ",";
-      csvFile << smo.value(5, 0) << ",";
-      csvFile << sqrt(smo.uncertainty(5, 5)) << "\n";
+      csvFile << fil.value(0, 0) << "," << sqrt(fil.uncertainty(0, 0)) << ","
+              << fil.value(1, 0) << "," << sqrt(fil.uncertainty(1, 1)) << ","
+              << fil.value(2, 0) << "," << sqrt(fil.uncertainty(2, 2)) << ","
+              << fil.value(3, 0) << "," << sqrt(fil.uncertainty(3, 3)) << ","
+              << fil.value(4, 0) << "," << sqrt(fil.uncertainty(4, 4)) << ","
+              << fil.value(5, 0) << "," << sqrt(fil.uncertainty(5, 5)) << ",";
+
+      csvFile << smo.value(0, 0) << "," << sqrt(smo.uncertainty(0, 0)) << ","
+              << smo.value(1, 0) << "," << sqrt(smo.uncertainty(1, 1)) << ","
+              << smo.value(2, 0) << "," << sqrt(smo.uncertainty(2, 2)) << ","
+              << smo.value(3, 0) << "," << sqrt(smo.uncertainty(3, 3)) << ","
+              << smo.value(4, 0) << "," << sqrt(smo.uncertainty(4, 4)) << ","
+              << smo.value(5, 0) << "," << sqrt(smo.uncertainty(5, 5)) << "\n";
     }
     csvFile.close();
   }

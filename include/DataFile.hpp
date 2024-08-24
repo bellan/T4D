@@ -13,7 +13,7 @@ public:
   ~DataFile();
 
   void SaveSingleMeasure(Measurement measure);
-  void SaveMultipleMeasures(std::vector<Measurement> measuremets);
+  void SaveMultipleMeasures(const std::vector<Measurement> &measuremets);
 
   std::vector<Measurement> readMeasures();
 

@@ -52,7 +52,7 @@ Detector::measure(TLorentzVector particlePosition) const {
   const double measuredX =
       randomGenerator.generateGaussian(deltaX, DETECTOR_SPACE_UNCERTAINTY);
   const double measuredY =
-      randomGenerator.generateGaussian(deltaX, DETECTOR_SPACE_UNCERTAINTY);
+      randomGenerator.generateGaussian(deltaY, DETECTOR_SPACE_UNCERTAINTY);
   return (xConstrain && yConstrain && zConstrain)
              ? std::optional<Measurement>{{measuredT, measuredX, measuredY, id}}
              : std::nullopt;
@@ -72,13 +72,9 @@ std::optional<Measurement> Detector::measure(TMatrixD particleState) const {
   const double x = particleState(1, 0);
   const double y = particleState(2, 0);
 
-  const bool xConstrain =
-      x > bottomLeftPosition.x() && x < bottomLeftPosition.x() + width;
-  const bool yConstrain =
-      y > bottomLeftPosition.y() && y < bottomLeftPosition.y() + height;
+  const TLorentzVector particlePosition{x, y, this->bottomLeftPosition.z(), t};
 
-  return (xConstrain && yConstrain) ? std::optional<Measurement>{{t, x, y, id}}
-                                    : std::nullopt;
+  return measure(particlePosition);
 }
 
 /**
@@ -92,20 +88,10 @@ std::optional<Measurement> Detector::measure(TMatrixD particleState) const {
  */
 std::optional<Measurement>
 Detector::measure(ParticleState particleState) const {
-  const double t = particleState.position.T();
-  const double x = particleState.position.X();
-  const double y = particleState.position.Y();
-
-  const bool xConstrain =
-      x > bottomLeftPosition.x() && x < bottomLeftPosition.x() + width;
-  const bool yConstrain =
-      y > bottomLeftPosition.y() && y < bottomLeftPosition.y() + height;
-
-  return (xConstrain && yConstrain) ? std::optional<Measurement>{{t, x, y, id}}
-                                    : std::nullopt;
+  return measure(particleState.position);
 }
 
-TMatrixD Detector::getMeasureUncertainty() {
+TMatrixD Detector::getMeasureUncertainty() const {
   double sdata[36] = {
       DETECTOR_TIME_UNCERTAINTY * DETECTOR_TIME_UNCERTAINTY,   0., 0., 0.,
       DETECTOR_SPACE_UNCERTAINTY * DETECTOR_SPACE_UNCERTAINTY, 0., 0., 0.,

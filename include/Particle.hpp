@@ -4,7 +4,6 @@
 #include <TLorentzVector.h>
 #include <TMatrixD.h>
 #include <TVector3.h>
-#include <vector>
 
 /**
  * The particle class.
@@ -17,12 +16,14 @@ public:
   Particle(TLorentzVector initialPosition, TVector3 velocity, double mass,
            double charge = 0.);
 
-  TLorentzVector zSpaceEvolve(double finalZ);
-
-  std::vector<ParticleState> getStates() { return states; };
+  ParticleState getInitialState() const { return initialState; }
+  ParticleState
+  zSpaceEvolve(ParticleState preaviousState, double finalZ,
+               bool multipleScattering = true,
+               std::optional<int> detectorId = std::nullopt) const;
 
 private:
-  std::vector<ParticleState> states;
+  ParticleState initialState;
 
   const double mass;
   const double charge;

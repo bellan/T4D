@@ -8,6 +8,14 @@ compile_run() {
     make -j 4
     echo "Executing"
     ./Tracker
+
+    echo "
+
+    "
+    echo "Creating data visualization"
+    cd ../DataVisualization
+    python dataVis.py
+    cd ..
 }
 
 $1

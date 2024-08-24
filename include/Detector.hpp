@@ -17,20 +17,16 @@ class Detector {
 public:
   Detector(double zPosition, double width, double height);
 
+  int getId() const { return id; }
   TVector3 getBottmLeftPosition() const { return bottomLeftPosition; }
   double getWidth() const { return width; }
   double getHeight() const { return height; }
-
-  static void resetCounter() {
-    counter = 0;
-  } // TODO: Consider removing this. It can be useful to instanciate differente
-    // experiments (e.g. one for the sim and one for the reconstruction).
 
   std::optional<Measurement> measure(TLorentzVector particlePosition) const;
   std::optional<Measurement> measure(TMatrixD particleState) const;
   std::optional<Measurement> measure(ParticleState particleState) const;
 
-  TMatrixD getMeasureUncertainty();
+  TMatrixD getMeasureUncertainty() const;
 
 private:
   static int counter;

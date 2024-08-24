@@ -6,56 +6,84 @@
 #include <TMatrixD.h>
 #include <vector>
 
-std::vector<MatrixStateEstimate>
-Tracker::kalmanFilter(std::vector<Measurement> measures,
-                      std::vector<MatrixStateEstimate> &predictions) {
+kalmanFilterResult
+Tracker::kalmanFilter(const std::vector<Measurement> &measures) const {
   std::vector<MatrixStateEstimate> filteredStates;
-  predictions = std::vector<MatrixStateEstimate>();
+  std::vector<MatrixStateEstimate> predictedStates;
 
   TMatrixD evolutionMatrix(6, 6);
 
   // Initializing the state at 0, that is at the particle cannon
-  TMatrixD initialStateValue(
-      6, 1); // 6 dimentional vector (t,x,y,1/speed,thetazx,thetazy)
-  TMatrixD initialStateError(6, 6);
-  double data[6] = {0., 0., 0., 1. / LIGHT_SPEED, 0., 0.};
+  // 6 dimentional vector (t,x,y,1/speed,thetazx,thetazy)
+  double initialStateData[6] = {0., 0., 0., 1. / LIGHT_SPEED, 0., 0.};
   constexpr double bigT = VERY_HIGH_TIME_ERROR * VERY_HIGH_TIME_ERROR;
   constexpr double bigX = VERY_HIGH_SPACE_ERROR * VERY_HIGH_SPACE_ERROR;
   constexpr double bigVInv =
       VERY_HIGH_VELOCITY_INVERSE_ERROR * VERY_HIGH_VELOCITY_INVERSE_ERROR;
   constexpr double bigDirection =
       VERY_HIGH_DIRECTION_ERROR * VERY_HIGH_DIRECTION_ERROR;
-  double sdata[36] = {
+  double initialStateSData[36] = {
       bigT,         0., 0., 0., 0., 0., 0., bigX,        0., 0., 0., 0., 0., 0.,
       bigX,         0., 0., 0., 0., 0., 0., bigVInv,     0., 0., 0., 0., 0., 0.,
       bigDirection, 0., 0., 0., 0., 0., 0., bigDirection};
-  initialStateValue.SetMatrixArray(data, "");
-  initialStateError.SetMatrixArray(sdata, "");
+
+  TMatrixD initialStateValue(6, 1, initialStateData);
+  TMatrixD initialStateError(6, 6, initialStateSData);
   MatrixStateEstimate initialState{initialStateValue, initialStateError};
 
-  predictions.push_back(initialState);
+  predictedStates.push_back(initialState);
   filteredStates.push_back(initialState);
 
   // Initializing the first state
   for (int i = 0; i < (int)measures.size(); i++) {
     if (i == 0) {
-      double data[6] = {measures[i].t,
-                        measures[i].x,
-                        measures[i].y,
-                        1. / LIGHT_SPEED,
-                        0.,
-                        0.};
-      TMatrixD stateValue(6, 1, data);
+      double predictedData[6] = {measures[i].t,
+                                 measures[i].x,
+                                 measures[i].y,
+                                 1. / LIGHT_SPEED,
+                                 0.,
+                                 0.};
+      TMatrixD stateValue(6, 1, predictedData);
 
       TMatrixD measureError = detectors[i].getMeasureUncertainty();
-      double sdata[36] = {measureError(0, 0), 0., 0., 0., 0., 0.,
-                          0., measureError(1, 1), 0., 0., 0., 0.,
-                          0., 0., measureError(2, 2), 0., 0., 0.,
-                          0., 0., 0., bigVInv, 0., 0.,
-                          0., 0., 0., 0., bigDirection, 0.,
-                          0., 0., 0., 0., 0., bigDirection};
+      double sdata[36] = {measureError(0, 0),
+                          0.,
+                          0.,
+                          0.,
+                          0.,
+                          0.,
+                          0.,
+                          measureError(1, 1),
+                          0.,
+                          0.,
+                          0.,
+                          0.,
+                          0.,
+                          0.,
+                          measureError(2, 2),
+                          0.,
+                          0.,
+                          0.,
+                          0.,
+                          0.,
+                          0.,
+                          bigVInv,
+                          0.,
+                          0.,
+                          0.,
+                          0.,
+                          0.,
+                          0.,
+                          bigDirection,
+                          0.,
+                          0.,
+                          0.,
+                          0.,
+                          0.,
+                          0.,
+                          bigDirection};
       TMatrixD stateError(6, 6, sdata);
-      predictions.push_back(
+      predictedStates.push_back(
           MatrixStateEstimate{initialStateValue, initialStateError});
       filteredStates.push_back(MatrixStateEstimate{stateValue, stateError});
       continue;
@@ -86,7 +114,7 @@ Tracker::kalmanFilter(std::vector<Measurement> measures,
                           sDeltaX2 / (deltaZ * deltaZ), 0., 0., 0., 0., 0., 0.,
                           sDeltaY2 / (deltaZ * deltaZ)};
       TMatrixD stateError(6, 6, sdata);
-      predictions.push_back(
+      predictedStates.push_back(
           MatrixStateEstimate{initialStateValue, initialStateError});
       filteredStates.push_back(MatrixStateEstimate{stateValue, stateError});
       continue;
@@ -102,17 +130,14 @@ Tracker::kalmanFilter(std::vector<Measurement> measures,
 
     const double deltaZ = detectors[i].getBottmLeftPosition().Z() -
                           detectors[i - 1].getBottmLeftPosition().Z();
-    double evolutiondata[36] = {1., 0., 0., deltaZ, 0., 0.,
-                                0., 1., 0., 0., deltaZ, 0.,
-                                0., 0., 1., 0., 0., deltaZ,
-                                0., 0., 0., 1., 0., 0.,
-                                0., 0., 0., 0., 1., 0.,
-                                0., 0., 0., 0., 0., 1.};
+    double evolutiondata[36] = {1., 0.,     0., deltaZ, 0., 0., 0., 1., 0.,
+                                0., deltaZ, 0., 0.,     0., 1., 0., 0., deltaZ,
+                                0., 0.,     0., 1.,     0., 0., 0., 0., 0.,
+                                0., 1.,     0., 0.,     0., 0., 0., 0., 1.};
     evolutionMatrix.SetMatrixArray(evolutiondata);
 
-    double projectiondata[18] = {1., 0., 0., 0., 0., 0.,
-                                 0., 1., 0., 0., 0., 0.,
-                                 0., 0., 1., 0., 0., 0.};
+    double projectiondata[18] = {1., 0., 0., 0., 0., 0., 0., 1., 0.,
+                                 0., 0., 0., 0., 0., 1., 0., 0., 0.};
     TMatrixD projectionMatrix(3, 6, projectiondata);
 
     // TODO: Check if this is correct
@@ -161,17 +186,17 @@ Tracker::kalmanFilter(std::vector<Measurement> measures,
     filteredStateError =
         TMatrixD(estimatedStateError, TMatrixD::kMinus, filteredStateError);
 
-    predictions.push_back(
+    predictedStates.push_back(
         MatrixStateEstimate{estimatedStateValue, estimatedStateError});
     filteredStates.push_back(
         MatrixStateEstimate{filteredStateValue, filteredStateError});
   }
 
-  return filteredStates;
+  return kalmanFilterResult{predictedStates, filteredStates};
 }
 
 std::vector<MatrixStateEstimate>
-Tracker::kalmanSmoother(std::vector<MatrixStateEstimate> filteredStates) {
+Tracker::kalmanSmoother(const std::vector<MatrixStateEstimate> &filteredStates) const {
   std::vector<MatrixStateEstimate> smoothedStates;
 
   TMatrixD evolutionMatrix(6, 6);

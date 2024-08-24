@@ -7,10 +7,14 @@
 
 void printMatrix(TMatrixD matrix);
 
+std::vector<std::vector<Measurement>>
+separateMeasuresInParticles(const std::vector<Measurement> &allMeasures);
+
 void saveDataToCSV(
-    std::vector<Detector> detectors,
-    std::vector<std::vector<ParticleState>> generatedStates,
-    std::vector<std::vector<Measurement>> generaterdMeasures,
-    std::vector<std::vector<MatrixStateEstimate>> filteredStates,
-    std::vector<std::vector<MatrixStateEstimate>> smoothedStates,
-    std::vector<std::vector<MatrixStateEstimate>> predictedStates);
+    const std::vector<Detector> &detectors,
+    const std::vector<std::vector<ParticleState>> &theoreticalStates,
+    const std::vector<std::vector<ParticleState>> &realStates,
+    const std::vector<std::vector<Measurement>> &measures,
+    const std::vector<std::vector<MatrixStateEstimate>> &predictedStates,
+    const std::vector<std::vector<MatrixStateEstimate>> &filteredStates,
+    const std::vector<std::vector<MatrixStateEstimate>> &smoothedStates);
