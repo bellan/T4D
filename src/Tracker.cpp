@@ -5,6 +5,7 @@
 #include "Utils.hpp"
 
 #include <TMatrixD.h>
+#include <cmath>
 #include <vector>
 
 kalmanFilterResult
@@ -206,11 +207,25 @@ Tracker::kalmanSmoother(const std::vector<MatrixStateEstimate> &filteredStates, 
                               ? detectors[i].getBottmLeftPosition().Z() -
                                     detectors[i - 1].getBottmLeftPosition().Z()
                               : detectors[i].getBottmLeftPosition().Z();
-    double evolutiondata[36] = {1., 0.,     0., deltaZ, 0., 0., 0., 1., 0.,
-                                0., deltaZ, 0., 0.,     0., 1., 0., 0., deltaZ,
-                                0., 0.,     0., 1.,     0., 0., 0., 0., 0.,
-                                0., 1.,     0., 0.,     0., 0., 0., 0., 1.};
+    double evolutiondata[36] = {
+            1., 0., 0., deltaZ, 0., 0.,
+            0., 1., 0., 0., deltaZ, 0.,
+            0., 0., 1., 0., 0., deltaZ,
+            0., 0., 0., 1., 0., 0.,
+            0., 0., 0., 0., 1., 0.,
+            0., 0., 0., 0., 0., 1.};
     evolutionMatrix.SetMatrixArray(evolutiondata);
+    // TODO: Check if this is correct
+    constexpr double inverse_velocity_sigma =
+        DIRECTION_EVOLUTION_SIGMA / (LIGHT_SPEED * LIGHT_SPEED);
+    double evolutionUncertaintyData[36] = {
+        pow(TIME_EVOLUTION_SIGMA, 2), 0., 0., 0., 0., 0.,
+        0., pow(SPACE_EVOLUTION_SIGMA, 2), 0., 0., 0., 0.,
+        0., 0., pow(SPACE_EVOLUTION_SIGMA, 2), 0., 0., 0.,
+        0., 0., 0., pow(inverse_velocity_sigma, 2), 0., 0.,
+        0., 0., 0., 0., pow(DIRECTION_EVOLUTION_SIGMA, 2), 0.,
+        0., 0., 0., 0., 0., pow(DIRECTION_EVOLUTION_SIGMA, 2)};
+    TMatrixD evolutionUncertainty(6, 6, evolutionUncertaintyData);
 
     TMatrixD estimatedNextStateValue =
         TMatrixD(evolutionMatrix, TMatrixD::kMult, filteredStates[i].value);
@@ -218,15 +233,28 @@ Tracker::kalmanSmoother(const std::vector<MatrixStateEstimate> &filteredStates, 
         TMatrixD(evolutionMatrix, TMatrixD::kMult,
                  TMatrixD(filteredStates[i].uncertainty,
                           TMatrixD::kMultTranspose, evolutionMatrix));
+    estimatedNextStateError += evolutionUncertainty;
 
     TMatrixD estimatedNextStateErrorInverted =
         TMatrixD(estimatedNextStateError);
+
     estimatedNextStateErrorInverted.SetTol(DETERMINANT_TOLERANCE);
+    if (logging) {
+      std::cout<<"evolution Matrix"<<std::endl;
+      Utils::printMatrix(evolutionMatrix);
+      std::cout<<std::endl;
+      std::cout<<"firtered state"<<std::endl;
+      Utils::printMatrix(filteredStates[i].uncertainty);
+      std::cout<<std::endl;
+      std::cout<<"estimated next state error"<<std::endl;
+      Utils::printMatrix(estimatedNextStateErrorInverted);
+      std::cout<<std::endl;
+    }
     estimatedNextStateErrorInverted.Invert();
 
     TMatrixD smootherGain = TMatrixD(filteredStates[i].uncertainty,
                                      TMatrixD::kMultTranspose, evolutionMatrix);
-    smootherGain = TMatrixD(smootherGain, TMatrixD::kMultTranspose,
+    smootherGain = TMatrixD(smootherGain, TMatrixD::kMult,
                             estimatedNextStateErrorInverted);
 
     TMatrixD residualValue = TMatrixD(smoothedNextStateValue, TMatrixD::kMinus,
@@ -242,6 +270,15 @@ Tracker::kalmanSmoother(const std::vector<MatrixStateEstimate> &filteredStates, 
     smoothedStateError =
         TMatrixD(smootherGain, TMatrixD::kMult, smoothedStateError);
     smoothedStateError += filteredStates[i].uncertainty;
+    if (logging) {
+      std::cout<<"smoother gain"<<std::endl;
+      Utils::printMatrix(smootherGain);
+      std::cout<<std::endl;
+      std::cout<<"residual error"<<std::endl;
+      Utils::printMatrix(residualError);
+      std::cout<<std::endl;
+      std::cout<<std::endl;
+    }
 
     smoothedStates.push_back(
         MatrixStateEstimate{smoothedStateValue, smoothedStateError});
@@ -249,4 +286,36 @@ Tracker::kalmanSmoother(const std::vector<MatrixStateEstimate> &filteredStates, 
 
   std::reverse(smoothedStates.begin(), smoothedStates.end());
   return smoothedStates;
+}
+
+Chi2Variables Tracker::computeChi2s(const std::vector<ParticleState> &expectedStates, const std::vector<MatrixStateEstimate> &obtainedStates, bool logging, bool skipFirst) const {
+    double tChi2 = 0;
+    double xChi2 = 0;
+    double yChi2 = 0;
+    double vChi2 = 0;
+    double xzChi2 = 0;
+    double yzChi2 = 0;
+
+    int lim = (skipFirst) ? 0 : -1;
+    // NOTE: The vectors are traversed backwords because sometimes the first elements aren't computed
+    for (int o = obtainedStates.size()-1, e = expectedStates.size()-1; o > lim && e > lim; o--, e--) {
+        tChi2 += pow((expectedStates[e].position.T() - obtainedStates[o].value(0,0))/sqrt(obtainedStates[o].uncertainty(0,0)), 2);
+        xChi2 += pow((expectedStates[e].position.X() - obtainedStates[o].value(1,0))/sqrt(obtainedStates[o].uncertainty(1,1)), 2);
+        yChi2 += pow((expectedStates[e].position.Y() - obtainedStates[o].value(2,0))/sqrt(obtainedStates[o].uncertainty(2,2)), 2);
+        if (skipFirst && o==1) continue;
+        vChi2 += pow(((1./expectedStates[e].velocity.Z()) - obtainedStates[o].value(3,0))/sqrt(obtainedStates[o].uncertainty(3,3)), 2);
+        xzChi2 += pow(((expectedStates[e].velocity.X()/expectedStates[e].velocity.Z()) - obtainedStates[o].value(4,0))/sqrt(obtainedStates[o].uncertainty(4,4)), 2);
+        yzChi2 += pow(((expectedStates[e].velocity.Y()/expectedStates[e].velocity.Z()) - obtainedStates[o].value(5,0))/sqrt(obtainedStates[o].uncertainty(5,5)), 2);
+    }
+
+    if (logging) {
+        std::cout<<"t = "<<tChi2<<std::endl;
+        std::cout<<"x = "<<xChi2<<std::endl;
+        std::cout<<"y = "<<yChi2<<std::endl;
+        std::cout<<"1/v_z = "<<vChi2<<std::endl;
+        std::cout<<"xz = "<<xzChi2<<std::endl;
+        std::cout<<"yz = "<<yzChi2<<std::endl;
+    }
+
+    return Chi2Variables{tChi2, xChi2, yChi2, vChi2, xzChi2, yzChi2};
 }

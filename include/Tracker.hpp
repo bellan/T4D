@@ -11,6 +11,10 @@ struct kalmanFilterResult {
   std::vector<MatrixStateEstimate> filteredStates;
 };
 
+struct Chi2Variables {
+  double tChi2, xChi2, yChi2, vChi2, xzChi2, yzChi2;
+};
+
 class Tracker {
 public:
   Tracker(){};
@@ -21,6 +25,8 @@ public:
 
   std::vector<MatrixStateEstimate>
   kalmanSmoother(const std::vector<MatrixStateEstimate> &filteredStates, bool looging=false) const;
+
+  Chi2Variables computeChi2s(const std::vector<ParticleState> &expectedStates, const std::vector<MatrixStateEstimate> &obtainedStates, bool logging=false, bool skipFirst=false) const;
 
 private:
   std::vector<Detector> detectors;

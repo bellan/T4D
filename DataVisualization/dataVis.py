@@ -29,7 +29,8 @@ for particle_index in range(PARTICLE_NUMBER):
     ylabels = ["t [s]", "x [m]", "y [m]", "1/(v_z) [s/m]", "(v_x/v_z) []", "(v_y/v_z) []"]
     yfilenames = ["t", "x", "y", "v", "xz", "yz"]
 
-    smoothed_initial_index = {"t": 0, "x": 1, "y": 1, "v": 1, "xz": 2, "yz": 2}
+    smoothed_initial_index = {"t": 1, "x": 1, "y": 1, "v": 2, "xz": 2, "yz": 2}
+    filtered_initial_index = {"t": 1, "x": 1, "y": 1, "v": 2, "xz": 2, "yz": 2}
 
     for (y_t, y_r, y_m, y_f, y_p, y_s, sy_m, sy_f, sy_p, sy_s, ylabel, yfilename) in zip(ys_t, ys_r, ys_m, ys_f, ys_p, ys_s, sys_m, sys_f, sys_p, sys_s, ylabels, yfilenames):
         figure, ax = plt.subplots()
@@ -37,13 +38,14 @@ for particle_index in range(PARTICLE_NUMBER):
         ax.set_xlabel("z [m]")
         ax.set_ylabel(ylabel)
         s = smoothed_initial_index[yfilename]
+        f = filtered_initial_index[yfilename]
         # ax.errorbar(z, y_t, ls=" ", fmt="o", elinewidth=1, capsize=1, label="theoretical", color="yellow")
         ax.plot(z, y_t, label="theoretical", color="yellow")
         ax.errorbar(z, y_r, fmt=".:", elinewidth=1, capsize=1, label="real", color="black")
         if y_m.size != 0:
             ax.errorbar(z, y_m, yerr=sy_m, ls=" ", fmt="o", elinewidth=1, capsize=1, label="measured", color="grey")
         ax.errorbar(z[3:], y_p[3:], yerr=sy_p[3:], fmt="o", elinewidth=1, capsize=1, label="predicted", color="red")
-        ax.errorbar(z[2:], y_f[2:], yerr=sy_f[2:], fmt=".-.", elinewidth=1, capsize=1, label="filtered", color="blue")
+        ax.errorbar(z[f:], y_f[f:], yerr=sy_f[f:], fmt=".-.", elinewidth=1, capsize=1, label="filtered", color="blue")
         ax.errorbar(z[s:], y_s[s:], yerr=sy_s[s:], fmt=".:", elinewidth=1, capsize=1, label="smoothed", color="green")
         ax.legend()
         figure.savefig(f"Particle {particle_index} {yfilename}.pdf")

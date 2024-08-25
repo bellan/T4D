@@ -66,7 +66,7 @@ ParticleState Particle::zSpaceEvolve(ParticleState preaviousState,
 
   RandomGenerator &randomGenerator = RandomGenerator::getInstance();
   const double variationT =
-      randomGenerator.generateGaussian(0., TIME_EVOLUTION_SIGMA);
+      fabs(randomGenerator.generateGaussian(0., TIME_EVOLUTION_SIGMA));
   const double variationX =
       randomGenerator.generateGaussian(0., SPACE_EVOLUTION_SIGMA);
   const double variationY =

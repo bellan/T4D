@@ -8,9 +8,9 @@ constexpr int NUMBER_OF_PARTICLES = 1;
 // bigger should be ok)
 constexpr double VERY_HIGH_TIME_ERROR = 1e-6;
 constexpr double VERY_HIGH_SPACE_ERROR = 1;
-constexpr double VERY_HIGH_VELOCITY_INVERSE_ERROR = 1e-1;
+constexpr double VERY_HIGH_VELOCITY_INVERSE_ERROR = 1e-4;
 constexpr double VERY_HIGH_DIRECTION_ERROR = 1e4;
-constexpr double DETERMINANT_TOLERANCE = 1e-55;
+constexpr double DETERMINANT_TOLERANCE = 1e-80;
 
 // Phisical costants
 constexpr double FOUNDAMENTAL_CHARGE = 1.602176634e-19;
@@ -39,7 +39,7 @@ constexpr double MIN_TIME_BETWEEN_PARTICLE =
     (NUMBER_OF_DETECTORS * DISTANCE_BETWEEN_DETECTORS * 1.1) / LIGHT_SPEED;
 
 // Evolution parameters
-constexpr double TIME_EVOLUTION_SIGMA = 1e-11;
-constexpr double SPACE_EVOLUTION_SIGMA = 1e-6;
+constexpr double TIME_EVOLUTION_SIGMA = 5.e-12;
+constexpr double SPACE_EVOLUTION_SIGMA = 5.e-7;
 constexpr double VELOCITY_EVOLUTION_SIGMA = 0.01 * LIGHT_SPEED;
 constexpr double DIRECTION_EVOLUTION_SIGMA = 0.5e-4;

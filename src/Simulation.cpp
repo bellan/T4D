@@ -9,13 +9,13 @@
 
 #include "DataGenerator.hpp"
 #include "MeasuresAndStates.hpp"
-#include "Particle.hpp"
 #include "SetupFactory.hpp"
 #include "Tracker.hpp"
 #include "Utils.hpp"
 
 /**
- * The default constructor TODO: sobstitude with a factory that creates the
+ * The default constructor
+ * TODO: sobstitude with a factory that creates the
  * experiment settings
  */
 Simulation::Simulation() : detectors(), dataFile() {
@@ -31,14 +31,14 @@ Simulation::Simulation() : detectors(), dataFile() {
 }
 
 /**
- * The main simulation function
+ * The main simulation function.
  *
- * TODO: determine what actually does
+ * @param particlesNumber the number of particles to be simulated.
  */
 void Simulation::runSimulation(int particlesNumber) {
   // DATA CREATION
   GeneratedData generatedData =
-      dataGenerator.generateAllData(particlesNumber, false, true);
+      dataGenerator.generateAllData(particlesNumber, true, true);
   std::vector<Measurement> allMeasures =
       Utils::concatenateMeasures(generatedData.allParticlesMeasures);
 
@@ -53,8 +53,9 @@ void Simulation::runSimulation(int particlesNumber) {
   std::vector<std::vector<MatrixStateEstimate>> allParticlesPredictedStates;
   std::vector<std::vector<MatrixStateEstimate>> allParticlesFilteredStates;
   std::vector<std::vector<MatrixStateEstimate>> allParticlesSmoothedStates;
-  for (std::vector<Measurement> particleMeasures : allParticlesMeasures) {
-    kalmanFilterResult filterResults = tracker.kalmanFilter(particleMeasures, false);
+  for (int i = 0; i < (int)allParticlesMeasures.size(); i++) {
+    kalmanFilterResult filterResults =
+        tracker.kalmanFilter(allParticlesMeasures[i], false);
     std::vector<MatrixStateEstimate> predictedStates =
         filterResults.predictedStates;
     std::vector<MatrixStateEstimate> filteredStates =
@@ -65,6 +66,13 @@ void Simulation::runSimulation(int particlesNumber) {
     allParticlesPredictedStates.push_back(predictedStates);
     allParticlesFilteredStates.push_back(filteredStates);
     allParticlesSmoothedStates.push_back(smoothedStates);
+
+    std::cout << "Filtered Chi2" << std::endl;
+    tracker.computeChi2s(generatedData.allParticlesRealStates[i],
+                         filteredStates, true, true);
+    std::cout << "\nSmoothed Chi2" << std::endl;
+    tracker.computeChi2s(generatedData.allParticlesRealStates[i],
+                         smoothedStates, true, true);
   }
 
   Utils::saveDataToCSV(detectors, generatedData.allParticlesTheoreticalStates,

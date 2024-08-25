@@ -110,7 +110,6 @@ void Utils::saveDataToCSV(
       theoreticalStates.size() == filteredStates.size() &&
       theoreticalStates.size() == smoothedStates.size() &&
       theoreticalStates.size() == measures.size();
-    std::cout<<measures[0].size()<<std::endl;
   if (!particleLengthCheck)
     throw std::invalid_argument("saveDataToCSV: vectors of different size");
 
