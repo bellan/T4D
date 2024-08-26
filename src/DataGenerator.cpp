@@ -43,8 +43,12 @@ std::vector<Measurement> DataGenerator::generateParticleMeasures(
 
     std::optional<Measurement> measure =
         simulationSetup.detectors[state.detectorID.value()].measure(state);
-    if (measure)
-      measureVector.push_back(measure.value());
+    if (!measure) {
+      const int id = state.detectorID.value();
+      std::cout<<"Particle went out of detector line at detector "<<id+1<<" (id = "<<id<<")"<<std::endl;
+      break;
+    }
+    measureVector.push_back(measure.value());
   }
 
   return measureVector;

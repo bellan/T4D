@@ -55,7 +55,7 @@ void Simulation::runSimulation(int particlesNumber) {
   std::vector<std::vector<MatrixStateEstimate>> allParticlesSmoothedStates;
   for (int i = 0; i < (int)allParticlesMeasures.size(); i++) {
     kalmanFilterResult filterResults =
-        tracker.kalmanFilter(allParticlesMeasures[i], false);
+        tracker.kalmanFilter(allParticlesMeasures[i], false, false);
     std::vector<MatrixStateEstimate> predictedStates =
         filterResults.predictedStates;
     std::vector<MatrixStateEstimate> filteredStates =

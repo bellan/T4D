@@ -26,11 +26,11 @@ constexpr double MIN_BETA = 0.8;
 constexpr double MAX_BETA = 1.;
 
 // Detector parameters
-constexpr int NUMBER_OF_DETECTORS = 6;
+constexpr int NUMBER_OF_DETECTORS = 9;
 constexpr double DISTANCE_BETWEEN_DETECTORS = 1.e-2;
 // NOTE: This parameter should be used to limit the movement along
 // the x and y axes. It can be smaller than the real dimension
-constexpr double DETECTOR_DIMENSION = 1.;
+constexpr double DETECTOR_DIMENSION = 1.e-4;
 constexpr double DETECTOR_SPACE_UNCERTAINTY = 1e-6;
 constexpr double DETECTOR_TIME_UNCERTAINTY = 1e-11;
 
@@ -41,5 +41,12 @@ constexpr double MIN_TIME_BETWEEN_PARTICLE =
 // Evolution parameters
 constexpr double TIME_EVOLUTION_SIGMA = 5.e-12;
 constexpr double SPACE_EVOLUTION_SIGMA = 5.e-7;
+// NOTE: These next two parameters should be modified toghether somewhat
+// euristically.
+// The first regulates the data production, while the second the tracking.
+// The theoretical value of the second is
+// (VELOCITY_EVOLUTION_SIGMA / (LIGHT_SPEED * LIGHT_SPEED))
+// however the value should be finetuned to optimize the tracking.
 constexpr double VELOCITY_EVOLUTION_SIGMA = 0.01 * LIGHT_SPEED;
+constexpr double INVERSE_VELOCITY_EVOLUTION_SIGMA = 0.2 / LIGHT_SPEED;
 constexpr double DIRECTION_EVOLUTION_SIGMA = 0.5e-4;

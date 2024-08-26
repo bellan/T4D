@@ -133,7 +133,6 @@ void Utils::saveDataToCSV(
         csvFile << "0.,";
         meas = Measurement{0, 0, 0, 1};
       } else if (i > (int)measures[j].size()) {
-                std::cout<<"Cond"<<std::endl;
         break;
       } else {
         csvFile << detectors[i - 1].getBottmLeftPosition().z() << ",";

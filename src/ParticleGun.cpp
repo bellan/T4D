@@ -29,7 +29,8 @@ ParticleGun::ParticleGun(TVector3 position)
  * @param detector a vector of all the detectors used to determine the valid
  * angles.
  */
-ParticleGun::ParticleGun(TVector3 position, const std::vector<Detector> &detectors)
+ParticleGun::ParticleGun(TVector3 position,
+                         const std::vector<Detector> &detectors)
     : position(position), timeCounter(0.) {
   double thetaMax = M_PI;
   for (auto &detector : detectors) {
@@ -49,13 +50,8 @@ ParticleGun::ParticleGun(TVector3 position, const std::vector<Detector> &detecto
     const double thetaTL = vTL.Angle({0, 0, 1});
     const double thetaTR = vTR.Angle({0, 0, 1});
 
-    thetaMax = std::min(
-        thetaMax,
-        std::min(thetaBL,
-                 std::min(thetaBR,
-                          std::min(thetaTL,
-                                   thetaTR)))); // TODO: consider changing to max
-                                                // (change also initialization)
+    thetaMax = std::min({thetaMax, thetaBL, thetaBR, thetaTL, thetaTR}) * 0.9;
+    // TODO: consider changing to max (change also initialization)
   }
   maxColatitude = thetaMax;
 }
@@ -85,7 +81,8 @@ Particle ParticleGun::generateParticle() {
 
   const Particle newParticle({position, timeCounter}, velocity, mass, charge);
 
-  timeCounter += randomGenerator.generateUniform(0., 50.)*MIN_TIME_BETWEEN_PARTICLE;
+  timeCounter +=
+      randomGenerator.generateUniform(0., 50.) * MIN_TIME_BETWEEN_PARTICLE;
 
   return newParticle;
 }
