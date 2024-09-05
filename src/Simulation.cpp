@@ -9,14 +9,13 @@
 
 #include "DataGenerator.hpp"
 #include "MeasuresAndStates.hpp"
+#include "ResultFile.hpp"
 #include "SetupFactory.hpp"
 #include "Tracker.hpp"
 #include "Utils.hpp"
 
 /**
  * The default constructor
- * TODO: sobstitude with a factory that creates the
- * experiment settings
  */
 Simulation::Simulation() : detectors(), dataFile() {
   SetupFactory factory{};
@@ -67,14 +66,20 @@ void Simulation::runSimulation(int particlesNumber) {
     allParticlesFilteredStates.push_back(filteredStates);
     allParticlesSmoothedStates.push_back(smoothedStates);
 
-    std::cout << "Filtered Chi2" << std::endl;
-    tracker.computeChi2s(generatedData.allParticlesRealStates[i],
-                         filteredStates, true, true);
-    std::cout << "\nSmoothed Chi2" << std::endl;
-    tracker.computeChi2s(generatedData.allParticlesRealStates[i],
-                         smoothedStates, true, true);
-  }
+    /*std::cout << "Filtered Chi2" << std::endl;*/
+    /*tracker.computeChi2s(generatedData.allParticlesRealStates[i],*/
+    /*                     filteredStates, true, true);*/
+    /*std::cout << "\nSmoothed Chi2" << std::endl;*/
+    /*tracker.computeChi2s(generatedData.allParticlesRealStates[i],*/
+    /*                     smoothedStates, true, true);*/
 
+    /*std::string fileName("../results/Particle ");*/
+    /*fileName += std::to_string(i);*/
+    /*fileName += ".root";*/
+    /**/
+    /*ResultFile resultFile(fileName.c_str(), "ResultsTree");*/
+    /*resultFile.SaveMultipleValues(detectors, generatedData.allParticlesTheoreticalStates[i], generatedData.allParticlesRealStates[i], allParticlesMeasures[i], predictedStates, filteredStates, smoothedStates);*/
+  }
   Utils::saveDataToCSV(detectors, generatedData.allParticlesTheoreticalStates,
                        generatedData.allParticlesRealStates,
                        allParticlesMeasures, allParticlesPredictedStates,

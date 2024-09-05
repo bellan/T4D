@@ -1,5 +1,6 @@
 #include "DataGenerator.hpp"
 #include "MeasuresAndStates.hpp"
+#include <iomanip>
 #include <vector>
 
 /**
@@ -85,6 +86,7 @@ GeneratedData DataGenerator::generateAllData(int particlesNumber,
 
 void DataGenerator::logData(const GeneratedData &generatedData) const {
   std::cout << "GENERATED DATA LOGS" << std::endl;
+    std::cout << std::setprecision(5);
   const std::vector<std::vector<ParticleState>> &allParticlesTheoreticalStates =
       generatedData.allParticlesTheoreticalStates;
   const std::vector<std::vector<ParticleState>> &allParticlesRealStates =

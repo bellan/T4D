@@ -82,7 +82,7 @@ Particle ParticleGun::generateParticle() {
   const Particle newParticle({position, timeCounter}, velocity, mass, charge);
 
   timeCounter +=
-      randomGenerator.generateUniform(0., 50.) * MIN_TIME_BETWEEN_PARTICLE;
+      randomGenerator.generateUniform(1., 2.) * MIN_TIME_BETWEEN_PARTICLE;
 
   return newParticle;
 }

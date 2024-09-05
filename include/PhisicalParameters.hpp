@@ -1,6 +1,6 @@
 #pragma once
 
-constexpr int NUMBER_OF_PARTICLES = 1;
+constexpr int NUMBER_OF_PARTICLES = 10000;
 
 // Program parameters
 // NOTE: this paramater should be chosen such that the standard detector
