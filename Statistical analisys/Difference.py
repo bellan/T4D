@@ -19,6 +19,7 @@ mes_y_dif = []
 smo_t_dif = []
 smo_x_dif = []
 smo_y_dif = []
+pol_x = []
 for particle_index in range(PARTICLE_NUMBER):
     if (particle_index % 100 == 0):
         print(particle_index)
@@ -30,6 +31,7 @@ for particle_index in range(PARTICLE_NUMBER):
     smo_t_dif.append(smo_t[analyzed_detector_index] - rea_t[analyzed_detector_index])
     smo_x_dif.append(smo_x[analyzed_detector_index] - rea_x[analyzed_detector_index])
     smo_y_dif.append(smo_y[analyzed_detector_index] - rea_y[analyzed_detector_index])
+    pol_x.append((smo_y[analyzed_detector_index] - rea_y[analyzed_detector_index])/smo_sx[analyzed_detector_index])
     if (abs(mes_t[analyzed_detector_index] - rea_t[analyzed_detector_index])>0.75e-10):
         print(f"AAAAAAAAA {particle_index}")
 
@@ -39,6 +41,7 @@ mes_y_dif = np.array(mes_y_dif)
 smo_t_dif = np.array(smo_t_dif)
 smo_x_dif = np.array(smo_x_dif)
 smo_y_dif = np.array(smo_y_dif)
+pol_x = np.array(pol_x)
 
 
 ys = [(mes_t_dif, smo_t_dif), (mes_x_dif, smo_x_dif), (mes_y_dif, smo_y_dif)]
@@ -54,3 +57,17 @@ for (y,name) in zip(ys,names):
     ax.legend()
     figure.savefig(f"figures/{name}.pdf")
     plt.close(figure)
+
+
+figure, ax = plt.subplots()
+x = np.linspace(pol_x.min(), pol_x.max(), 1000)
+ax.grid()
+values, bin_edges, _ = ax.hist(pol_x, label="measured", bins=20)
+area = ((bin_edges[1:]-bin_edges[:-1])*values).sum()
+ax.plot(x,  area/np.sqrt(2*np.pi) * np.exp(-0.5*x**2) )
+ax.set_xlabel("Differenc")
+ax.set_ylabel("Occurrences")
+ax.legend()
+figure.savefig(f"figures/Pol.pdf")
+plt.close(figure)
+
