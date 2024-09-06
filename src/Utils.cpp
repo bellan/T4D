@@ -56,10 +56,8 @@ std::vector<std::vector<Measurement>> Utils::separateMeasuresInParticles(
   std::vector<std::vector<Measurement>> singleParticleMeasuresVectors;
 
   for (Measurement measure : allMeasures) {
-    if (singleParticleMeasuresVectors.empty()) {
-      singleParticleMeasuresVectors.push_back(std::vector<Measurement>());
-    } else if (measure.detectorID <
-               singleParticleMeasuresVectors.back().back().detectorID) {
+    if (singleParticleMeasuresVectors.empty() ||
+        measure.detectorID < singleParticleMeasuresVectors.back().back().detectorID) {
       singleParticleMeasuresVectors.push_back(std::vector<Measurement>());
     }
     singleParticleMeasuresVectors.back().push_back(measure);

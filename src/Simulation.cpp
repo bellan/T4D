@@ -37,7 +37,7 @@ Simulation::Simulation() : detectors(), dataFile() {
 void Simulation::runSimulation(int particlesNumber) {
   // DATA CREATION
   GeneratedData generatedData =
-      dataGenerator.generateAllData(particlesNumber, true, true);
+      dataGenerator.generateAllData(particlesNumber, false, true);
   std::vector<Measurement> allMeasures =
       Utils::concatenateMeasures(generatedData.allParticlesMeasures);
 

@@ -17,8 +17,9 @@
  *
  * @param position the position of the gun.
  */
-ParticleGun::ParticleGun(TVector3 position)
-    : position{position}, maxColatitude(M_PI / 2.), timeCounter(0.) {}
+ParticleGun::ParticleGun(TVector3 position, double timeOfEmission)
+    : position{position}, timeOfEmission{timeOfEmission},
+      maxColatitude(M_PI / 2.) {}
 
 /**
  * constructor with specified shooting angle
@@ -30,8 +31,9 @@ ParticleGun::ParticleGun(TVector3 position)
  * angles.
  */
 ParticleGun::ParticleGun(TVector3 position,
-                         const std::vector<Detector> &detectors)
-    : position(position), timeCounter(0.) {
+                         const std::vector<Detector> &detectors,
+                         double timeOfEmission)
+    : position(position), timeOfEmission(timeOfEmission) {
   double thetaMax = M_PI;
   for (auto &detector : detectors) {
     const TVector3 bottomLeft = detector.getBottmLeftPosition();
@@ -79,10 +81,8 @@ Particle ParticleGun::generateParticle() {
 
   const TVector3 velocity(speed * TVector3{vx, vy, vz});
 
-  const Particle newParticle({position, timeCounter}, velocity, mass, charge);
-
-  timeCounter +=
-      randomGenerator.generateUniform(1., 2.) * MIN_TIME_BETWEEN_PARTICLE;
+  const Particle newParticle({position, timeOfEmission}, velocity, mass,
+                             charge);
 
   return newParticle;
 }

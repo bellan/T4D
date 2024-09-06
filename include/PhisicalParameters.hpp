@@ -26,11 +26,11 @@ constexpr double MIN_BETA = 0.8;
 constexpr double MAX_BETA = 1.;
 
 // Detector parameters
-constexpr int NUMBER_OF_DETECTORS = 9;
+constexpr int NUMBER_OF_DETECTORS = 8;
 constexpr double DISTANCE_BETWEEN_DETECTORS = 1.e-2;
 // NOTE: This parameter should be used to limit the movement along
 // the x and y axes. It can be smaller than the real dimension
-constexpr double DETECTOR_DIMENSION = 1.e-4;
+constexpr double DETECTOR_DIMENSION = 1.e-3;
 constexpr double DETECTOR_SPACE_UNCERTAINTY = 1e-6;
 constexpr double DETECTOR_TIME_UNCERTAINTY = 1e-11;
 
