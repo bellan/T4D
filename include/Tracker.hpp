@@ -20,6 +20,8 @@ public:
   Tracker(){};
   Tracker(const std::vector<Detector> &detectors) : detectors(detectors) {}
 
+  MatrixStateEstimate estimateNextState(const MatrixStateEstimate& preaviousState, double deltaZ) const;
+
   kalmanFilterResult
   kalmanFilter(const std::vector<Measurement> &measures, bool logging=false, bool realTime=false) const;
 

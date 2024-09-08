@@ -179,3 +179,71 @@ void Utils::saveDataToCSV(
     csvFile.close();
   }
 }
+
+/**
+ * Save all the produced and filtered data to a csv file.
+ *
+ * @param detectors the detectors of the experiment.
+ * @param theoreticalStates the theoretical states of the particles (i.e. the
+ * states if multiple scattering was inactive).
+ * @param realStates the states of the particles with multiple scattering
+ * active.
+ * @param measures the registered measures.
+ * @param predictedStates the states predicted by the kalman filter.
+ * @param filteredStates the states filtered by the kalman filter.
+ * @param smoothedStates the states smoothed by the kalman smoother.
+ */
+void Utils::saveDataToCSV(
+    const std::vector<Detector> &detectors,
+    const std::vector<std::vector<ParticleState>> &realStates,
+    const std::vector<std::vector<Measurement>> &measures,
+    const std::vector<std::vector<MatrixStateEstimate>> &smoothedStates) {
+
+  const bool particleLengthCheck =
+      realStates.size() == smoothedStates.size() &&
+      realStates.size() == measures.size();
+  if (!particleLengthCheck)
+    throw std::invalid_argument("saveDataToCSV: vectors of different size");
+
+  // Particles loop
+  for (int j = 0; j < (int)realStates.size(); j++) {
+    std::string filename("../results/Particle ");
+    filename += std::to_string(j);
+    filename += ".csv";
+    std::ofstream csvFile;
+    csvFile.open(filename);
+    csvFile << "z,real,,,,,,measured,,,smoothed,,,,,,,,,,,,\n";
+    csvFile << "z,t,x,y,speeed,xz,yz,t,x,y,t,st,x,sx,y,sy,"
+               "speeed,sspeed,xz,sxz,yz,syz\n";
+    for (int i = 0; i < (int)realStates[j].size(); i++) {
+      Measurement meas;
+      if (i == 0) {
+        csvFile << "0.,";
+        meas = Measurement{0, 0, 0, 1};
+      } else if (i > (int)measures[j].size()) {
+        break;
+      } else {
+        csvFile << detectors[i - 1].getBottmLeftPosition().z() << ",";
+        meas = measures[j][i - 1];
+      }
+
+      ParticleState rea = realStates[j][i];
+      MatrixStateEstimate smo = smoothedStates[j][i];
+
+      csvFile << rea.position.T() << "," << rea.position.X() << ","
+              << rea.position.Y() << "," << 1. / rea.velocity.Z() << ","
+              << rea.velocity.X() / rea.velocity.Z() << ","
+              << rea.velocity.Y() / rea.velocity.Z() << ",";
+
+      csvFile << meas.t << "," << meas.x << "," << meas.y << ",";
+
+      csvFile << smo.value(0, 0) << "," << sqrt(smo.uncertainty(0, 0)) << ","
+              << smo.value(1, 0) << "," << sqrt(smo.uncertainty(1, 1)) << ","
+              << smo.value(2, 0) << "," << sqrt(smo.uncertainty(2, 2)) << ","
+              << smo.value(3, 0) << "," << sqrt(smo.uncertainty(3, 3)) << ","
+              << smo.value(4, 0) << "," << sqrt(smo.uncertainty(4, 4)) << ","
+              << smo.value(5, 0) << "," << sqrt(smo.uncertainty(5, 5)) << "\n";
+    }
+    csvFile.close();
+  }
+}

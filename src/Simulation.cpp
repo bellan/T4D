@@ -9,6 +9,7 @@
 
 #include "DataGenerator.hpp"
 #include "MeasuresAndStates.hpp"
+#include "PhisicalParameters.hpp"
 #include "ResultFile.hpp"
 #include "SetupFactory.hpp"
 #include "Tracker.hpp"
@@ -78,10 +79,75 @@ void Simulation::runSimulation(int particlesNumber) {
     /*fileName += ".root";*/
     /**/
     /*ResultFile resultFile(fileName.c_str(), "ResultsTree");*/
-    /*resultFile.SaveMultipleValues(detectors, generatedData.allParticlesTheoreticalStates[i], generatedData.allParticlesRealStates[i], allParticlesMeasures[i], predictedStates, filteredStates, smoothedStates);*/
+    /*resultFile.SaveMultipleValues(detectors,
+     * generatedData.allParticlesTheoreticalStates[i],
+     * generatedData.allParticlesRealStates[i], allParticlesMeasures[i],
+     * predictedStates, filteredStates, smoothedStates);*/
   }
   Utils::saveDataToCSV(detectors, generatedData.allParticlesTheoreticalStates,
                        generatedData.allParticlesRealStates,
                        allParticlesMeasures, allParticlesPredictedStates,
                        allParticlesFilteredStates, allParticlesSmoothedStates);
+}
+
+/**
+ * The main simulation function.
+ *
+ * @param particlesNumber the number of particles to be simulated.
+ */
+void Simulation::testDetector(int particlesNumber, int detectorId) {
+  // DATA CREATION
+  GeneratedData generatedData =
+      dataGenerator.generateAllData(particlesNumber, false, true);
+  std::vector<Measurement> allMeasures =
+      Utils::concatenateMeasures(generatedData.allParticlesMeasures);
+
+  // DATA SAVING
+  dataFile.SaveMultipleMeasures(allMeasures);
+
+  // DATA ELABORATION
+  allMeasures = dataFile.readMeasures();
+  std::vector<std::vector<Measurement>> allParticlesMeasures =
+      Utils::separateMeasuresInParticles(allMeasures);
+
+  std::vector<std::vector<MatrixStateEstimate>> allParticlesSmoothedStates;
+  for (int i = 0; i < (int)allParticlesMeasures.size(); i++) {
+    std::vector<Measurement> givenMeasures = allParticlesMeasures[i];
+    const Measurement detectorMeasurement = givenMeasures[detectorId];
+    givenMeasures.erase(givenMeasures.begin() + detectorId);
+
+    kalmanFilterResult filterResults =
+        tracker.kalmanFilter(givenMeasures, false, false);
+    std::vector<MatrixStateEstimate> predictedStates =
+        filterResults.predictedStates;
+    std::vector<MatrixStateEstimate> filteredStates =
+        filterResults.filteredStates;
+
+    std::vector<MatrixStateEstimate> smoothedStates =
+        tracker.kalmanSmoother(filteredStates, false);
+
+    MatrixStateEstimate preaviousStateEstimate = smoothedStates[detectorId];
+    double deltaZ = (detectorId == 0)
+                        ? detectors[detectorId].getBottmLeftPosition().Z()
+                        : detectors[detectorId].getBottmLeftPosition().Z() -
+                              detectors[detectorId - 1].getBottmLeftPosition().Z();
+    MatrixStateEstimate estimatedNextState = tracker.estimateNextState(preaviousStateEstimate, deltaZ);
+    TMatrixD estimatedValue = estimatedNextState.value;
+    TMatrixD estimatedError = estimatedNextState.uncertainty;
+
+    std::cout<<"DIFFERENCE CALCULATED AT THE DETECTOR WITH ID "<<detectorId<<std::endl;
+    std::cout<<"Detector measurement: t="<<detectorMeasurement.t<<"±"<<DETECTOR_TIME_UNCERTAINTY<<" |   x = "<<detectorMeasurement.x<<"±"<<DETECTOR_SPACE_UNCERTAINTY<<" |   y = "<<detectorMeasurement.y<<"±"<<DETECTOR_SPACE_UNCERTAINTY<<std::endl;
+    std::cout<<"Smoother estimate: t="<<estimatedValue(0,0)<<"±"<<sqrt(estimatedError(0,0))<<" |   x = "<<estimatedValue(1,0)<<"±"<<sqrt(estimatedError(1,1))<<" |   y = "<<estimatedValue(2,0) <<"±"<<sqrt(estimatedError(2,2))<<std::endl;
+
+    double Zt = (detectorMeasurement.t - estimatedValue(0,0)) / sqrt(DETECTOR_TIME_UNCERTAINTY*DETECTOR_TIME_UNCERTAINTY + estimatedError(0,0));
+    double Zx = (detectorMeasurement.x - estimatedValue(1,0)) / sqrt(DETECTOR_SPACE_UNCERTAINTY*DETECTOR_SPACE_UNCERTAINTY + estimatedError(1,1));
+    double Zy = (detectorMeasurement.y - estimatedValue(2,0)) / sqrt(DETECTOR_SPACE_UNCERTAINTY*DETECTOR_SPACE_UNCERTAINTY + estimatedError(2,2));
+    std::cout<<"Z_t = "<<Zt<<"    Z_x = "<<Zx<<"    Z_y = "<<Zy<<std::endl;
+
+
+    smoothedStates.insert(smoothedStates.begin()+detectorId+1, estimatedNextState);
+    allParticlesSmoothedStates.push_back(smoothedStates);
+  }
+  Utils::saveDataToCSV(detectors, generatedData.allParticlesRealStates,
+                       allParticlesMeasures, allParticlesSmoothedStates);
 }

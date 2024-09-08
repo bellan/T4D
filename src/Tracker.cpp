@@ -8,6 +8,42 @@
 #include <cmath>
 #include <vector>
 
+/**
+ * Estimate the next state of the particle after a distance deltaZ from a state preaviousState.
+ *
+ * This function uses the distance deltaZ to compute the evolution matrix to apply to the
+ * preavious state. Then, an evolution error is applied to the uncertainty.
+ *
+ * @param preaviousState the state of the particle at the preavious measure.
+ * @param deltaZ the distance covered by the particle.
+ * @return the estimated new state of the particle.
+ */
+MatrixStateEstimate Tracker::estimateNextState(const MatrixStateEstimate& preaviousState, double deltaZ) const {
+  double evolutionMatrixData[36] = {
+            1., 0., 0., deltaZ, 0., 0.,
+            0., 1., 0., 0., deltaZ, 0.,
+            0., 0., 1., 0., 0., deltaZ,
+            0., 0., 0., 1., 0., 0.,
+            0., 0., 0., 0., 1., 0.,
+            0., 0., 0., 0., 0., 1.};
+  TMatrixD evolutionMatrix(6, 6, evolutionMatrixData);
+
+  double evolutionUncertaintyData[36] = {
+        pow(TIME_EVOLUTION_SIGMA, 2), 0., 0., 0., 0., 0.,
+        0., pow(SPACE_EVOLUTION_SIGMA, 2), 0., 0., 0., 0.,
+        0., 0., pow(SPACE_EVOLUTION_SIGMA, 2), 0., 0., 0.,
+        0., 0., 0., pow(INVERSE_VELOCITY_EVOLUTION_SIGMA, 2), 0., 0.,
+        0., 0., 0., 0., pow(DIRECTION_EVOLUTION_SIGMA, 2), 0.,
+        0., 0., 0., 0., 0., pow(DIRECTION_EVOLUTION_SIGMA, 2)};
+  TMatrixD evolutionUncertainty(6, 6, evolutionUncertaintyData);
+
+  TMatrixD estimatedStateValue = TMatrixD(evolutionMatrix, TMatrixD::kMult, preaviousState.value);
+  TMatrixD estimatedStateError = TMatrixD(evolutionMatrix, TMatrixD::kMult, TMatrixD(preaviousState.uncertainty, TMatrixD::kMultTranspose, evolutionMatrix));
+  estimatedStateError += evolutionUncertainty;
+
+  return MatrixStateEstimate{estimatedStateValue, estimatedStateError};
+}
+
 kalmanFilterResult
 Tracker::kalmanFilter(const std::vector<Measurement> &measures, bool logging, bool realTime) const {
   if (logging) std::cout<<"KALMAN FILTER LOGS"<<std::endl;

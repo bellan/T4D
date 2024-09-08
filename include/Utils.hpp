@@ -22,4 +22,10 @@ void saveDataToCSV(
     const std::vector<std::vector<MatrixStateEstimate>> &predictedStates,
     const std::vector<std::vector<MatrixStateEstimate>> &filteredStates,
     const std::vector<std::vector<MatrixStateEstimate>> &smoothedStates);
+
+void saveDataToCSV(
+    const std::vector<Detector> &detectors,
+    const std::vector<std::vector<ParticleState>> &realStates,
+    const std::vector<std::vector<Measurement>> &measures,
+    const std::vector<std::vector<MatrixStateEstimate>> &smoothedStates);
 } // namespace Utils

@@ -14,6 +14,7 @@ class Simulation {
 public:
   Simulation();
   void runSimulation(int particlesNumber);
+  void testDetector(int particlesNumber, int detectorId);
 
 private:
   std::vector<Detector> detectors;
