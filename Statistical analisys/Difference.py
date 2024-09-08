@@ -1,7 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-analyzed_detector_index = 5 # NOTE: Detector indexing start at 0
+det_idx = 5 # NOTE: Detector indexing start at 0
+det_idx+=1 # NOTE: Because the first must be ignore since is the initial state
 PARTICLE_NUMBER = 10000
 
 FOUNDAMENTAL_CHARGE = 1.602176634e-19;
@@ -19,21 +20,44 @@ mes_y_dif = []
 smo_t_dif = []
 smo_x_dif = []
 smo_y_dif = []
+
+ext_vz_dif = []
+ext_vx_dif = []
+ext_vy_dif = []
+smo_vz_dif = []
+smo_vx_dif = []
+smo_vy_dif = []
+
+pol_t = []
 pol_x = []
+pol_y = []
+
+pol_mesmo_t = []
+
 for particle_index in range(PARTICLE_NUMBER):
     if (particle_index % 100 == 0):
         print(particle_index)
     data = np.loadtxt(f"../results/Particle {particle_index}.csv", skiprows=2, unpack=True, delimiter=",", dtype=float)
-    _, _, _, _, _, _, _, rea_t, rea_x, rea_y, rea_v, rea_xz, rea_yz, mes_t, mes_x, mes_y, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, smo_t, smo_st, smo_x, smo_sx, smo_y, smo_sy, smo_v, smo_sv, smo_xz, smo_sxz, smo_yz, smo_syz = data
-    mes_t_dif.append(mes_t[analyzed_detector_index] - rea_t[analyzed_detector_index])
-    mes_x_dif.append(mes_x[analyzed_detector_index] - rea_x[analyzed_detector_index])
-    mes_y_dif.append(mes_y[analyzed_detector_index] - rea_y[analyzed_detector_index])
-    smo_t_dif.append(smo_t[analyzed_detector_index] - rea_t[analyzed_detector_index])
-    smo_x_dif.append(smo_x[analyzed_detector_index] - rea_x[analyzed_detector_index])
-    smo_y_dif.append(smo_y[analyzed_detector_index] - rea_y[analyzed_detector_index])
-    pol_x.append((smo_y[analyzed_detector_index] - rea_y[analyzed_detector_index])/smo_sx[analyzed_detector_index])
-    if (abs(mes_t[analyzed_detector_index] - rea_t[analyzed_detector_index])>0.75e-10):
-        print(f"AAAAAAAAA {particle_index}")
+    z, _, _, _, _, _, _, rea_t, rea_x, rea_y, rea_v, rea_xz, rea_yz, mes_t, mes_x, mes_y, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, smo_t, smo_st, smo_x, smo_sx, smo_y, smo_sy, smo_v, smo_sv, smo_xz, smo_sxz, smo_yz, smo_syz = data
+    mes_t_dif.append(mes_t[det_idx] - rea_t[det_idx])
+    mes_x_dif.append(mes_x[det_idx] - rea_x[det_idx])
+    mes_y_dif.append(mes_y[det_idx] - rea_y[det_idx])
+    smo_t_dif.append(smo_t[det_idx] - rea_t[det_idx])
+    smo_x_dif.append(smo_x[det_idx] - rea_x[det_idx])
+    smo_y_dif.append(smo_y[det_idx] - rea_y[det_idx])
+
+    ext_vz_dif.append((mes_t[det_idx] - mes_t[det_idx-1])/(z[det_idx]-z[det_idx-1]) - rea_v[det_idx])
+    ext_vx_dif.append((mes_x[det_idx] - mes_x[det_idx-1])/(z[det_idx]-z[det_idx-1]) - rea_xz[det_idx])
+    ext_vy_dif.append((mes_y[det_idx] - mes_y[det_idx-1])/(z[det_idx]-z[det_idx-1]) - rea_yz[det_idx])
+    smo_vz_dif.append(smo_v[det_idx] - rea_v[det_idx])
+    smo_vx_dif.append(smo_xz[det_idx] - rea_xz[det_idx])
+    smo_vy_dif.append(smo_yz[det_idx] - rea_yz[det_idx])
+
+    pol_t.append((smo_t[det_idx] - rea_t[det_idx])/smo_st[det_idx])
+    pol_x.append((smo_x[det_idx] - rea_x[det_idx])/smo_sx[det_idx])
+    pol_y.append((smo_y[det_idx] - rea_y[det_idx])/smo_sy[det_idx])
+
+    pol_mesmo_t.append((smo_t[det_idx] - mes_t[det_idx])/np.sqrt(DETECTOR_TIME_UNCERTAINTY**2+smo_st[det_idx]**2))
 
 mes_t_dif = np.array(mes_t_dif)
 mes_x_dif = np.array(mes_x_dif)
@@ -41,33 +65,47 @@ mes_y_dif = np.array(mes_y_dif)
 smo_t_dif = np.array(smo_t_dif)
 smo_x_dif = np.array(smo_x_dif)
 smo_y_dif = np.array(smo_y_dif)
+
+ext_vz_dif = np.array(ext_vz_dif)
+ext_vx_dif = np.array(ext_vx_dif)
+ext_vy_dif = np.array(ext_vy_dif)
+smo_vz_dif = np.array(smo_vz_dif)
+smo_vx_dif = np.array(smo_vx_dif)
+smo_vy_dif = np.array(smo_vy_dif)
+
+pol_t = np.array(pol_t)
 pol_x = np.array(pol_x)
+pol_y = np.array(pol_y)
+
+pol_mesmo_t = np.array(pol_mesmo_t)
 
 
-ys = [(mes_t_dif, smo_t_dif), (mes_x_dif, smo_x_dif), (mes_y_dif, smo_y_dif)]
-names = ["t", "x", "y"]
+ys = [(mes_t_dif, smo_t_dif), (mes_x_dif, smo_x_dif), (mes_y_dif, smo_y_dif), (ext_vz_dif, smo_vz_dif), (ext_vx_dif, smo_vx_dif), (ext_vy_dif, smo_vy_dif)]
+names = ["set_t", "set_x", "set_y", "set_vz", "set_xz", "set_yz"]
 for (y,name) in zip(ys,names):
     figure, ax = plt.subplots()
     ax.grid()
-    measured, smoothed = y
-    ax.hist(measured, label="measured", bins=20)
-    ax.hist(smoothed, label="smoothed", bins=20)
-    ax.set_xlabel("Differenc")
+    measured, smoothed= y
+    ax.hist(measured, label="measured", bins=50)
+    ax.hist(smoothed, label="smoothed", alpha=0.8, bins=50)
+    ax.set_xlabel("Difference")
     ax.set_ylabel("Occurrences")
     ax.legend()
     figure.savefig(f"figures/{name}.pdf")
     plt.close(figure)
 
 
-figure, ax = plt.subplots()
-x = np.linspace(pol_x.min(), pol_x.max(), 1000)
-ax.grid()
-values, bin_edges, _ = ax.hist(pol_x, label="measured", bins=20)
-area = ((bin_edges[1:]-bin_edges[:-1])*values).sum()
-ax.plot(x,  area/np.sqrt(2*np.pi) * np.exp(-0.5*x**2) )
-ax.set_xlabel("Differenc")
-ax.set_ylabel("Occurrences")
-ax.legend()
-figure.savefig(f"figures/Pol.pdf")
-plt.close(figure)
-
+ys = [pol_t, pol_x, pol_y, pol_mesmo_t]
+names = ["pol_t", "pol_x", "pol_y", "pol_mesmo"]
+for (y,name) in zip(ys,names):
+    figure, ax = plt.subplots()
+    x = np.linspace(pol_x.min(), pol_x.max(), 1000)
+    ax.grid()
+    values, bin_edges, _ = ax.hist(y, label="measured", bins=50)
+    area = ((bin_edges[1:]-bin_edges[:-1])*values).sum()
+    ax.plot(x,  area/np.sqrt(2*np.pi) * np.exp(-0.5*x**2) )
+    ax.set_xlabel("Difference")
+    ax.set_ylabel("Occurrences")
+    ax.legend()
+    figure.savefig(f"figures/{name}.pdf")
+    plt.close(figure)

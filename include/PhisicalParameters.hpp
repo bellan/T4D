@@ -39,14 +39,19 @@ constexpr double MIN_TIME_BETWEEN_PARTICLE =
     (NUMBER_OF_DETECTORS * DISTANCE_BETWEEN_DETECTORS * 1.1) / LIGHT_SPEED;
 
 // Evolution parameters
-constexpr double TIME_EVOLUTION_SIGMA = 5.e-12;
-constexpr double SPACE_EVOLUTION_SIGMA = 5.e-7;
+/*constexpr double TIME_EVOLUTION_SIGMA = 5.e-12;*/
+constexpr double TIME_EVOLUTION_SIGMA = 0.;
+/*constexpr double SPACE_EVOLUTION_SIGMA = 5.e-7;*/
+constexpr double SPACE_EVOLUTION_SIGMA = 0.;
 // NOTE: These next two parameters should be modified toghether somewhat
 // euristically.
 // The first regulates the data production, while the second the tracking.
 // The theoretical value of the second is
 // (VELOCITY_EVOLUTION_SIGMA / (LIGHT_SPEED * LIGHT_SPEED))
 // however the value should be finetuned to optimize the tracking.
-constexpr double VELOCITY_EVOLUTION_SIGMA = 0.01 * LIGHT_SPEED;
-constexpr double INVERSE_VELOCITY_EVOLUTION_SIGMA = 0.2 / LIGHT_SPEED;
-constexpr double DIRECTION_EVOLUTION_SIGMA = 0.5e-4;
+/*constexpr double VELOCITY_EVOLUTION_SIGMA = 0.01 * LIGHT_SPEED;*/
+/*constexpr double INVERSE_VELOCITY_EVOLUTION_SIGMA = 0.2 / LIGHT_SPEED;*/
+/*constexpr double DIRECTION_EVOLUTION_SIGMA = 0.5e-4;*/
+constexpr double VELOCITY_EVOLUTION_SIGMA = 0.;
+constexpr double INVERSE_VELOCITY_EVOLUTION_SIGMA = 0.;
+constexpr double DIRECTION_EVOLUTION_SIGMA = 0.;
