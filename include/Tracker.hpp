@@ -20,16 +20,32 @@ public:
   Tracker(){};
   Tracker(const std::vector<Detector> &detectors) : detectors(detectors) {}
 
-  MatrixStateEstimate estimateNextState(const MatrixStateEstimate& preaviousState, double deltaZ) const;
+  MatrixStateEstimate
+  estimateNextState(const MatrixStateEstimate &preaviousState,
+                    double deltaZ) const;
 
-  kalmanFilterResult
-  kalmanFilter(const std::vector<Measurement> &measures, bool logging=false, bool realTime=false) const;
+  kalmanFilterResult kalmanFilter(const std::vector<Measurement> &measures,
+                                  bool logging = false,
+                                  bool realTime = false) const;
 
   std::vector<MatrixStateEstimate>
-  kalmanSmoother(const std::vector<MatrixStateEstimate> &filteredStates, bool looging=false) const;
+  kalmanSmoother(const std::vector<MatrixStateEstimate> &filteredStates,
+                 bool looging = false) const;
 
-  Chi2Variables computeChi2s(const std::vector<ParticleState> &expectedStates, const std::vector<MatrixStateEstimate> &obtainedStates, bool logging=false, bool skipFirst=false) const;
+  Chi2Variables
+  computeChi2s(const std::vector<ParticleState> &expectedStates,
+               const std::vector<MatrixStateEstimate> &obtainedStates,
+               bool logging = false, bool skipFirst = false) const;
 
 private:
   std::vector<Detector> detectors;
+
+  void initializeFilterRealTime(
+      const std::vector<Measurement> &measures,
+      std::vector<MatrixStateEstimate> &predictedStates,
+      std::vector<MatrixStateEstimate> &filteredStates) const;
+  void initializeFilter(
+      const std::vector<Measurement> &measures,
+      std::vector<MatrixStateEstimate> &predictedStates,
+      std::vector<MatrixStateEstimate> &filteredStates) const;
 };

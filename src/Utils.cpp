@@ -207,7 +207,7 @@ void Utils::saveDataToCSV(
 
   // Particles loop
   for (int j = 0; j < (int)realStates.size(); j++) {
-    std::string filename("../results/Particle ");
+    std::string filename("../results/Detector test part ");
     filename += std::to_string(j);
     filename += ".csv";
     std::ofstream csvFile;

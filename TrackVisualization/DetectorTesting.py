@@ -1,10 +1,12 @@
-from Parameters import *
 import numpy as np
 import matplotlib.pyplot as plt
 
-# for particle_index in range(PARTICLE_NUMBER):
-for particle_index in [0]:
-    data = np.loadtxt(f"../results/Particle {particle_index}.csv", skiprows=2, unpack=True, delimiter=",", dtype=float)
+PARTICLE_LIST = [0]
+DETECTOR_SPACE_UNCERTAINTY = 1e-6;
+DETECTOR_TIME_UNCERTAINTY = 1e-11;
+
+for particle_index in PARTICLE_LIST:
+    data = np.loadtxt(f"../results/Detector test part {particle_index}.csv", skiprows=2, unpack=True, delimiter=",", dtype=float)
     z, rea_t, rea_x, rea_y, rea_v, rea_xz, rea_yz, mes_t, mes_x, mes_y, smo_t, smo_st, smo_x, smo_sx, smo_y, smo_sy, smo_v, smo_sv, smo_xz, smo_sxz, smo_yz, smo_syz = data
     # rea_v = 1./rea_v
     # fil_v[2:] = 1./fil_v[2:]
@@ -44,5 +46,5 @@ for particle_index in [0]:
         ax.errorbar(z[mask], y_s[mask], yerr=sy_s[mask], fmt=".:", elinewidth=1, capsize=1, label="smoothed", color="green")
         ax.errorbar(z[antimastk], y_s[antimastk], yerr=sy_s[antimastk], fmt="o", elinewidth=1, capsize=1, label="smoothed", color="red")
         ax.legend()
-        figure.savefig(f"figures/Particle {particle_index} {yfilename}.pdf")
+        figure.savefig(f"figures/Detector test part {particle_index} {yfilename}.pdf")
         plt.close(figure)

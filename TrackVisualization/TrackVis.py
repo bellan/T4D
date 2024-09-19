@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-PARTICLE_LIST = [1204]
+PARTICLE_LIST = [1203]
 DETECTOR_SPACE_UNCERTAINTY = 1e-6;
 DETECTOR_TIME_UNCERTAINTY = 1e-11;
 

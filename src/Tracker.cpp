@@ -9,6 +9,26 @@
 #include <cmath>
 #include <vector>
 
+// Initializing the state at 0, that is at the particle cannon
+// 6 dimentional vector (t,x,y,1/speed,thetazx,thetazy)
+constexpr double initialStateData[6] = {0., 0., 0., 1. / LIGHT_SPEED, 0., 0.};
+constexpr double bigT = VERY_HIGH_TIME_ERROR * VERY_HIGH_TIME_ERROR;
+constexpr double bigX = VERY_HIGH_SPACE_ERROR * VERY_HIGH_SPACE_ERROR;
+constexpr double bigVInv =
+    VERY_HIGH_VELOCITY_INVERSE_ERROR * VERY_HIGH_VELOCITY_INVERSE_ERROR;
+constexpr double bigDirection =
+    VERY_HIGH_DIRECTION_ERROR * VERY_HIGH_DIRECTION_ERROR;
+constexpr double initialStateSData[36] = {
+    bigT, 0., 0., 0., 0., 0.,
+    0., bigX, 0., 0., 0., 0.,
+    0., 0., bigX, 0., 0., 0.,
+    0., 0., 0., bigVInv, 0., 0.,
+    0., 0., 0., 0., bigDirection, 0.,
+    0., 0., 0., 0., 0., bigDirection};
+const TMatrixD initialStateValue(6, 1, initialStateData);
+const TMatrixD initialStateError(6, 6, initialStateSData);
+const MatrixStateEstimate initialState{initialStateValue, initialStateError};
+
 /**
  * Estimate the next state of the particle after a distance deltaZ from a state preaviousState.
  *
@@ -46,122 +66,121 @@ MatrixStateEstimate Tracker::estimateNextState(const MatrixStateEstimate& preavi
   return MatrixStateEstimate{estimatedStateValue, estimatedStateError};
 }
 
+void Tracker::initializeFilterRealTime(
+    const std::vector<Measurement> &measures,
+    std::vector<MatrixStateEstimate> &predictedStates,
+    std::vector<MatrixStateEstimate> &filteredStates) const {
+  double predictedData[6] = {
+      measures[0].t, measures[0].x, measures[0].y, 1. / LIGHT_SPEED, 0., 0.};
+  TMatrixD stateValue(6, 1, predictedData);
+
+  TMatrixD measureError = detectors[0].getMeasureUncertainty();
+  double firstSdata[36] = {
+    measureError(0, 0), 0., 0., 0., 0., 0.,
+    0., measureError(1, 1), 0., 0., 0., 0.,
+    0., 0., measureError(2, 2), 0., 0., 0.,
+    0., 0., 0., bigVInv, 0., 0.,
+    0., 0., 0., 0., bigDirection, 0.,
+    0., 0., 0., 0., 0., bigDirection};
+  TMatrixD stateError(6, 6, firstSdata);
+  predictedStates.push_back(
+      MatrixStateEstimate{initialStateValue, initialStateError});
+  filteredStates.push_back(MatrixStateEstimate{stateValue, stateError});
+  if (measures.size() == 1) return;
+
+  const double deltaZ = detectors[1].getBottmLeftPosition().Z() -
+                        detectors[0].getBottmLeftPosition().Z();
+  const double t = measures[1].t;
+  const double x = measures[1].x;
+  const double y = measures[1].y;
+  TMatrixD preaviousStateValue = TMatrixD(filteredStates[1].value);
+  const double deltaT = t - preaviousStateValue(0, 0);
+  const double deltaX = x - preaviousStateValue(1, 0);
+  const double deltaY = y - preaviousStateValue(2, 0);
+  double data[6] = {t, x, y,
+                    deltaT / deltaZ, deltaX / deltaZ, deltaY / deltaZ};
+  stateValue.SetMatrixArray(data);
+
+  measureError = detectors[1].getMeasureUncertainty();
+  TMatrixD preaviousStateError = TMatrixD(filteredStates[1].uncertainty);
+  const double sDeltaT2 = measureError(0, 0) + preaviousStateError(0, 0);
+  const double sDeltaX2 = measureError(1, 1) + preaviousStateError(1, 1);
+  const double sDeltaY2 = measureError(2, 2) + preaviousStateError(2, 2);
+
+  double secondSdata[36] = {
+    measureError(0, 0), 0., 0., 0., 0., 0.,
+    0., measureError(1, 1), 0., 0., 0., 0.,
+    0., 0., measureError(2, 2), 0., 0., 0.,
+    0., 0., 0., sDeltaT2 / (deltaZ * deltaZ), 0., 0.,
+    0., 0., 0., 0., sDeltaX2 / (deltaZ * deltaZ), 0.,
+    0., 0., 0., 0., 0., sDeltaY2 / (deltaZ * deltaZ)};
+  stateError.SetMatrixArray(secondSdata);
+  predictedStates.push_back(
+      MatrixStateEstimate{initialStateValue, initialStateError});
+  filteredStates.push_back(MatrixStateEstimate{stateValue, stateError});
+}
+
+void Tracker::initializeFilter(
+    const std::vector<Measurement> &measures,
+    std::vector<MatrixStateEstimate> &predictedStates,
+    std::vector<MatrixStateEstimate> &filteredStates) const {
+  if (measures.size() == 1) {
+    initializeFilterRealTime(measures, predictedStates, filteredStates); 
+    return;
+  }
+
+  const double deltaZ = detectors[1].getBottmLeftPosition().Z() -
+                        detectors[0].getBottmLeftPosition().Z();
+  const double t = measures[0].t;
+  const double x = measures[0].x;
+  const double y = measures[0].y;
+  const double nextT = measures[1].t;
+  const double nextX = measures[1].x;
+  const double nextY = measures[1].y;
+  const double deltaT = nextT - t;
+  const double deltaX = nextX - x;
+  const double deltaY = nextY - y;
+  double data[6] = {measures[0].t,   measures[0].x,   measures[0].y,
+                    deltaT / deltaZ, deltaX / deltaZ, deltaY / deltaZ};
+  TMatrixD stateValue(6, 1, data);
+
+  TMatrixD measureError = detectors[0].getMeasureUncertainty();
+  TMatrixD nextMeasureError = detectors[1].getMeasureUncertainty();
+  const double sDeltaT2 = measureError(0, 0) + nextMeasureError(0, 0);
+  const double sDeltaX2 = measureError(1, 1) + nextMeasureError(1, 1);
+  const double sDeltaY2 = measureError(2, 2) + nextMeasureError(2, 2);
+
+  double sdata[36] = {measureError(0, 0),           0., 0., 0., 0., 0., 0.,
+                      measureError(1, 1),           0., 0., 0., 0., 0., 0.,
+                      measureError(2, 2),           0., 0., 0., 0., 0., 0.,
+                      sDeltaT2 / (deltaZ * deltaZ), 0., 0., 0., 0., 0., 0.,
+                      sDeltaX2 / (deltaZ * deltaZ), 0., 0., 0., 0., 0., 0.,
+                      sDeltaY2 / (deltaZ * deltaZ)};
+  TMatrixD stateError(6, 6, sdata);
+  predictedStates.push_back(
+      MatrixStateEstimate{initialStateValue, initialStateError});
+  filteredStates.push_back(MatrixStateEstimate{stateValue, stateError});
+}
+
 kalmanFilterResult
 Tracker::kalmanFilter(const std::vector<Measurement> &measures, bool logging, bool realTime) const {
   if (logging) std::cout<<"KALMAN FILTER LOGS"<<std::endl;
   std::vector<MatrixStateEstimate> filteredStates;
   std::vector<MatrixStateEstimate> predictedStates;
 
-  // Initializing the state at 0, that is at the particle cannon
-  // 6 dimentional vector (t,x,y,1/speed,thetazx,thetazy)
-  double initialStateData[6] = {0., 0., 0., 1. / LIGHT_SPEED, 0., 0.};
-  constexpr double bigT = VERY_HIGH_TIME_ERROR * VERY_HIGH_TIME_ERROR;
-  constexpr double bigX = VERY_HIGH_SPACE_ERROR * VERY_HIGH_SPACE_ERROR;
-  constexpr double bigVInv =
-      VERY_HIGH_VELOCITY_INVERSE_ERROR * VERY_HIGH_VELOCITY_INVERSE_ERROR;
-  constexpr double bigDirection =
-      VERY_HIGH_DIRECTION_ERROR * VERY_HIGH_DIRECTION_ERROR;
-  double initialStateSData[36] = {
-      bigT, 0., 0., 0., 0., 0.,
-      0., bigX, 0., 0., 0., 0.,
-      0., 0., bigX, 0., 0., 0.,
-      0., 0., 0., bigVInv, 0., 0.,
-      0., 0., 0., 0., bigDirection, 0.,
-      0., 0., 0., 0., 0., bigDirection};
-
-  TMatrixD initialStateValue(6, 1, initialStateData);
-  TMatrixD initialStateError(6, 6, initialStateSData);
-  MatrixStateEstimate initialState{initialStateValue, initialStateError};
-
+  // State at the gun
+  // TODO: Consider removing this if using root file to save results
   predictedStates.push_back(initialState);
   filteredStates.push_back(initialState);
 
+  int firstMeasureIndex = realTime ? 2 : 1;
+  if (realTime)
+    initializeFilterRealTime(measures, predictedStates, filteredStates);
+  else 
+    initializeFilter(measures, predictedStates, filteredStates);
+
   // Initializing the first state
-  for (int i = 0; i < (int)measures.size(); i++) {
-    if ((i == 0 && realTime) || measures.size()==0) {
-      double predictedData[6] = {
-          measures[i].t, measures[i].x, measures[i].y, 1. / LIGHT_SPEED, 0., 0.};
-      TMatrixD stateValue(6, 1, predictedData);
-
-      TMatrixD measureError = detectors[i].getMeasureUncertainty();
-      double sdata[36] = {
-          measureError(0, 0), 0., 0., 0., 0., 0.,
-          0., measureError(1, 1), 0., 0., 0., 0.,
-          0., 0., measureError(2, 2), 0., 0., 0.,
-          0., 0., 0., bigVInv, 0., 0.,
-          0., 0., 0., 0., bigDirection, 0.,
-          0., 0., 0., 0., 0., bigDirection};
-      TMatrixD stateError(6, 6, sdata);
-      predictedStates.push_back(
-          MatrixStateEstimate{initialStateValue, initialStateError});
-      filteredStates.push_back(MatrixStateEstimate{stateValue, stateError});
-      continue;
-    } else if (i == 0 && !realTime) {
-      const double deltaZ = detectors[i + 1].getBottmLeftPosition().Z() -
-                            detectors[i].getBottmLeftPosition().Z();
-      const double t = measures[i].t;
-      const double x = measures[i].x;
-      const double y = measures[i].y;
-      const double nextT = measures[i+1].t;
-      const double nextX = measures[i+1].x;
-      const double nextY = measures[i+1].y;
-      const double deltaT = nextT - t;
-      const double deltaX = nextX - x;
-      const double deltaY = nextY - y;
-      double data[6] = {measures[i].t,   measures[i].x,   measures[i].y,
-                        deltaT / deltaZ, deltaX / deltaZ, deltaY / deltaZ};
-      TMatrixD stateValue(6, 1, data);
-
-      TMatrixD measureError = detectors[i].getMeasureUncertainty();
-      TMatrixD nextMeasureError = detectors[i+1].getMeasureUncertainty();
-      const double sDeltaT2 = measureError(0, 0) + nextMeasureError(0, 0);
-      const double sDeltaX2 = measureError(1, 1) + nextMeasureError(1, 1);
-      const double sDeltaY2 = measureError(2, 2) + nextMeasureError(2, 2);
-
-      double sdata[36] = {measureError(0, 0),           0., 0., 0., 0., 0., 0.,
-                          measureError(1, 1),           0., 0., 0., 0., 0., 0.,
-                          measureError(2, 2),           0., 0., 0., 0., 0., 0.,
-                          sDeltaT2 / (deltaZ * deltaZ), 0., 0., 0., 0., 0., 0.,
-                          sDeltaX2 / (deltaZ * deltaZ), 0., 0., 0., 0., 0., 0.,
-                          sDeltaY2 / (deltaZ * deltaZ)};
-      TMatrixD stateError(6, 6, sdata);
-      predictedStates.push_back(
-          MatrixStateEstimate{initialStateValue, initialStateError});
-      filteredStates.push_back(MatrixStateEstimate{stateValue, stateError});
-      continue;
-    } else if (i == 1 && realTime) {
-      const double deltaZ = detectors[i].getBottmLeftPosition().Z() -
-                            detectors[i - 1].getBottmLeftPosition().Z();
-      const double t = measures[i].t;
-      const double x = measures[i].x;
-      const double y = measures[i].y;
-      TMatrixD preaviousStateValue = TMatrixD(filteredStates[i].value);
-      const double deltaT = t - preaviousStateValue(0, 0);
-      const double deltaX = x - preaviousStateValue(1, 0);
-      const double deltaY = y - preaviousStateValue(2, 0);
-      double data[6] = {t, x, y,
-                        deltaT / deltaZ, deltaX / deltaZ, deltaY / deltaZ};
-      TMatrixD stateValue(6, 1, data);
-
-      TMatrixD measureError = detectors[i].getMeasureUncertainty();
-      TMatrixD preaviousStateError = TMatrixD(filteredStates[i].uncertainty);
-      const double sDeltaT2 = measureError(0, 0) + preaviousStateError(0, 0);
-      const double sDeltaX2 = measureError(1, 1) + preaviousStateError(1, 1);
-      const double sDeltaY2 = measureError(2, 2) + preaviousStateError(2, 2);
-
-      double sdata[36] = {measureError(0, 0),           0., 0., 0., 0., 0., 0.,
-                          measureError(1, 1),           0., 0., 0., 0., 0., 0.,
-                          measureError(2, 2),           0., 0., 0., 0., 0., 0.,
-                          sDeltaT2 / (deltaZ * deltaZ), 0., 0., 0., 0., 0., 0.,
-                          sDeltaX2 / (deltaZ * deltaZ), 0., 0., 0., 0., 0., 0.,
-                          sDeltaY2 / (deltaZ * deltaZ)};
-      TMatrixD stateError(6, 6, sdata);
-      predictedStates.push_back(
-          MatrixStateEstimate{initialStateValue, initialStateError});
-      filteredStates.push_back(MatrixStateEstimate{stateValue, stateError});
-      continue;
-    }
-
+  for (int i = firstMeasureIndex; i < (int)measures.size(); i++) {
     double measureData[3] = {measures[i].t, measures[i].x, measures[i].y};
     TMatrixD measure(3, 1, measureData);
 
