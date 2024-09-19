@@ -8,14 +8,6 @@ DETECTOR_TIME_UNCERTAINTY = 1e-11;
 for particle_index in PARTICLE_LIST:
     data = np.loadtxt(f"../results/Detector test part {particle_index}.csv", skiprows=2, unpack=True, delimiter=",", dtype=float)
     z, rea_t, rea_x, rea_y, rea_v, rea_xz, rea_yz, mes_t, mes_x, mes_y, smo_t, smo_st, smo_x, smo_sx, smo_y, smo_sy, smo_v, smo_sv, smo_xz, smo_sxz, smo_yz, smo_syz = data
-    # rea_v = 1./rea_v
-    # fil_v[2:] = 1./fil_v[2:]
-    # pre_v[3:] = 1./pre_v[3:]
-    # smo_v = 1./smo_v
-    #
-    # fil_sv[2:] = fil_sv[2:]/(fil_v[2:]*fil_v[2:])
-    # pre_sv[3:] = pre_sv[3:]/(pre_v[3:]*pre_v[3:])
-    # smo_sv = smo_sv/(smo_v*smo_v)
 
     void_array = np.array([])
 
@@ -39,7 +31,6 @@ for particle_index in PARTICLE_LIST:
         mask[5+1] = False
         antimastk = np.invert(mask)
         mask[0]=False
-        # ax.errorbar(z, y_t, ls=" ", fmt="o", elinewidth=1, capsize=1, label="theoretical", color="yellow")
         ax.errorbar(z, y_r, fmt=".:", elinewidth=1, capsize=1, label="real", color="black")
         if y_m.size != 0:
             ax.errorbar(z[1:], y_m[1:], yerr=sy_m, ls=" ", fmt="o", elinewidth=1, capsize=1, label="measured", color="grey")

@@ -21,18 +21,9 @@ smo_t_dif = []
 smo_x_dif = []
 smo_y_dif = []
 
-ext_vz_dif = []
-ext_vx_dif = []
-ext_vy_dif = []
-smo_vz_dif = []
-smo_vx_dif = []
-smo_vy_dif = []
-
-pull_t = []
-pull_x = []
-pull_y = []
-
 pull_mesmo_t = []
+pull_mesmo_x = []
+pull_mesmo_y = []
 
 for particle_index in range(PARTICLE_NUMBER):
     if (particle_index % 100 == 0):
@@ -46,18 +37,9 @@ for particle_index in range(PARTICLE_NUMBER):
     smo_x_dif.append(smo_x[det_idx] - rea_x[det_idx])
     smo_y_dif.append(smo_y[det_idx] - rea_y[det_idx])
 
-    ext_vz_dif.append((mes_t[det_idx] - mes_t[det_idx-1])/(z[det_idx]-z[det_idx-1]) - rea_v[det_idx])
-    ext_vx_dif.append((mes_x[det_idx] - mes_x[det_idx-1])/(z[det_idx]-z[det_idx-1]) - rea_xz[det_idx])
-    ext_vy_dif.append((mes_y[det_idx] - mes_y[det_idx-1])/(z[det_idx]-z[det_idx-1]) - rea_yz[det_idx])
-    smo_vz_dif.append(smo_v[det_idx] - rea_v[det_idx])
-    smo_vx_dif.append(smo_xz[det_idx] - rea_xz[det_idx])
-    smo_vy_dif.append(smo_yz[det_idx] - rea_yz[det_idx])
-
-    pull_t.append((smo_t[det_idx] - rea_t[det_idx])/smo_st[det_idx])
-    pull_x.append((smo_x[det_idx] - rea_x[det_idx])/smo_sx[det_idx])
-    pull_y.append((smo_y[det_idx] - rea_y[det_idx])/smo_sy[det_idx])
-
     pull_mesmo_t.append((smo_t[det_idx] - mes_t[det_idx])/np.sqrt(DETECTOR_TIME_UNCERTAINTY**2+smo_st[det_idx]**2))
+    pull_mesmo_x.append((smo_x[det_idx] - mes_x[det_idx])/np.sqrt(DETECTOR_SPACE_UNCERTAINTY**2+smo_sx[det_idx]**2))
+    pull_mesmo_y.append((smo_y[det_idx] - mes_y[det_idx])/np.sqrt(DETECTOR_SPACE_UNCERTAINTY**2+smo_sy[det_idx]**2))
 
 mes_t_dif = np.array(mes_t_dif)
 mes_x_dif = np.array(mes_x_dif)
@@ -66,21 +48,12 @@ smo_t_dif = np.array(smo_t_dif)
 smo_x_dif = np.array(smo_x_dif)
 smo_y_dif = np.array(smo_y_dif)
 
-ext_vz_dif = np.array(ext_vz_dif)
-ext_vx_dif = np.array(ext_vx_dif)
-ext_vy_dif = np.array(ext_vy_dif)
-smo_vz_dif = np.array(smo_vz_dif)
-smo_vx_dif = np.array(smo_vx_dif)
-smo_vy_dif = np.array(smo_vy_dif)
-
-pull_t = np.array(pull_t)
-pull_x = np.array(pull_x)
-pull_y = np.array(pull_y)
-
 pull_mesmo_t = np.array(pull_mesmo_t)
+pull_mesmo_x = np.array(pull_mesmo_x)
+pull_mesmo_y = np.array(pull_mesmo_y)
 
 
-ys = [(mes_t_dif, smo_t_dif), (mes_x_dif, smo_x_dif), (mes_y_dif, smo_y_dif), (ext_vz_dif, smo_vz_dif), (ext_vx_dif, smo_vx_dif), (ext_vy_dif, smo_vy_dif)]
+ys = [(mes_t_dif, smo_t_dif), (mes_x_dif, smo_x_dif), (mes_y_dif, smo_y_dif)]
 names = ["res_t", "res_x", "res_y", "res_vz", "res_xz", "res_yz"]
 for (y,name) in zip(ys,names):
     figure, ax = plt.subplots()
@@ -97,11 +70,11 @@ for (y,name) in zip(ys,names):
     plt.close(figure)
 
 
-ys = [pull_t, pull_x, pull_y, pull_mesmo_t]
-names = ["pull_t", "pull_x", "pull_y", "pull_mesmo"]
+ys = [pull_mesmo_t, pull_mesmo_x, pull_mesmo_y]
+names = ["pull_mesmo_t", "pull_mesmo_x", "pull_mesmo_y"]
 for (y,name) in zip(ys,names):
     figure, ax = plt.subplots()
-    x = np.linspace(pull_x.min(), pull_x.max(), 1000)
+    x = np.linspace(pull_mesmo_x.min(), pull_mesmo_x.max(), 1000)
     ax.grid()
     values, bin_edges, _ = ax.hist(y, label="measured", bins=50)
     area = ((bin_edges[1:]-bin_edges[:-1])*values).sum()

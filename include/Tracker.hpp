@@ -18,7 +18,10 @@ struct Chi2Variables {
 class Tracker {
 public:
   Tracker(){};
-  Tracker(const std::vector<Detector> &detectors) : detectors(detectors) {}
+  Tracker(const std::vector<Detector> &detectors) : allDetectors(detectors), consideredDetectors(detectors) {}
+
+  void ignoreDetector(int detectorIndex) { consideredDetectors.erase(consideredDetectors.begin() + detectorIndex); }
+  void resetDetectors() { consideredDetectors = allDetectors; }
 
   MatrixStateEstimate
   estimateNextState(const MatrixStateEstimate &preaviousState,
@@ -38,7 +41,8 @@ public:
                bool logging = false, bool skipFirst = false) const;
 
 private:
-  std::vector<Detector> detectors;
+  std::vector<Detector> allDetectors;
+  std::vector<Detector> consideredDetectors;
 
   void initializeFilterRealTime(
       const std::vector<Measurement> &measures,

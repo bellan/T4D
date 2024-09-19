@@ -110,6 +110,7 @@ void Simulation::testDetector(int particlesNumber, int detectorId) {
   std::vector<std::vector<Measurement>> allParticlesMeasures =
       Utils::separateMeasuresInParticles(allMeasures);
 
+  tracker.ignoreDetector(detectorId);
   std::vector<std::vector<MatrixStateEstimate>> allParticlesSmoothedStates;
   for (int i = 0; i < (int)allParticlesMeasures.size(); i++) {
     std::vector<Measurement> givenMeasures = allParticlesMeasures[i];
@@ -148,6 +149,7 @@ void Simulation::testDetector(int particlesNumber, int detectorId) {
     smoothedStates.insert(smoothedStates.begin()+detectorId+1, estimatedNextState);
     allParticlesSmoothedStates.push_back(smoothedStates);
   }
+  tracker.resetDetectors();
   Utils::saveDataToCSV(detectors, generatedData.allParticlesRealStates,
                        allParticlesMeasures, allParticlesSmoothedStates);
 }

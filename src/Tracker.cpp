@@ -74,7 +74,7 @@ void Tracker::initializeFilterRealTime(
       measures[0].t, measures[0].x, measures[0].y, 1. / LIGHT_SPEED, 0., 0.};
   TMatrixD stateValue(6, 1, predictedData);
 
-  TMatrixD measureError = detectors[0].getMeasureUncertainty();
+  TMatrixD measureError = consideredDetectors[0].getMeasureUncertainty();
   double firstSdata[36] = {
     measureError(0, 0), 0., 0., 0., 0., 0.,
     0., measureError(1, 1), 0., 0., 0., 0.,
@@ -88,8 +88,8 @@ void Tracker::initializeFilterRealTime(
   filteredStates.push_back(MatrixStateEstimate{stateValue, stateError});
   if (measures.size() == 1) return;
 
-  const double deltaZ = detectors[1].getBottmLeftPosition().Z() -
-                        detectors[0].getBottmLeftPosition().Z();
+  const double deltaZ = consideredDetectors[1].getBottmLeftPosition().Z() -
+                        consideredDetectors[0].getBottmLeftPosition().Z();
   const double t = measures[1].t;
   const double x = measures[1].x;
   const double y = measures[1].y;
@@ -101,7 +101,7 @@ void Tracker::initializeFilterRealTime(
                     deltaT / deltaZ, deltaX / deltaZ, deltaY / deltaZ};
   stateValue.SetMatrixArray(data);
 
-  measureError = detectors[1].getMeasureUncertainty();
+  measureError = consideredDetectors[1].getMeasureUncertainty();
   TMatrixD preaviousStateError = TMatrixD(filteredStates[1].uncertainty);
   const double sDeltaT2 = measureError(0, 0) + preaviousStateError(0, 0);
   const double sDeltaX2 = measureError(1, 1) + preaviousStateError(1, 1);
@@ -129,8 +129,8 @@ void Tracker::initializeFilter(
     return;
   }
 
-  const double deltaZ = detectors[1].getBottmLeftPosition().Z() -
-                        detectors[0].getBottmLeftPosition().Z();
+  const double deltaZ = consideredDetectors[1].getBottmLeftPosition().Z() -
+                        consideredDetectors[0].getBottmLeftPosition().Z();
   const double t = measures[0].t;
   const double x = measures[0].x;
   const double y = measures[0].y;
@@ -144,8 +144,8 @@ void Tracker::initializeFilter(
                     deltaT / deltaZ, deltaX / deltaZ, deltaY / deltaZ};
   TMatrixD stateValue(6, 1, data);
 
-  TMatrixD measureError = detectors[0].getMeasureUncertainty();
-  TMatrixD nextMeasureError = detectors[1].getMeasureUncertainty();
+  TMatrixD measureError = consideredDetectors[0].getMeasureUncertainty();
+  TMatrixD nextMeasureError = consideredDetectors[1].getMeasureUncertainty();
   const double sDeltaT2 = measureError(0, 0) + nextMeasureError(0, 0);
   const double sDeltaX2 = measureError(1, 1) + nextMeasureError(1, 1);
   const double sDeltaY2 = measureError(2, 2) + nextMeasureError(2, 2);
@@ -184,13 +184,13 @@ Tracker::kalmanFilter(const std::vector<Measurement> &measures, bool logging, bo
     double measureData[3] = {measures[i].t, measures[i].x, measures[i].y};
     TMatrixD measure(3, 1, measureData);
 
-    TMatrixD measureError = detectors[i].getMeasureUncertainty();
+    TMatrixD measureError = consideredDetectors[i].getMeasureUncertainty();
 
     TMatrixD preaviousStateValue = TMatrixD(filteredStates[i].value);
     TMatrixD preaviousStateError = TMatrixD(filteredStates[i].uncertainty);
 
-    const double deltaZ = detectors[i].getBottmLeftPosition().Z() -
-                          detectors[i - 1].getBottmLeftPosition().Z();
+    const double deltaZ = consideredDetectors[i].getBottmLeftPosition().Z() -
+                          consideredDetectors[i - 1].getBottmLeftPosition().Z();
 
     double projectiondata[18] = {1., 0., 0., 0., 0., 0., 0., 1., 0.,
                                  0., 0., 0., 0., 0., 1., 0., 0., 0.};
@@ -268,9 +268,9 @@ Tracker::kalmanSmoother(const std::vector<MatrixStateEstimate> &filteredStates, 
     // NOTE: This indexes are like this because filteredStates has an element
     // corresponding to the initial state (i.e. at z=0)
     const double deltaZ = i != 0
-                              ? detectors[i].getBottmLeftPosition().Z() -
-                                    detectors[i - 1].getBottmLeftPosition().Z()
-                              : detectors[i].getBottmLeftPosition().Z();
+                              ? consideredDetectors[i].getBottmLeftPosition().Z() -
+                                    consideredDetectors[i - 1].getBottmLeftPosition().Z()
+                              : consideredDetectors[i].getBottmLeftPosition().Z();
     double evolutiondata[36] = {
             1., 0., 0., deltaZ, 0., 0.,
             0., 1., 0., 0., deltaZ, 0.,
