@@ -2,9 +2,10 @@
 
 #include "MeasuresAndStates.hpp"
 #include "PhisicalParameters.hpp"
-#include "Utils.hpp"
 
+#include "Utils.hpp"
 #include <TMatrixD.h>
+#include <TMatrixDfwd.h>
 #include <cmath>
 #include <vector>
 
@@ -27,17 +28,18 @@ MatrixStateEstimate Tracker::estimateNextState(const MatrixStateEstimate& preavi
             0., 0., 0., 0., 1., 0.,
             0., 0., 0., 0., 0., 1.};
   TMatrixD evolutionMatrix(6, 6, evolutionMatrixData);
+  TMatrixD estimatedStateValue = TMatrixD(evolutionMatrix, TMatrixD::kMult, preaviousState.value);
 
+  double inverseVelocityEvolutionSigma = VELOCITY_EVOLUTION_SIGMA * pow(estimatedStateValue(3,0), 2);
   double evolutionUncertaintyData[36] = {
         pow(TIME_EVOLUTION_SIGMA, 2), 0., 0., 0., 0., 0.,
         0., pow(SPACE_EVOLUTION_SIGMA, 2), 0., 0., 0., 0.,
         0., 0., pow(SPACE_EVOLUTION_SIGMA, 2), 0., 0., 0.,
-        0., 0., 0., pow(INVERSE_VELOCITY_EVOLUTION_SIGMA, 2), 0., 0.,
+        0., 0., 0., pow(inverseVelocityEvolutionSigma, 2), 0., 0.,
         0., 0., 0., 0., pow(DIRECTION_EVOLUTION_SIGMA, 2), 0.,
         0., 0., 0., 0., 0., pow(DIRECTION_EVOLUTION_SIGMA, 2)};
   TMatrixD evolutionUncertainty(6, 6, evolutionUncertaintyData);
 
-  TMatrixD estimatedStateValue = TMatrixD(evolutionMatrix, TMatrixD::kMult, preaviousState.value);
   TMatrixD estimatedStateError = TMatrixD(evolutionMatrix, TMatrixD::kMult, TMatrixD(preaviousState.uncertainty, TMatrixD::kMultTranspose, evolutionMatrix));
   estimatedStateError += evolutionUncertainty;
 
@@ -49,8 +51,6 @@ Tracker::kalmanFilter(const std::vector<Measurement> &measures, bool logging, bo
   if (logging) std::cout<<"KALMAN FILTER LOGS"<<std::endl;
   std::vector<MatrixStateEstimate> filteredStates;
   std::vector<MatrixStateEstimate> predictedStates;
-
-  TMatrixD evolutionMatrix(6, 6);
 
   // Initializing the state at 0, that is at the particle cannon
   // 6 dimentional vector (t,x,y,1/speed,thetazx,thetazy)
@@ -172,37 +172,14 @@ Tracker::kalmanFilter(const std::vector<Measurement> &measures, bool logging, bo
 
     const double deltaZ = detectors[i].getBottmLeftPosition().Z() -
                           detectors[i - 1].getBottmLeftPosition().Z();
-    double evolutionMatrixData[36] = {
-            1., 0., 0., deltaZ, 0., 0.,
-            0., 1., 0., 0., deltaZ, 0.,
-            0., 0., 1., 0., 0., deltaZ,
-            0., 0., 0., 1., 0., 0.,
-            0., 0., 0., 0., 1., 0.,
-            0., 0., 0., 0., 0., 1.};
-    evolutionMatrix.SetMatrixArray(evolutionMatrixData);
 
     double projectiondata[18] = {1., 0., 0., 0., 0., 0., 0., 1., 0.,
                                  0., 0., 0., 0., 0., 1., 0., 0., 0.};
     TMatrixD projectionMatrix(3, 6, projectiondata);
 
-    // TODO: Check if this is correct
-    double evolutionUncertaintyData[36] = {
-        pow(TIME_EVOLUTION_SIGMA, 2), 0., 0., 0., 0., 0.,
-        0., pow(SPACE_EVOLUTION_SIGMA, 2), 0., 0., 0., 0.,
-        0., 0., pow(SPACE_EVOLUTION_SIGMA, 2), 0., 0., 0.,
-        0., 0., 0., pow(INVERSE_VELOCITY_EVOLUTION_SIGMA, 2), 0., 0.,
-        0., 0., 0., 0., pow(DIRECTION_EVOLUTION_SIGMA, 2), 0.,
-        0., 0., 0., 0., 0., pow(DIRECTION_EVOLUTION_SIGMA, 2)};
-    TMatrixD evolutionUncertainty(6, 6, evolutionUncertaintyData);
-
-    // NOTE: see https://arxiv.org/abs/2101.12040 for the math
-    TMatrixD estimatedStateValue =
-        TMatrixD(evolutionMatrix, TMatrixD::kMult, preaviousStateValue);
-    TMatrixD estimatedStateError =
-        TMatrixD(evolutionMatrix, TMatrixD::kMult,
-                 TMatrixD(preaviousStateError, TMatrixD::kMultTranspose,
-                          evolutionMatrix));
-    estimatedStateError += evolutionUncertainty;
+    MatrixStateEstimate estimatedNextState = estimateNextState(filteredStates[i], deltaZ);
+    TMatrixD estimatedStateValue = TMatrixD(estimatedNextState.value);
+    TMatrixD estimatedStateError = TMatrixD(estimatedNextState.uncertainty);
 
     TMatrixD residual = TMatrixD(
         measure, TMatrixD::kMinus,
@@ -258,7 +235,7 @@ Tracker::kalmanSmoother(const std::vector<MatrixStateEstimate> &filteredStates, 
   if (logging) std::cout<<"KALMAN SMOOTHER LOGS"<<std::endl;
   std::vector<MatrixStateEstimate> smoothedStates;
 
-  TMatrixD evolutionMatrix(6, 6);
+  TMatrixD evolutionMatrix(6,6);
 
   smoothedStates.push_back(filteredStates.back());
 
@@ -282,25 +259,12 @@ Tracker::kalmanSmoother(const std::vector<MatrixStateEstimate> &filteredStates, 
             0., 0., 0., 0., 1., 0.,
             0., 0., 0., 0., 0., 1.};
     evolutionMatrix.SetMatrixArray(evolutiondata);
-    double evolutionUncertaintyData[36] = {
-        pow(TIME_EVOLUTION_SIGMA, 2), 0., 0., 0., 0., 0.,
-        0., pow(SPACE_EVOLUTION_SIGMA, 2), 0., 0., 0., 0.,
-        0., 0., pow(SPACE_EVOLUTION_SIGMA, 2), 0., 0., 0.,
-        0., 0., 0., pow(INVERSE_VELOCITY_EVOLUTION_SIGMA, 2), 0., 0.,
-        0., 0., 0., 0., pow(DIRECTION_EVOLUTION_SIGMA, 2), 0.,
-        0., 0., 0., 0., 0., pow(DIRECTION_EVOLUTION_SIGMA, 2)};
-    TMatrixD evolutionUncertainty(6, 6, evolutionUncertaintyData);
 
-    TMatrixD estimatedNextStateValue =
-        TMatrixD(evolutionMatrix, TMatrixD::kMult, filteredStates[i].value);
-    TMatrixD estimatedNextStateError =
-        TMatrixD(evolutionMatrix, TMatrixD::kMult,
-                 TMatrixD(filteredStates[i].uncertainty,
-                          TMatrixD::kMultTranspose, evolutionMatrix));
-    estimatedNextStateError += evolutionUncertainty;
+    MatrixStateEstimate estimatedNextState = estimateNextState(filteredStates[i], deltaZ);
+    TMatrixD estimatedNextStateValue = TMatrixD(estimatedNextState.value);
+    TMatrixD estimatedNextStateError = TMatrixD(estimatedNextState.uncertainty);
 
-    TMatrixD estimatedNextStateErrorInverted =
-        TMatrixD(estimatedNextStateError);
+    TMatrixD estimatedNextStateErrorInverted = TMatrixD(estimatedNextStateError);
 
     estimatedNextStateErrorInverted.SetTol(DETERMINANT_TOLERANCE);
     if (logging) {

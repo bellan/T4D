@@ -49,15 +49,8 @@ constexpr double SPACE_EVOLUTION_SIGMA = 5.e-7;
 // The theoretical value of the second is
 // (VELOCITY_EVOLUTION_SIGMA / (LIGHT_SPEED * LIGHT_SPEED))
 // however the value should be finetuned to optimize the tracking.
-
-constexpr double VELOCITY_EVOLUTION_SIGMA = 0.05 * LIGHT_SPEED;
-
-// Realistic value of a muon (m = 105.65 MeV/c^2) at the ionization minimum
-// passing through 1 cm of steel (rho = 7.5 g/cm^3)
-// Delta E = 7.5*2 MeV = 15 MeV
-// Delta v = -0.1583 c
-/*constexpr double VELOCITY_EVOLUTION_SIGMA = 0.158 * LIGHT_SPEED;*/
-/*constexpr double INVERSE_VELOCITY_EVOLUTION_SIGMA = 0.2 / LIGHT_SPEED;*/
+constexpr double VELOCITY_EVOLUTION_SIGMA = 0.01 * LIGHT_SPEED;
+constexpr double INVERSE_VELOCITY_EVOLUTION_SIGMA = 0.2 / LIGHT_SPEED;
 constexpr double DIRECTION_EVOLUTION_SIGMA = 0.5e-4;
 /*constexpr double VELOCITY_EVOLUTION_SIGMA = 0.;*/
 /*constexpr double INVERSE_VELOCITY_EVOLUTION_SIGMA = 0.;*/
