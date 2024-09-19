@@ -199,6 +199,7 @@ Tracker::kalmanFilter(const std::vector<Measurement> &measures, bool logging, bo
     TMatrixD filteredStateValue =
             TMatrixD(kalmanGain, TMatrixD::kMult, residual);
     if (logging) {
+      // Put here stuff to be logged
       std::cout<<"residual"<<std::endl;
       Utils::printMatrix(residual);
       std::cout<<std::endl;

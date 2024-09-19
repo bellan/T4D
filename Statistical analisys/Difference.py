@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-det_idx = 5 # NOTE: Detector indexing start at 0
+det_idx = 0 # NOTE: Detector indexing start at 0
 det_idx+=1 # NOTE: Because the first must be ignore since is the initial state
 PARTICLE_NUMBER = 10000
 
@@ -28,11 +28,11 @@ smo_vz_dif = []
 smo_vx_dif = []
 smo_vy_dif = []
 
-pol_t = []
-pol_x = []
-pol_y = []
+pull_t = []
+pull_x = []
+pull_y = []
 
-pol_mesmo_t = []
+pull_mesmo_t = []
 
 for particle_index in range(PARTICLE_NUMBER):
     if (particle_index % 100 == 0):
@@ -53,11 +53,11 @@ for particle_index in range(PARTICLE_NUMBER):
     smo_vx_dif.append(smo_xz[det_idx] - rea_xz[det_idx])
     smo_vy_dif.append(smo_yz[det_idx] - rea_yz[det_idx])
 
-    pol_t.append((smo_t[det_idx] - rea_t[det_idx])/smo_st[det_idx])
-    pol_x.append((smo_x[det_idx] - rea_x[det_idx])/smo_sx[det_idx])
-    pol_y.append((smo_y[det_idx] - rea_y[det_idx])/smo_sy[det_idx])
+    pull_t.append((smo_t[det_idx] - rea_t[det_idx])/smo_st[det_idx])
+    pull_x.append((smo_x[det_idx] - rea_x[det_idx])/smo_sx[det_idx])
+    pull_y.append((smo_y[det_idx] - rea_y[det_idx])/smo_sy[det_idx])
 
-    pol_mesmo_t.append((smo_t[det_idx] - mes_t[det_idx])/np.sqrt(DETECTOR_TIME_UNCERTAINTY**2+smo_st[det_idx]**2))
+    pull_mesmo_t.append((smo_t[det_idx] - mes_t[det_idx])/np.sqrt(DETECTOR_TIME_UNCERTAINTY**2+smo_st[det_idx]**2))
 
 mes_t_dif = np.array(mes_t_dif)
 mes_x_dif = np.array(mes_x_dif)
@@ -73,15 +73,15 @@ smo_vz_dif = np.array(smo_vz_dif)
 smo_vx_dif = np.array(smo_vx_dif)
 smo_vy_dif = np.array(smo_vy_dif)
 
-pol_t = np.array(pol_t)
-pol_x = np.array(pol_x)
-pol_y = np.array(pol_y)
+pull_t = np.array(pull_t)
+pull_x = np.array(pull_x)
+pull_y = np.array(pull_y)
 
-pol_mesmo_t = np.array(pol_mesmo_t)
+pull_mesmo_t = np.array(pull_mesmo_t)
 
 
 ys = [(mes_t_dif, smo_t_dif), (mes_x_dif, smo_x_dif), (mes_y_dif, smo_y_dif), (ext_vz_dif, smo_vz_dif), (ext_vx_dif, smo_vx_dif), (ext_vy_dif, smo_vy_dif)]
-names = ["set_t", "set_x", "set_y", "set_vz", "set_xz", "set_yz"]
+names = ["res_t", "res_x", "res_y", "res_vz", "res_xz", "res_yz"]
 for (y,name) in zip(ys,names):
     figure, ax = plt.subplots()
     ax.grid()
@@ -95,11 +95,11 @@ for (y,name) in zip(ys,names):
     plt.close(figure)
 
 
-ys = [pol_t, pol_x, pol_y, pol_mesmo_t]
-names = ["pol_t", "pol_x", "pol_y", "pol_mesmo"]
+ys = [pull_t, pull_x, pull_y, pull_mesmo_t]
+names = ["pull_t", "pull_x", "pull_y", "pull_mesmo"]
 for (y,name) in zip(ys,names):
     figure, ax = plt.subplots()
-    x = np.linspace(pol_x.min(), pol_x.max(), 1000)
+    x = np.linspace(pull_x.min(), pull_x.max(), 1000)
     ax.grid()
     values, bin_edges, _ = ax.hist(y, label="measured", bins=50)
     area = ((bin_edges[1:]-bin_edges[:-1])*values).sum()

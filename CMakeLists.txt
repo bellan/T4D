@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.26 FATAL_ERROR)
 # set(CMAKE_CXX_STANDARD 20)
-project(Tracker)
+project(Tracking_simulation)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 find_package(ROOT 6.30 REQUIRED COMPONENTS)
