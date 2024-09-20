@@ -17,6 +17,6 @@ file(GLOB sources ${PROJECT_SOURCE_DIR}/src/*.cpp)
 
 add_compile_options(-Wall -Wextra -Wpedantic)
 #
-add_executable(Tracker main.cpp ${sources})
+add_executable(Tracking_simulation main.cpp ${sources})
 target_link_libraries(Tracker PUBLIC ${ROOT_LIBRARIES})
 target_include_directories(Tracker PUBLIC ${ROOT_INCLUDE_DIRS})
