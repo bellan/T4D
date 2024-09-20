@@ -7,7 +7,7 @@ compile_run() {
     echo "Compiling"
     make -j 4
     echo "Executing"
-    ./Tracker
+    ./Tracking_simulation
 }
 
 compile_run_show() {
@@ -17,7 +17,7 @@ compile_run_show() {
     echo "Compiling"
     make -j 4
     echo "Executing"
-    ./Tracker
+    ./Tracking_simulation
 
     echo "
 
