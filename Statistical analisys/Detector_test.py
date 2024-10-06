@@ -74,12 +74,11 @@ ys = [pull_mesmo_t, pull_mesmo_x, pull_mesmo_y]
 names = ["pull_mesmo_t", "pull_mesmo_x", "pull_mesmo_y"]
 for (y,name) in zip(ys,names):
     figure, ax = plt.subplots()
-    x = np.linspace(pull_mesmo_x.min(), pull_mesmo_x.max(), 1000)
+    x = np.linspace(-1*(pull_mesmo_x.min()+pull_mesmo_x.max())*0.5, (pull_mesmo_x.min()+pull_mesmo_x.max())*0.5, 1000)
     ax.grid()
-    values, bin_edges, _ = ax.hist(y, label="measured", bins=50)
+    values, bin_edges, _ = ax.hist(y, label=r"$\frac{x_t - x_r}{\sqrt{\sigma_t^2 + \sigma_r^2}}$", bins=50)
     area = ((bin_edges[1:]-bin_edges[:-1])*values).sum()
-    ax.plot(x,  area/np.sqrt(2*np.pi) * np.exp(-0.5*x**2) )
-    ax.set_xlabel("Difference")
+    ax.plot(x,  area/np.sqrt(2*np.pi) * np.exp(-0.5*x**2), label=r"$y=\frac{A}{\sqrt{2\pi}}e^{-\frac{x^2}{2}}$" )
     ax.set_ylabel("Occurrences")
     ax.legend()
     figure.savefig(f"figures/Detector test {name}.pdf")

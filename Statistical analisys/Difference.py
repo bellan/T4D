@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.stats import chi2
 import matplotlib.pyplot as plt
 
 det_idx = 5 # NOTE: Detector indexing start at 0
@@ -90,7 +91,7 @@ for (y,name) in zip(ys,names):
     bin_size = bin_edges[1] - bin_edges[0]
     new_bin_number = int((smoothed.max() - smoothed.min())/bin_size)
     ax.hist(smoothed, label="smoothed", alpha=0.8, bins=new_bin_number)
-    ax.set_xlabel("Difference")
+    ax.set_xlabel("Residual")
     ax.set_ylabel("Occurrences")
     ax.legend()
     figure.savefig(f"figures/{name}.pdf")
@@ -103,11 +104,22 @@ for (y,name) in zip(ys,names):
     figure, ax = plt.subplots()
     x = np.linspace(pull_x.min(), pull_x.max(), 1000)
     ax.grid()
-    values, bin_edges, _ = ax.hist(y, label="measured", bins=50)
+    values, bin_edges, _ = ax.hist(y, label=r"$\frac{x_t - x_r}{\sigma_t}$", bins=50)
     area = ((bin_edges[1:]-bin_edges[:-1])*values).sum()
-    ax.plot(x,  area/np.sqrt(2*np.pi) * np.exp(-0.5*x**2) )
-    ax.set_xlabel("Difference")
+
+    ax.plot(x,  area/np.sqrt(2*np.pi) * np.exp(-0.5*x**2), label=r"$y=\frac{A}{\sqrt{2\pi}}e^{-\frac{x^2}{2}}$" )
     ax.set_ylabel("Occurrences")
     ax.legend()
     figure.savefig(f"figures/{name}.pdf")
     plt.close(figure)
+
+    xs = (bin_edges[1:]+bin_edges[:-1])/2.
+    mask = values > 5
+    xs = xs[mask]
+    ys = values[mask]
+    chi2value = (((ys - area/np.sqrt(2*np.pi) * np.exp(-0.5*xs**2))/np.sqrt(ys))**2).sum()
+
+    ndof = ys.size - 1
+    pval = 1-chi2.cdf(chi2value, ndof)
+    print(f"{name}:    chi2={chi2value},   ndof={ndof},   pvalue={pval}")
+
