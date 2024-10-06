@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-PARTICLE_LIST = [1203]
+PARTICLE_LIST = [1203, 1206]
 DETECTOR_SPACE_UNCERTAINTY = 1e-6;
 DETECTOR_TIME_UNCERTAINTY = 1e-11;
 
@@ -29,7 +29,7 @@ for particle_index in PARTICLE_LIST:
     sys_f = [fil_st, fil_sx, fil_sy, fil_sv, fil_sxz, fil_syz]
     sys_p = [pre_st, pre_sx, pre_sy, pre_sv, pre_sxz, pre_syz]
     sys_s = [smo_st, smo_sx, smo_sy, smo_sv, smo_sxz, smo_syz]
-    ylabels = ["t [s]", "x [m]", "y [m]", "1/(v_z) [s/m]", "(v_x/v_z) []", "(v_y/v_z) []"]
+    ylabels = [r"$t\, [\text{s}]$", r"$x\, [\text{m}]$", r"$y\, [\text{m}]$", r"$\frac{1}{v_z}\, \left[\frac{\text{s}}{\text{m}}\right]$", r"$\frac{v_x}{v_z}\, \left[\right]$", r"$\frac{v_y}{v_z}\, \left[\right]$"]
     yfilenames = ["t", "x", "y", "v", "xz", "yz"]
 
     smoothed_initial_index = {"t": 1, "x": 1, "y": 1, "v": 1, "xz": 1, "yz": 1}
@@ -38,7 +38,8 @@ for particle_index in PARTICLE_LIST:
     for (y_t, y_r, y_m, y_f, y_p, y_s, sy_m, sy_f, sy_p, sy_s, ylabel, yfilename) in zip(ys_t, ys_r, ys_m, ys_f, ys_p, ys_s, sys_m, sys_f, sys_p, sys_s, ylabels, yfilenames):
         figure, ax = plt.subplots()
         ax.grid()
-        ax.set_xlabel("z [m]")
+        ax.set_xlabel(r"$z\, [\text{m}]$")
+        ax.ticklabel_format(style="sci",axis="y", scilimits=(-2,3), useMathText=True)
         ax.set_ylabel(ylabel)
         s = smoothed_initial_index[yfilename]
         f = filtered_initial_index[yfilename]
