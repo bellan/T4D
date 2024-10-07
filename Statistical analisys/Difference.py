@@ -1,6 +1,7 @@
 import numpy as np
 from scipy.stats import chi2
 import matplotlib.pyplot as plt
+from scipy.odr import ODR, Model, RealData
 
 det_idx = 5 # NOTE: Detector indexing start at 0
 det_idx+=1 # NOTE: Because the first must be ignore since is the initial state
@@ -82,18 +83,68 @@ pull_mesmo_t = np.array(pull_mesmo_t)
 
 
 ys = [(mes_t_dif, smo_t_dif), (mes_x_dif, smo_x_dif), (mes_y_dif, smo_y_dif), (ext_vz_dif, smo_vz_dif), (ext_vx_dif, smo_vx_dif), (ext_vy_dif, smo_vy_dif)]
+sigmas = [(1e-11,0.7e-11),(1e-6,0.7e-6),(1e-6,0.7e-6),(2.3e-9,0.1e-9),(1.3e-4,0.2e-4),(1.3e-4,0.2e-4)]
 names = ["res_t", "res_x", "res_y", "res_vz", "res_xz", "res_yz"]
-for (y,name) in zip(ys,names):
+for (y,name, sigma) in zip(ys,names, sigmas):
+    sigma1, sigma2 = sigma
     figure, ax = plt.subplots()
     ax.grid()
+    ax.ticklabel_format(style="sci",axis="x", scilimits=(-2,3), useMathText=True)
     measured, smoothed= y
-    _, bin_edges, _ = ax.hist(measured, label="measured", bins=50)
+    values, bin_edges, _ = ax.hist(measured, label="measured", bins=50)
     bin_size = bin_edges[1] - bin_edges[0]
-    new_bin_number = int((smoothed.max() - smoothed.min())/bin_size)
-    ax.hist(smoothed, label="smoothed", alpha=0.8, bins=new_bin_number)
+    new_bin_number = int(np.ceil((smoothed.max() - smoothed.min())/bin_size))
+    values2, bin_edges2, _ = ax.hist(smoothed, label="smoothed", alpha=0.8, bins=new_bin_number)
+    # values2, bin_edges2, _ = ax.hist(smoothed, label="smoothed", alpha=0.8, bins=50)
     ax.set_xlabel("Residual")
     ax.set_ylabel("Occurrences")
+    print(values)
     ax.legend()
+
+    xs = (bin_edges[:-1] + bin_edges[1:])*0.5 
+    mask = values > 5
+    xs = xs[mask]
+    ys = values[mask]
+    sxs = np.zeros_like(xs)
+    sys = np.sqrt(ys)
+
+    dati = RealData(xs, ys, sy=sys)
+    modello = Model(lambda pars, x: pars[0]/(pars[2]*np.sqrt(2*np.pi)) * np.exp(-0.5*((x-pars[1])**2)/(pars[2]**2)))
+    par_init = np.array([1400, 0, sigma1])
+    risultato = ODR(dati, modello, par_init).run()
+
+    chi_2, [norm,mu,sigma], [snorm, smu, ssigma] = risultato.sum_square, risultato.beta, risultato.sd_beta
+    ndof = ys.size - 3
+    pval = 1-chi2.cdf(chi_2, ndof)
+    print(f"{name} misurato")
+    print(f"A={norm}±{snorm}    mu={mu}±{smu}    sigma={sigma}±{ssigma}")
+    print(f"chi2={chi_2},   ndof={ndof},   pvalue={pval}")
+    # x = np.linspace(-3*sigma,3*sigma,1000)
+    # y = norm/(sigma*np.sqrt(2*np.pi)) * np.exp(-0.5*((x-mu)**2)/(sigma**2))
+    # ax.plot(x,y)
+
+    xs = (bin_edges2[:-1] + bin_edges2[1:])*0.5 
+    mask = values2 > 5
+    xs = xs[mask]
+    ys = values2[mask]
+    sxs = np.zeros_like(xs)
+    sys = np.sqrt(ys)
+
+    dati = RealData(xs, ys, sy=sys)
+    modello = Model(lambda pars, x: pars[0]/(pars[2]*np.sqrt(2*np.pi)) * np.exp(-0.5*((x-pars[1])**2)/(pars[2]**2)))
+    par_init = np.array([3200, 0, sigma2])
+    risultato = ODR(dati, modello, par_init).run()
+
+    chi_2, [norm,mu,sigma], [snorm, smu, ssigma] = risultato.sum_square, risultato.beta, risultato.sd_beta
+    ndof = ys.size - 3
+    pval = 1-chi2.cdf(chi_2, ndof)
+    print(f"{name} smoothed")
+    print(f"A={norm}±{snorm}    mu={mu}±{smu}    sigma={sigma}±{ssigma}")
+    print(f"chi2={chi_2},   ndof={ndof},   pvalue={pval}\n\n")
+    x = np.linspace(-3*sigma,3*sigma,1000)
+    y = norm/(sigma*np.sqrt(2*np.pi)) * np.exp(-0.5*((x-mu)**2)/(sigma**2))
+    # ax.plot(x,y)
+
     figure.savefig(f"figures/{name}.pdf")
     plt.close(figure)
 
@@ -113,13 +164,13 @@ for (y,name) in zip(ys,names):
     figure.savefig(f"figures/{name}.pdf")
     plt.close(figure)
 
-    xs = (bin_edges[1:]+bin_edges[:-1])/2.
-    mask = values > 5
-    xs = xs[mask]
-    ys = values[mask]
-    chi2value = (((ys - area/np.sqrt(2*np.pi) * np.exp(-0.5*xs**2))/np.sqrt(ys))**2).sum()
-
-    ndof = ys.size - 1
-    pval = 1-chi2.cdf(chi2value, ndof)
-    print(f"{name}:    chi2={chi2value},   ndof={ndof},   pvalue={pval}")
+    # xs = (bin_edges[1:]+bin_edges[:-1])/2.
+    # mask = values > 5
+    # xs = xs[mask]
+    # ys = values[mask]
+    # chi2value = (((ys - area/np.sqrt(2*np.pi) * np.exp(-0.5*xs**2))/np.sqrt(ys))**2).sum()
+    #
+    # ndof = ys.size - 1
+    # pval = 1-chi2.cdf(chi2value, ndof)
+    # print(f"{name}:    chi2={chi2value},   ndof={ndof},   pvalue={pval}")
 

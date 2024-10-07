@@ -44,12 +44,12 @@ for particle_index in PARTICLE_LIST:
         s = smoothed_initial_index[yfilename]
         f = filtered_initial_index[yfilename]
         ax.plot(z, y_t, label="theoretical", color="yellow")
-        ax.errorbar(z, y_r, fmt=".:", elinewidth=1, capsize=1, label="real", color="black")
+        ax.errorbar(z, y_r, fmt=".:", elinewidth=1.5, capsize=2.5, label="real", color="black")
         if y_m.size != 0:
-            ax.errorbar(z[1:], y_m[1:], yerr=sy_m, ls=" ", fmt="o", elinewidth=1, capsize=1, label="measured", color="grey")
-        ax.errorbar(z[2:], y_p[2:], yerr=sy_p[2:], fmt="o", elinewidth=1, capsize=1, label="predicted", color="red")
-        ax.errorbar(z[f:], y_f[f:], yerr=sy_f[f:], fmt=".-.", elinewidth=1, capsize=1, label="filtered", color="blue")
-        ax.errorbar(z[s:], y_s[s:], yerr=sy_s[s:], fmt=".:", elinewidth=1, capsize=1, label="smoothed", color="green")
+            ax.errorbar(z[1:], y_m[1:], yerr=sy_m, ls=" ", fmt="o", elinewidth=1.5, capsize=2.5, label="measured", color="grey")
+        ax.errorbar(z[2:], y_p[2:], yerr=sy_p[2:], fmt="o", elinewidth=1.5, capsize=2.5, label="predicted", color="red")
+        ax.errorbar(z[f:], y_f[f:], yerr=sy_f[f:], fmt="o-.", elinewidth=1.5, capsize=2.5, label="filtered", color="blue")
+        ax.errorbar(z[s:], y_s[s:], yerr=sy_s[s:], fmt="o:", elinewidth=1.5, capsize=2.5, label="smoothed", color="green")
         ax.legend()
         figure.savefig(f"figures/Particle {particle_index} {yfilename}.pdf")
         plt.close(figure)
