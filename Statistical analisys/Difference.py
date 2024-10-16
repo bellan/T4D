@@ -98,7 +98,6 @@ for (y,name, sigma) in zip(ys,names, sigmas):
     # values2, bin_edges2, _ = ax.hist(smoothed, label="smoothed", alpha=0.8, bins=50)
     ax.set_xlabel("Residual")
     ax.set_ylabel("Occurrences")
-    print(values)
     ax.legend()
 
     xs = (bin_edges[:-1] + bin_edges[1:])*0.5 
@@ -110,12 +109,13 @@ for (y,name, sigma) in zip(ys,names, sigmas):
 
     dati = RealData(xs, ys, sy=sys)
     modello = Model(lambda pars, x: pars[0]/(pars[2]*np.sqrt(2*np.pi)) * np.exp(-0.5*((x-pars[1])**2)/(pars[2]**2)))
-    par_init = np.array([1400, 0, sigma1])
+    par_init = np.array([5e-7, 0, sigma1])
     risultato = ODR(dati, modello, par_init).run()
 
     chi_2, [norm,mu,sigma], [snorm, smu, ssigma] = risultato.sum_square, risultato.beta, risultato.sd_beta
     ndof = ys.size - 3
     pval = 1-chi2.cdf(chi_2, ndof)
+    # NOTE: Se fai i fit ricordati di cambiare il binning e rimetterlo a 50
     print(f"{name} misurato")
     print(f"A={norm}±{snorm}    mu={mu}±{smu}    sigma={sigma}±{ssigma}")
     print(f"chi2={chi_2},   ndof={ndof},   pvalue={pval}")
