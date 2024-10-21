@@ -96,9 +96,9 @@ for (y,name, sigma) in zip(ys,names, sigmas):
     new_bin_number = int(np.ceil((smoothed.max() - smoothed.min())/bin_size))
     values2, bin_edges2, _ = ax.hist(smoothed, label="smoothed", alpha=0.8, bins=new_bin_number)
     # values2, bin_edges2, _ = ax.hist(smoothed, label="smoothed", alpha=0.8, bins=50)
-    ax.set_xlabel("Residual")
-    ax.set_ylabel("Occurrences")
-    ax.legend()
+    ax.set_xlabel("Residual", fontsize=12)
+    ax.set_ylabel("Occurrences", fontsize=12)
+    ax.legend(fontsize=12)
 
     xs = (bin_edges[:-1] + bin_edges[1:])*0.5 
     mask = values > 5
@@ -145,7 +145,7 @@ for (y,name, sigma) in zip(ys,names, sigmas):
     y = norm/(sigma*np.sqrt(2*np.pi)) * np.exp(-0.5*((x-mu)**2)/(sigma**2))
     # ax.plot(x,y)
 
-    figure.savefig(f"figures/{name}.pdf")
+    figure.savefig(f"figures/{name}.pdf", bbox_inches="tight")
     plt.close(figure)
 
 
@@ -159,9 +159,9 @@ for (y,name) in zip(ys,names):
     area = ((bin_edges[1:]-bin_edges[:-1])*values).sum()
 
     ax.plot(x,  area/np.sqrt(2*np.pi) * np.exp(-0.5*x**2), label=r"$y=\frac{A}{\sqrt{2\pi}}e^{-\frac{x^2}{2}}$" )
-    ax.set_ylabel("Occurrences")
-    ax.legend()
-    figure.savefig(f"figures/{name}.pdf")
+    ax.set_ylabel("Occurrences", fontsize=12)
+    ax.legend(fontsize=12)
+    figure.savefig(f"figures/{name}.pdf", bbox_inches="tight")
     plt.close(figure)
 
     # xs = (bin_edges[1:]+bin_edges[:-1])/2.
