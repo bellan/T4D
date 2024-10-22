@@ -71,5 +71,5 @@ constexpr double SPACE_EVOLUTION_SIGMA = 5.e-7;
  *  Delta v = -0.01468 c
  */
 constexpr double VELOCITY_EVOLUTION_SIGMA = 0.01468 * LIGHT_SPEED;
-// constexpr double INVERSE_VELOCITY_EVOLUTION_SIGMA = 0.2 / LIGHT_SPEED;
+/*constexpr double INVERSE_VELOCITY_EVOLUTION_SIGMA = 0.065 / LIGHT_SPEED;*/
 constexpr double DIRECTION_EVOLUTION_SIGMA = 0.; // Old value 0.5e-4

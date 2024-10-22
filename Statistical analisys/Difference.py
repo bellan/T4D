@@ -85,7 +85,8 @@ pull_mesmo_t = np.array(pull_mesmo_t)
 ys = [(mes_t_dif, smo_t_dif), (mes_x_dif, smo_x_dif), (mes_y_dif, smo_y_dif), (ext_vz_dif, smo_vz_dif), (ext_vx_dif, smo_vx_dif), (ext_vy_dif, smo_vy_dif)]
 sigmas = [(1e-11,0.7e-11),(1e-6,0.7e-6),(1e-6,0.7e-6),(2.3e-9,0.1e-9),(1.3e-4,0.2e-4),(1.3e-4,0.2e-4)]
 names = ["res_t", "res_x", "res_y", "res_vz", "res_xz", "res_yz"]
-for (y,name, sigma) in zip(ys,names, sigmas):
+xlabels = ["Residual on timing", "Residual on position", "Residual on position", "Residual on velocity", "Residual on direction", "Residual on direction"]
+for (y,name, sigma, lab) in zip(ys,names, sigmas, xlabels):
     sigma1, sigma2 = sigma
     figure, ax = plt.subplots()
     ax.grid()
@@ -96,53 +97,53 @@ for (y,name, sigma) in zip(ys,names, sigmas):
     new_bin_number = int(np.ceil((smoothed.max() - smoothed.min())/bin_size))
     values2, bin_edges2, _ = ax.hist(smoothed, label="smoothed", alpha=0.8, bins=new_bin_number)
     # values2, bin_edges2, _ = ax.hist(smoothed, label="smoothed", alpha=0.8, bins=50)
-    ax.set_xlabel("Residual", fontsize=12)
+    ax.set_xlabel(lab, fontsize=12)
     ax.set_ylabel("Occurrences", fontsize=12)
     ax.legend(fontsize=12)
 
-    xs = (bin_edges[:-1] + bin_edges[1:])*0.5 
-    mask = values > 5
-    xs = xs[mask]
-    ys = values[mask]
-    sxs = np.zeros_like(xs)
-    sys = np.sqrt(ys)
+    # xs = (bin_edges[:-1] + bin_edges[1:])*0.5 
+    # mask = values > 5
+    # xs = xs[mask]
+    # ys = values[mask]
+    # sxs = np.zeros_like(xs)
+    # sys = np.sqrt(ys)
 
-    dati = RealData(xs, ys, sy=sys)
-    modello = Model(lambda pars, x: pars[0]/(pars[2]*np.sqrt(2*np.pi)) * np.exp(-0.5*((x-pars[1])**2)/(pars[2]**2)))
-    par_init = np.array([5e-7, 0, sigma1])
-    risultato = ODR(dati, modello, par_init).run()
-
-    chi_2, [norm,mu,sigma], [snorm, smu, ssigma] = risultato.sum_square, risultato.beta, risultato.sd_beta
-    ndof = ys.size - 3
-    pval = 1-chi2.cdf(chi_2, ndof)
+    # dati = RealData(xs, ys, sy=sys)
+    # modello = Model(lambda pars, x: pars[0]/(pars[2]*np.sqrt(2*np.pi)) * np.exp(-0.5*((x-pars[1])**2)/(pars[2]**2)))
+    # par_init = np.array([5e-7, 0, sigma1])
+    # risultato = ODR(dati, modello, par_init).run()
+    #
+    # chi_2, [norm,mu,sigma], [snorm, smu, ssigma] = risultato.sum_square, risultato.beta, risultato.sd_beta
+    # ndof = ys.size - 3
+    # pval = 1-chi2.cdf(chi_2, ndof)
     # NOTE: Se fai i fit ricordati di cambiare il binning e rimetterlo a 50
-    print(f"{name} misurato")
-    print(f"A={norm}±{snorm}    mu={mu}±{smu}    sigma={sigma}±{ssigma}")
-    print(f"chi2={chi_2},   ndof={ndof},   pvalue={pval}")
+    # print(f"{name} misurato")
+    # print(f"A={norm}±{snorm}    mu={mu}±{smu}    sigma={sigma}±{ssigma}")
+    # print(f"chi2={chi_2},   ndof={ndof},   pvalue={pval}")
     # x = np.linspace(-3*sigma,3*sigma,1000)
     # y = norm/(sigma*np.sqrt(2*np.pi)) * np.exp(-0.5*((x-mu)**2)/(sigma**2))
     # ax.plot(x,y)
 
-    xs = (bin_edges2[:-1] + bin_edges2[1:])*0.5 
-    mask = values2 > 5
-    xs = xs[mask]
-    ys = values2[mask]
-    sxs = np.zeros_like(xs)
-    sys = np.sqrt(ys)
+    # xs = (bin_edges2[:-1] + bin_edges2[1:])*0.5 
+    # mask = values2 > 5
+    # xs = xs[mask]
+    # ys = values2[mask]
+    # sxs = np.zeros_like(xs)
+    # sys = np.sqrt(ys)
 
-    dati = RealData(xs, ys, sy=sys)
-    modello = Model(lambda pars, x: pars[0]/(pars[2]*np.sqrt(2*np.pi)) * np.exp(-0.5*((x-pars[1])**2)/(pars[2]**2)))
-    par_init = np.array([3200, 0, sigma2])
-    risultato = ODR(dati, modello, par_init).run()
+    # dati = RealData(xs, ys, sy=sys)
+    # modello = Model(lambda pars, x: pars[0]/(pars[2]*np.sqrt(2*np.pi)) * np.exp(-0.5*((x-pars[1])**2)/(pars[2]**2)))
+    # par_init = np.array([3200, 0, sigma2])
+    # risultato = ODR(dati, modello, par_init).run()
 
-    chi_2, [norm,mu,sigma], [snorm, smu, ssigma] = risultato.sum_square, risultato.beta, risultato.sd_beta
-    ndof = ys.size - 3
-    pval = 1-chi2.cdf(chi_2, ndof)
-    print(f"{name} smoothed")
-    print(f"A={norm}±{snorm}    mu={mu}±{smu}    sigma={sigma}±{ssigma}")
-    print(f"chi2={chi_2},   ndof={ndof},   pvalue={pval}\n\n")
-    x = np.linspace(-3*sigma,3*sigma,1000)
-    y = norm/(sigma*np.sqrt(2*np.pi)) * np.exp(-0.5*((x-mu)**2)/(sigma**2))
+    # chi_2, [norm,mu,sigma], [snorm, smu, ssigma] = risultato.sum_square, risultato.beta, risultato.sd_beta
+    # ndof = ys.size - 3
+    # pval = 1-chi2.cdf(chi_2, ndof)
+    # print(f"{name} smoothed")
+    # print(f"A={norm}±{snorm}    mu={mu}±{smu}    sigma={sigma}±{ssigma}")
+    # print(f"chi2={chi_2},   ndof={ndof},   pvalue={pval}\n\n")
+    # x = np.linspace(-3*sigma,3*sigma,1000)
+    # y = norm/(sigma*np.sqrt(2*np.pi)) * np.exp(-0.5*((x-mu)**2)/(sigma**2))
     # ax.plot(x,y)
 
     figure.savefig(f"figures/{name}.pdf", bbox_inches="tight")
@@ -151,14 +152,16 @@ for (y,name, sigma) in zip(ys,names, sigmas):
 
 ys = [pull_t, pull_x, pull_y, pull_mesmo_t]
 names = ["pull_t", "pull_x", "pull_y", "pull_mesmo"]
-for (y,name) in zip(ys,names):
+xlabels = ["Pull on timing", "Pull on position", "Pull on position", "Pull smooth-measured timing"]
+for (y,name, lab) in zip(ys,names, xlabels):
     figure, ax = plt.subplots()
     x = np.linspace(pull_x.min(), pull_x.max(), 1000)
     ax.grid()
-    values, bin_edges, _ = ax.hist(y, label=r"$\frac{x_t - x_r}{\sigma_t}$", bins=50)
+    values, bin_edges, _ = ax.hist(y, label=r"$\frac{x_t - x_r}{\sigma_t}$", bins=48)
     area = ((bin_edges[1:]-bin_edges[:-1])*values).sum()
 
     ax.plot(x,  area/np.sqrt(2*np.pi) * np.exp(-0.5*x**2), label=r"$y=\frac{A}{\sqrt{2\pi}}e^{-\frac{x^2}{2}}$" )
+    ax.set_xlabel(lab, fontsize=12)
     ax.set_ylabel("Occurrences", fontsize=12)
     ax.legend(fontsize=12)
     figure.savefig(f"figures/{name}.pdf", bbox_inches="tight")

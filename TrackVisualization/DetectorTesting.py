@@ -37,5 +37,5 @@ for particle_index in PARTICLE_LIST:
         ax.errorbar(z[mask], y_s[mask], yerr=sy_s[mask], fmt=".:", elinewidth=1, capsize=1, label="smoothed", color="green")
         ax.errorbar(z[antimastk], y_s[antimastk], yerr=sy_s[antimastk], fmt="o", elinewidth=1, capsize=1, label="smoothed", color="red")
         ax.legend()
-        figure.savefig(f"figures/Detector test part {particle_index} {yfilename}.pdf")
+        figure.savefig(f"figures/Detector test part {particle_index} {yfilename}.pdf", bbox_inches="tight")
         plt.close(figure)
