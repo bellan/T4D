@@ -1,4 +1,5 @@
 #include "Detector.hpp"
+
 #include "MeasuresAndStates.hpp"
 #include "PhisicalParameters.hpp"
 #include "RandomGenerator.hpp"
@@ -8,32 +9,14 @@
 #include <cmath>
 #include <optional>
 
-/**
- * The detector counter.
- * It is used to calculate the id of the detectors.
- */
 int Detector::counter = 0;
 
-/**
- * The constructor.
- * It determines the position from the zPosition (since they are all aligned to
- * the z-axis i.d. position=(0,0,z))
- */
 Detector::Detector(double zPosition, double width, double height)
     : id{counter}, width{width}, height{height},
       bottomLeftPosition{-width / 2., -height / 2., zPosition} {
   counter++;
 }
 
-/**
- * Creates a Measurement from a particlePosition, if the particle is inside the
- * area of the detector.
- *
- * @param particlePosition the position of the particle.
- *
- * @return an optional measurement. It contains the measure if the particle was
- * inside, nullopt otherwise.
- */
 std::optional<Measurement>
 Detector::measure(TLorentzVector particlePosition) const {
   const double deltaX = particlePosition.X();
@@ -58,15 +41,6 @@ Detector::measure(TLorentzVector particlePosition) const {
              : std::nullopt;
 }
 
-/**
- * Creates a Measurement from a particlePosition, if the particle is inside the
- * area of the detector.
- *
- * @param particlePosition the position of the particle.
- *
- * @return an optional measurement. It contains the measure if the particle was
- * inside, nullopt otherwise.
- */
 std::optional<Measurement> Detector::measure(TMatrixD particleState) const {
   const double t = particleState(0, 0);
   const double x = particleState(1, 0);
@@ -77,15 +51,6 @@ std::optional<Measurement> Detector::measure(TMatrixD particleState) const {
   return measure(particlePosition);
 }
 
-/**
- * Creates a Measurement from a ParticleState, if the particle is inside the
- * area of the detector.
- *
- * @param particlePosition the position of the particle.
- *
- * @return an optional measurement. It contains the measure if the particle was
- * inside, nullopt otherwise.
- */
 std::optional<Measurement>
 Detector::measure(ParticleState particleState) const {
   return measure(particleState.position);

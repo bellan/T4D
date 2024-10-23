@@ -10,26 +10,10 @@
 #include <cmath>
 #include <vector>
 
-/**
- * Default constructor
- *
- * It generates the particle gun assuming that all angles are valid to shoot.
- *
- * @param position the position of the gun.
- */
 ParticleGun::ParticleGun(TVector3 position, double timeOfEmission)
     : position{position}, timeOfEmission{timeOfEmission},
       maxColatitude(M_PI / 2.) {}
 
-/**
- * constructor with specified shooting angle
- *
- * It generates the particle gun determining the angles to shoot at.
- *
- * @param position the position of the gun.
- * @param detector a vector of all the detectors used to determine the valid
- * angles.
- */
 ParticleGun::ParticleGun(TVector3 position,
                          const std::vector<Detector> &detectors,
                          double timeOfEmission)
@@ -58,14 +42,6 @@ ParticleGun::ParticleGun(TVector3 position,
   maxColatitude = thetaMax;
 }
 
-/**
- * Generate a random particle
- *
- * It generates a particle in the position of the gun with a momentum directed
- * to a random angle in the range of valid angles.
- *
- * @return the particle generated
- */
 Particle ParticleGun::generateParticle() {
   RandomGenerator &randomGenerator = RandomGenerator::getInstance();
   const double phy = randomGenerator.generateLongitude(0., 2. * M_PI);

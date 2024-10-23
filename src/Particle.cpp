@@ -8,34 +8,12 @@
 #include <optional>
 #include <stdexcept>
 
-/**
- * The constructor
- *
- * It instantiate a Particle object with its inital momentum and position.
- * The mass of the particle can be determined from its momentum.
- *
- * @param initialPosition the poisition at which the particle is generated.
- * @param initialVelocity the momentum of the particle at its generation.
- * @param mass the mass of the particle.
- * @param charge the charge of the particle.
- */
 Particle::Particle(const TLorentzVector initialPosition,
                    const TVector3 initialVelocity, const double mass,
                    const double charge)
     : initialState{initialPosition, initialVelocity}, mass{mass},
       charge{charge} {}
 
-/**
- * The space evolution function.
- *
- * It evolves the particle to the desired z position.
- * It than adds the new position to the vector.
- *
- * @param preaviousState the state before the evolution.
- * @param finalZ the position in meters.
- *
- * @return the new state after the evolution.
- */
 ParticleState Particle::zSpaceEvolve(ParticleState preaviousState,
                                      double finalZ,
                                      bool multipleScattering,

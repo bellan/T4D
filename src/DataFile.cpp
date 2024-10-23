@@ -2,16 +2,9 @@
 
 #include <TFile.h>
 #include <TTree.h>
-#include <iostream>
 #include <stdexcept>
 #include <vector>
 
-/**
- * The default constructor
- *
- * @param fileName the name of the file
- * @param treeName the name of the Tree
- */
 DataFile::DataFile(const char *fileName, const char *treeName, bool exists)
     : tBuffer(0), xBuffer(0), yBuffer(0), idBuffer(1), treeName(treeName),
       writable(!exists) {
@@ -31,11 +24,6 @@ DataFile::DataFile(const char *fileName, const char *treeName, bool exists)
   }
 }
 
-/**
- * The destructor
- *
- * Saves the tree in the file before closing.
- */
 DataFile::~DataFile() {
   if (writable)
     rootFile->WriteObject(dataTree, treeName);
@@ -47,11 +35,6 @@ DataFile::~DataFile() {
    */
 }
 
-/**
- * Save a single measuremet to the file
- *
- * @param measure the measure to be saved.
- */
 void DataFile::SaveSingleMeasure(Measurement measure) {
   if (!writable)
     throw std::invalid_argument("You cannot write data to a readonly file");
@@ -62,11 +45,6 @@ void DataFile::SaveSingleMeasure(Measurement measure) {
   dataTree->Fill();
 }
 
-/**
- * Save a vector of measuremets to the file
- *
- * @param measures the vector of measures to be saved.
- */
 void DataFile::SaveMultipleMeasures(const std::vector<Measurement> &measures) {
   if (!writable)
     throw std::invalid_argument("You cannot write data to a readonly file");
@@ -79,11 +57,6 @@ void DataFile::SaveMultipleMeasures(const std::vector<Measurement> &measures) {
   }
 }
 
-/**
- * Read measures from the tree
- *
- * @return a vector containg all the measurements in the file
- */
 std::vector<Measurement> DataFile::readMeasures() {
   std::vector<Measurement> measures;
   for (int iEntry = 0; dataTree->LoadTree(iEntry) >= 0; ++iEntry) {
