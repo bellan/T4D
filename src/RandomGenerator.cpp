@@ -3,18 +3,8 @@
 #include <cstddef>
 #include <ctime>
 
-/**
- * The default constructor.
- *
- * Generates the root object.
- */
 RandomGenerator::RandomGenerator() : rootGenerator(std::time(NULL)) {}
 
-/**
- * Static method for accessing the singleton instance.
- *
- * @return the reference to the instance of the random generator (singletor)
- */
 RandomGenerator &RandomGenerator::getInstance() {
   static RandomGenerator instance;
   return instance;

@@ -29,16 +29,6 @@ const TMatrixD initialStateValue(6, 1, initialStateData);
 const TMatrixD initialStateError(6, 6, initialStateSData);
 const MatrixStateEstimate initialState{initialStateValue, initialStateError};
 
-/**
- * Estimate the next state of the particle after a distance deltaZ from a state preaviousState.
- *
- * This function uses the distance deltaZ to compute the evolution matrix to apply to the
- * preavious state. Then, an evolution error is applied to the uncertainty.
- *
- * @param preaviousState the state of the particle at the preavious measure.
- * @param deltaZ the distance covered by the particle.
- * @return the estimated new state of the particle.
- */
 MatrixStateEstimate Tracker::estimateNextState(const MatrixStateEstimate& preaviousState, double deltaZ) const {
   double evolutionMatrixData[36] = {
             1., 0., 0., deltaZ, 0., 0.,

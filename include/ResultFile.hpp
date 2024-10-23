@@ -9,15 +9,38 @@
 
 class ResultFile {
 public:
+  /**
+   * The default constructor
+   *
+   * @param fileName the name of the file
+   * @param treeName the name of the Tree
+   */
   ResultFile(const char *fileName = "../data/ProcessedData.root",
              const char *treeName = "ResultTree");
+
+  /**
+   * The destructor
+   *
+   * Saves the tree in the file before closing.
+   */
   ~ResultFile();
 
+  /**
+   * Save a single measuremet to the file
+   *
+   * @param measure the measure to be saved
+   */
   void SaveSingleValue(double z, ParticleState theoreticalState,
                        ParticleState realState, Measurement measure,
                        MatrixStateEstimate predictedState,
                        MatrixStateEstimate filteredState,
                        MatrixStateEstimate smoothedState);
+
+  /**
+   * Save a vector of measuremets to the file.
+   *
+   * @param measures the vector of measures to be saved.
+   */
   void SaveMultipleValues(
       const std::vector<Detector> &detectors,
       const std::vector<ParticleState> &theoreticalStates,

@@ -5,12 +5,6 @@
 #include <TTree.h>
 #include <cmath>
 
-/**
- * The default constructor
- *
- * @param fileName the name of the file
- * @param treeName the name of the Tree
- */
 ResultFile::ResultFile(const char *fileName, const char *treeName) {
   rootFile = TFile::Open(fileName, "RECREATE");
   dataTree = new TTree(treeName, treeName);
@@ -37,11 +31,6 @@ ResultFile::ResultFile(const char *fileName, const char *treeName) {
   }
 }
 
-/**
- * The destructor
- *
- * Saves the tree in the file before closing.
- */
 ResultFile::~ResultFile() {
   rootFile->WriteObject(dataTree, treeName);
   rootFile->Close();
@@ -52,11 +41,6 @@ ResultFile::~ResultFile() {
    */
 }
 
-/**
- * Save a single measuremet to the file
- *
- * @param measure the measure to be saved.
- */
 void ResultFile::SaveSingleValue(double z, ParticleState theoreticalState,
                                  ParticleState realState, Measurement measure,
                                  MatrixStateEstimate predictedState,
@@ -124,11 +108,6 @@ void ResultFile::SaveSingleValue(double z, ParticleState theoreticalState,
   dataTree->Fill();
 }
 
-/**
- * Save a vector of measuremets to the file.
- *
- * @param measures the vector of measures to be saved.
- */
 void ResultFile::SaveMultipleValues(
     const std::vector<Detector> &detectors,
     const std::vector<ParticleState> &theoreticalStates,

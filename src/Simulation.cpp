@@ -1,12 +1,5 @@
 #include "Simulation.hpp"
 
-#include <TFile.h>
-#include <TLorentzVector.h>
-#include <TMatrixD.h>
-#include <TMatrixDfwd.h>
-#include <stdexcept>
-#include <vector>
-
 #include "DataGenerator.hpp"
 #include "MeasuresAndStates.hpp"
 #include "PhisicalParameters.hpp"
@@ -15,9 +8,13 @@
 #include "Tracker.hpp"
 #include "Utils.hpp"
 
-/**
- * The default constructor
- */
+#include <TFile.h>
+#include <TLorentzVector.h>
+#include <TMatrixD.h>
+#include <TMatrixDfwd.h>
+#include <stdexcept>
+#include <vector>
+
 Simulation::Simulation() : detectors(), dataFile() {
   SetupFactory factory{};
   const SimulationSetup experiment = factory.generateExperiment();
@@ -30,11 +27,6 @@ Simulation::Simulation() : detectors(), dataFile() {
   }
 }
 
-/**
- * The main simulation function.
- *
- * @param particlesNumber the number of particles to be simulated.
- */
 void Simulation::runSimulation(int particlesNumber) {
   // DATA CREATION
   GeneratedData generatedData =
@@ -90,11 +82,6 @@ void Simulation::runSimulation(int particlesNumber) {
                        allParticlesFilteredStates, allParticlesSmoothedStates);
 }
 
-/**
- * The main simulation function.
- *
- * @param particlesNumber the number of particles to be simulated.
- */
 void Simulation::testDetector(int particlesNumber, int detectorId) {
   // DATA CREATION
   GeneratedData generatedData =

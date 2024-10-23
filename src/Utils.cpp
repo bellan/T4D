@@ -8,11 +8,6 @@
 #include <iostream>
 #include <stdexcept>
 
-/**
- * Print a TMatrixD to stdout.
- *
- * @param matrix the matrix to be printed.
- */
 void Utils::printMatrix(TMatrixD matrix) {
   std::cout << std::scientific << std::setprecision(2);
   const int nrows = matrix.GetNrows();
@@ -26,25 +21,8 @@ void Utils::printMatrix(TMatrixD matrix) {
   }
 }
 
-/**
- * Divide the measurement Vector into a vector of vectors containing measures
- * from a single particle for each vector.
- *
- * It first orders the measures based on the time they occour. Then devides them
- * based on the detector id: if the detector of a measure is lower than that of
- * the preavious measure, this is registered as a new particle.
- *
- * NOTE: This algorithm assumes that before a particle is shot the preavious one
- * has already passed through all the detectors
- * TODO: Implement the above (increasing the spees should be enough) and
- * uncomment the line in the code. Othewise change the description.
- *
- * @param allMeasures the vector containing the complete sequence of
- * measurements.
- * @param (out)(optional) particlesNumber the number of the particles
- *
- * @return a vector of vector each one representing a single particle
- */
+// TODO: Implement the above (increasing the spees should be enough) and
+// uncomment the line in the code. Othewise change the description.
 std::vector<std::vector<Measurement>> Utils::separateMeasuresInParticles(
     const std::vector<Measurement> &allMeasures) {
   if (allMeasures.empty())
@@ -66,11 +44,6 @@ std::vector<std::vector<Measurement>> Utils::separateMeasuresInParticles(
   return singleParticleMeasuresVectors;
 }
 
-/**
- * Concatenates a vector of vectors into one single vector.
- *
- * @param separateMeasures the vector of vectors to be concatenated.
- */
 std::vector<Measurement> Utils::concatenateMeasures(
     const std::vector<std::vector<Measurement>> &separateMeasures) {
   std::vector<Measurement> allMeasures;
@@ -80,19 +53,6 @@ std::vector<Measurement> Utils::concatenateMeasures(
   return allMeasures;
 }
 
-/**
- * Save all the produced and filtered data to a csv file.
- *
- * @param detectors the detectors of the experiment.
- * @param theoreticalStates the theoretical states of the particles (i.e. the
- * states if multiple scattering was inactive).
- * @param realStates the states of the particles with multiple scattering
- * active.
- * @param measures the registered measures.
- * @param predictedStates the states predicted by the kalman filter.
- * @param filteredStates the states filtered by the kalman filter.
- * @param smoothedStates the states smoothed by the kalman smoother.
- */
 void Utils::saveDataToCSV(
     const std::vector<Detector> &detectors,
     const std::vector<std::vector<ParticleState>> &theoreticalStates,
@@ -180,19 +140,6 @@ void Utils::saveDataToCSV(
   }
 }
 
-/**
- * Save all the produced and filtered data to a csv file.
- *
- * @param detectors the detectors of the experiment.
- * @param theoreticalStates the theoretical states of the particles (i.e. the
- * states if multiple scattering was inactive).
- * @param realStates the states of the particles with multiple scattering
- * active.
- * @param measures the registered measures.
- * @param predictedStates the states predicted by the kalman filter.
- * @param filteredStates the states filtered by the kalman filter.
- * @param smoothedStates the states smoothed by the kalman smoother.
- */
 void Utils::saveDataToCSV(
     const std::vector<Detector> &detectors,
     const std::vector<std::vector<ParticleState>> &realStates,
