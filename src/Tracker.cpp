@@ -11,23 +11,23 @@
 
 // Initializing the state at 0, that is at the particle cannon
 // 6 dimentional vector (t,x,y,1/speed,thetazx,thetazy)
-constexpr double initialStateData[6] = {0., 0., 0., 1. / LIGHT_SPEED, 0., 0.};
-constexpr double bigT = VERY_HIGH_TIME_ERROR * VERY_HIGH_TIME_ERROR;
-constexpr double bigX = VERY_HIGH_SPACE_ERROR * VERY_HIGH_SPACE_ERROR;
-constexpr double bigVInv =
+static constexpr double initialStateData[6] = {0., 0., 0., 1. / LIGHT_SPEED, 0., 0.};
+static constexpr double bigT = VERY_HIGH_TIME_ERROR * VERY_HIGH_TIME_ERROR;
+static constexpr double bigX = VERY_HIGH_SPACE_ERROR * VERY_HIGH_SPACE_ERROR;
+static constexpr double bigVInv =
     VERY_HIGH_VELOCITY_INVERSE_ERROR * VERY_HIGH_VELOCITY_INVERSE_ERROR;
-constexpr double bigDirection =
+static constexpr double bigDirection =
     VERY_HIGH_DIRECTION_ERROR * VERY_HIGH_DIRECTION_ERROR;
-constexpr double initialStateSData[36] = {
+static constexpr double initialStateSData[36] = {
     bigT, 0., 0., 0., 0., 0.,
     0., bigX, 0., 0., 0., 0.,
     0., 0., bigX, 0., 0., 0.,
     0., 0., 0., bigVInv, 0., 0.,
     0., 0., 0., 0., bigDirection, 0.,
     0., 0., 0., 0., 0., bigDirection};
-const TMatrixD initialStateValue(6, 1, initialStateData);
-const TMatrixD initialStateError(6, 6, initialStateSData);
-const MatrixStateEstimate initialState{initialStateValue, initialStateError};
+static const TMatrixD initialStateValue(6, 1, initialStateData);
+static const TMatrixD initialStateError(6, 6, initialStateSData);
+static const MatrixStateEstimate initialState{initialStateValue, initialStateError};
 
 MatrixStateEstimate Tracker::estimateNextState(const MatrixStateEstimate& preaviousState, double deltaZ) const {
   double evolutionMatrixData[36] = {
@@ -43,12 +43,12 @@ MatrixStateEstimate Tracker::estimateNextState(const MatrixStateEstimate& preavi
   double inverseVelocityEvolutionSigma = VELOCITY_EVOLUTION_SIGMA * pow(estimatedStateValue(3,0), 2);
   /*double inverseVelocityEvolutionSigma = 3 * VELOCITY_EVOLUTION_SIGMA * pow(estimatedStateValue(3,0), 2);*/
   double evolutionUncertaintyData[36] = {
-        pow(TIME_EVOLUTION_SIGMA, 2), 0., 0., 0., 0., 0.,
-        0., pow(SPACE_EVOLUTION_SIGMA, 2), 0., 0., 0., 0.,
-        0., 0., pow(SPACE_EVOLUTION_SIGMA, 2), 0., 0., 0.,
-        0., 0., 0., pow(inverseVelocityEvolutionSigma, 2), 0., 0.,
-        0., 0., 0., 0., pow(DIRECTION_EVOLUTION_SIGMA, 2), 0.,
-        0., 0., 0., 0., 0., pow(DIRECTION_EVOLUTION_SIGMA, 2)};
+        TIME_EVOLUTION_SIGMA * TIME_EVOLUTION_SIGMA, 0., 0., 0., 0., 0.,
+        0., SPACE_EVOLUTION_SIGMA * SPACE_EVOLUTION_SIGMA, 0., 0., 0., 0.,
+        0., 0., SPACE_EVOLUTION_SIGMA* SPACE_EVOLUTION_SIGMA, 0., 0., 0.,
+        0., 0., 0., inverseVelocityEvolutionSigma * inverseVelocityEvolutionSigma, 0., 0.,
+        0., 0., 0., 0., DIRECTION_EVOLUTION_SIGMA * DIRECTION_EVOLUTION_SIGMA, 0.,
+        0., 0., 0., 0., 0., DIRECTION_EVOLUTION_SIGMA * DIRECTION_EVOLUTION_SIGMA};
   TMatrixD evolutionUncertainty(6, 6, evolutionUncertaintyData);
 
   TMatrixD estimatedStateError = TMatrixD(evolutionMatrix, TMatrixD::kMult, TMatrixD(preaviousState.uncertainty, TMatrixD::kMultTranspose, evolutionMatrix));

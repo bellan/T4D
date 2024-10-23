@@ -19,7 +19,7 @@ ParticleGun::ParticleGun(TVector3 position,
                          double timeOfEmission)
     : position(position), timeOfEmission(timeOfEmission) {
   double thetaMax = M_PI;
-  for (auto &detector : detectors) {
+  for (const Detector &detector : detectors) {
     const TVector3 bottomLeft = detector.getBottmLeftPosition();
     const double width = detector.getWidth();
     const double height = detector.getHeight();
@@ -36,12 +36,13 @@ ParticleGun::ParticleGun(TVector3 position,
     const double thetaTL = vTL.Angle({0, 0, 1});
     const double thetaTR = vTR.Angle({0, 0, 1});
 
+    // NOTE: the 0.9 is accounting for approximation in the sine calculation
     thetaMax = std::min({thetaMax, thetaBL, thetaBR, thetaTL, thetaTR}) * 0.9;
-    // TODO: consider changing to max (change also initialization)
   }
   maxColatitude = thetaMax;
 }
 
+// TODO: Change to a more accurate handling of the approximation
 Particle ParticleGun::generateParticle() {
   RandomGenerator &randomGenerator = RandomGenerator::getInstance();
   const double phy = randomGenerator.generateLongitude(0., 2. * M_PI);

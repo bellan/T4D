@@ -3,7 +3,6 @@
 #include "DataGenerator.hpp"
 #include "MeasuresAndStates.hpp"
 #include "PhisicalParameters.hpp"
-#include "ResultFile.hpp"
 #include "SetupFactory.hpp"
 #include "Tracker.hpp"
 #include "Utils.hpp"
@@ -43,8 +42,11 @@ void Simulation::runSimulation(int particlesNumber) {
       Utils::separateMeasuresInParticles(allMeasures);
 
   std::vector<std::vector<MatrixStateEstimate>> allParticlesPredictedStates;
+  allParticlesPredictedStates.reserve(particlesNumber);
   std::vector<std::vector<MatrixStateEstimate>> allParticlesFilteredStates;
+  allParticlesFilteredStates.reserve(particlesNumber);
   std::vector<std::vector<MatrixStateEstimate>> allParticlesSmoothedStates;
+  allParticlesSmoothedStates.reserve(particlesNumber);
   for (int i = 0; i < (int)allParticlesMeasures.size(); i++) {
     kalmanFilterResult filterResults =
         tracker.kalmanFilter(allParticlesMeasures[i], false, false);

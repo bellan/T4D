@@ -9,6 +9,7 @@ std::vector<ParticleState>
 DataGenerator::generateParticleStates(Particle particle,
                                       bool multipleScattering) const {
   std::vector<ParticleState> particleStates;
+  particleStates.reserve(simulationSetup.detectors.size() + 1);
   particleStates.push_back(particle.getInitialState());
 
   for (Detector detector : simulationSetup.detectors) {
@@ -23,6 +24,7 @@ DataGenerator::generateParticleStates(Particle particle,
 std::vector<Measurement> DataGenerator::generateParticleMeasures(
     std::vector<ParticleState> &particleStates) const {
   std::vector<Measurement> measureVector;
+  measureVector.reserve(simulationSetup.detectors.size());
   for (ParticleState state : particleStates) {
     if (!state.detectorID)
       continue;
@@ -45,8 +47,11 @@ GeneratedData DataGenerator::generateAllData(int particlesNumber,
                                              bool enableLogging,
                                              bool useMultipleScattering) {
   std::vector<std::vector<ParticleState>> allParticlesTheoreticalStates;
+  allParticlesTheoreticalStates.reserve(particlesNumber);
   std::vector<std::vector<ParticleState>> allParticlesRealStates;
+  allParticlesRealStates.reserve(particlesNumber);
   std::vector<std::vector<Measurement>> allParticlesMeasures;
+  allParticlesMeasures.reserve(particlesNumber);
 
   for (int i = 0; i < particlesNumber; i++) {
     Particle particle = generateParticle();
