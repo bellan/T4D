@@ -21,8 +21,9 @@ void Utils::printMatrix(TMatrixD matrix) {
   }
 }
 
-// TODO: Implement the above (increasing the spees should be enough) and
-// uncomment the line in the code. Othewise change the description.
+// TODO: Implement the real definition in the header (increasing the spees
+// should be enough) and uncomment the line in the code. Othewise change the
+// description.
 std::vector<std::vector<Measurement>> Utils::separateMeasuresInParticles(
     const std::vector<Measurement> &allMeasures) {
   if (allMeasures.empty())
@@ -35,7 +36,8 @@ std::vector<std::vector<Measurement>> Utils::separateMeasuresInParticles(
 
   for (Measurement measure : allMeasures) {
     if (singleParticleMeasuresVectors.empty() ||
-        measure.detectorID < singleParticleMeasuresVectors.back().back().detectorID) {
+        measure.detectorID <
+            singleParticleMeasuresVectors.back().back().detectorID) {
       singleParticleMeasuresVectors.push_back(std::vector<Measurement>());
     }
     singleParticleMeasuresVectors.back().push_back(measure);
@@ -146,9 +148,8 @@ void Utils::saveDataToCSV(
     const std::vector<std::vector<Measurement>> &measures,
     const std::vector<std::vector<MatrixStateEstimate>> &smoothedStates) {
 
-  const bool particleLengthCheck =
-      realStates.size() == smoothedStates.size() &&
-      realStates.size() == measures.size();
+  const bool particleLengthCheck = realStates.size() == smoothedStates.size() &&
+                                   realStates.size() == measures.size();
   if (!particleLengthCheck)
     throw std::invalid_argument("saveDataToCSV: vectors of different size");
 

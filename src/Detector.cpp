@@ -58,9 +58,9 @@ Detector::measure(ParticleState particleState) const {
 
 TMatrixD Detector::getMeasureUncertainty() const {
   double sdata[36] = {
-      DETECTOR_TIME_UNCERTAINTY * DETECTOR_TIME_UNCERTAINTY,   0., 0., 0.,
-      DETECTOR_SPACE_UNCERTAINTY * DETECTOR_SPACE_UNCERTAINTY, 0., 0., 0.,
-      DETECTOR_SPACE_UNCERTAINTY * DETECTOR_SPACE_UNCERTAINTY};
+      DETECTOR_TIME_UNCERTAINTY * DETECTOR_TIME_UNCERTAINTY,   0., 0.,
+      0., DETECTOR_SPACE_UNCERTAINTY * DETECTOR_SPACE_UNCERTAINTY, 0.,
+      0., 0., DETECTOR_SPACE_UNCERTAINTY * DETECTOR_SPACE_UNCERTAINTY};
   TMatrixD uncertainty(3, 3, sdata);
   return uncertainty;
 }

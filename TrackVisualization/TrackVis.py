@@ -2,7 +2,8 @@ import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 
-PARTICLE_LIST = [1203, 1206]
+PARTICLE_LIST = range(1203, 1207)
+PARTICLE_LIST = [1200,1201,1202,1210]
 DETECTOR_SPACE_UNCERTAINTY = 1e-6;
 DETECTOR_TIME_UNCERTAINTY = 1e-11;
 
