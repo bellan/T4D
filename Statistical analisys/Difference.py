@@ -60,7 +60,10 @@ for particle_index in range(PARTICLE_NUMBER):
     pull_y.append((smo_y[det_idx] - rea_y[det_idx])/smo_sy[det_idx])
 
     pull_mesmo_t.append((smo_t[det_idx] - mes_t[det_idx])/np.sqrt(DETECTOR_TIME_UNCERTAINTY**2+smo_st[det_idx]**2))
+    if np.abs(rea_x).max() < 50.e-6:
+        print(particle_index)
 
+raise
 mes_t_dif = np.array(mes_t_dif)
 mes_x_dif = np.array(mes_x_dif)
 mes_y_dif = np.array(mes_y_dif)
@@ -80,7 +83,6 @@ pull_x = np.array(pull_x)
 pull_y = np.array(pull_y)
 
 pull_mesmo_t = np.array(pull_mesmo_t)
-
 
 ys = [(mes_t_dif, smo_t_dif), (mes_x_dif, smo_x_dif), (mes_y_dif, smo_y_dif), (ext_vz_dif, smo_vz_dif), (ext_vx_dif, smo_vx_dif), (ext_vy_dif, smo_vy_dif)]
 sigmas = [(1e-11,0.7e-11),(1e-6,0.7e-6),(1e-6,0.7e-6),(2.3e-9,0.1e-9),(1.3e-4,0.2e-4),(1.3e-4,0.2e-4)]

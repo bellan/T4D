@@ -40,8 +40,7 @@ MatrixStateEstimate Tracker::estimateNextState(const MatrixStateEstimate& preavi
   TMatrixD evolutionMatrix(6, 6, evolutionMatrixData);
   TMatrixD estimatedStateValue = TMatrixD(evolutionMatrix, TMatrixD::kMult, preaviousState.value);
 
-  double inverseVelocityEvolutionSigma = VELOCITY_EVOLUTION_SIGMA * pow(estimatedStateValue(3,0), 2);
-  /*double inverseVelocityEvolutionSigma = 3 * VELOCITY_EVOLUTION_SIGMA * pow(estimatedStateValue(3,0), 2);*/
+  double inverseVelocityEvolutionSigma = V_EVOLUTION_SIGMA_KALMAN * pow(estimatedStateValue(3,0), 2);
   double evolutionUncertaintyData[36] = {
         TIME_EVOLUTION_SIGMA * TIME_EVOLUTION_SIGMA, 0., 0., 0., 0., 0.,
         0., SPACE_EVOLUTION_SIGMA * SPACE_EVOLUTION_SIGMA, 0., 0., 0., 0.,

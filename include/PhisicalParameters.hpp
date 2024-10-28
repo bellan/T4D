@@ -46,15 +46,15 @@ constexpr double MIN_TIME_BETWEEN_PARTICLE =
  * the tracking process. They represent a random noise introduced in the
  * evolution of the particle. There are various processes that contribute to
  * this noise, but the main two are
- *  - Multiple scattering: a process inside the detector that offsets the
- * position of the particle.
+ *  - Multiple scattering: a process inside the detector that changes the
+ * direction of the particle.
  *  - Energy loss due to particle-matter interaction occourring inside
  * structural parts of the experiment (likely steel plates between detectors).
  *  Therefore there should be noise introduced in the 3D position and in the
  * velocty modulus.
  */
-constexpr double TIME_EVOLUTION_SIGMA = 0.; // Old value 5.e-12
-constexpr double SPACE_EVOLUTION_SIGMA = 5.e-7;
+constexpr double TIME_EVOLUTION_SIGMA = 0.;  // Old value 5.e-12
+constexpr double SPACE_EVOLUTION_SIGMA = 0.; // Old value 5.e-7
 
 /**
  *  NOTE: These next two parameters should be modified toghether somewhat
@@ -71,5 +71,9 @@ constexpr double SPACE_EVOLUTION_SIGMA = 5.e-7;
  *  Delta v = -0.01468 c
  */
 constexpr double VELOCITY_EVOLUTION_SIGMA = 0.01468 * LIGHT_SPEED;
+// The following is the value passed to the Kalman filter (it can give better
+// results if a little larger then the previous one)
+
+constexpr double V_EVOLUTION_SIGMA_KALMAN = 3. * VELOCITY_EVOLUTION_SIGMA;
 /*constexpr double INVERSE_VELOCITY_EVOLUTION_SIGMA = 0.065 / LIGHT_SPEED;*/
-constexpr double DIRECTION_EVOLUTION_SIGMA = 0.; // Old value 0.5e-4
+constexpr double DIRECTION_EVOLUTION_SIGMA = 0.5e-4; // TODO: Check value
