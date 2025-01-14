@@ -77,9 +77,9 @@ struct ParticleState {
 
 'Particle.hpp'
 class Particle {
-   +Particle(TLorentzVector initialPosition, TVector3 velocity, double mass, double charge)
+   +Particle(TLorentzVector initialPosition, TVector3 velocity,\n\t\tdouble mass, double charge)
    +ParticleState getInitialState()
-   +TLorentzVector zSpaceEvolve(ParticleState preaviousState, double finalZ, bool multipleScattering, std::optional<int> detectorId)
+   +TLorentzVector zSpaceEvolve(ParticleState preaviousState, \n\t\tdouble finalZ, bool multipleScattering, \n\t\tstd::optional<int> detectorId)
 
    -ParticleState initialState
    -const double mass
@@ -89,7 +89,7 @@ class Particle {
 'ParticleGun.hpp'
 class ParticleGun {
    +ParticleGun(TVector3 position, double timeOfEmission)
-   +ParticleGun(TVector3 position, const std::vector<Detector> &detectors, double timeOfEmission)
+   +ParticleGun(TVector3 position, const std::vector<Detector> &detectors,\n\t\tdouble timeOfEmission)
    +void setMaxColatitude(double newValue)
    +void setPosition(TVector3 newPosition)
    +double getMaxColatitude()
@@ -141,12 +141,12 @@ class Tracker {
    +Tracker(const std::vector<Detector> &detectors)
    +void ignoreDetector(int detectorIndex)
    +void resetDetectors()
-   +MatrixStateEstimate estimateNextState(const MatrixStateEstimate &preaviousState, double deltaZ)
-   +kalmanFilterResult kalmanFilter(const std::vector<Measurement> &measures, bool logging, bool realTime)
-   +std::vector<MatrixStateEstimate> kalmanSmoother(const std::vector<MatrixStateEstimate> &filteredStates, bool looging)
-   +Chi2Variables computeChi2s(const std::vector<ParticleState> &expectedStates, const std::vector<MatrixStateEstimate> &obtainedStates, bool logging, bool skipFirst)
-   -void initializeFilterRealTime(const std::vector<Measurement> &measures, std::vector<MatrixStateEstimate> &predictedStates, std::vector<MatrixStateEstimate> &filteredStates)
-   -void initializeFilter(const std::vector<Measurement> &measures, std::vector<MatrixStateEstimate> &predictedStates, std::vector<MatrixStateEstimate> &filteredStates)
+   +MatrixStateEstimate estimateNextState(const MatrixStateEstimate &preaviousState,\n\t\tdouble deltaZ)
+   +kalmanFilterResult kalmanFilter(const std::vector<Measurement> &measures,\n\t\tbool logging, bool realTime)
+   +std::vector<MatrixStateEstimate> kalmanSmoother(const std::vector<MatrixStateEstimate> &filteredStates,\n\t\tbool looging)
+   +Chi2Variables computeChi2s(const std::vector<ParticleState> &expectedStates,\n\t\tconst std::vector<MatrixStateEstimate> &obtainedStates,\n\t\tbool logging, bool skipFirst)
+   -void initializeFilterRealTime(const std::vector<Measurement> &measures,\n\t\tstd::vector<MatrixStateEstimate> &predictedStates,\n\t\tstd::vector<MatrixStateEstimate> &filteredStates)
+   -void initializeFilter(const std::vector<Measurement> &measures,\n\t\tstd::vector<MatrixStateEstimate> &predictedStates,\n\t\tstd::vector<MatrixStateEstimate> &filteredStates)
 
    -std::vector<Detector> allDetectors
    -std::vector<Detector> consideredDetectors

@@ -19,6 +19,7 @@ Detector::Detector(double zPosition, double width, double height)
 
 std::optional<Measurement>
 Detector::measure(TLorentzVector particlePosition) const {
+  // TODO: Controllare questo
   const double deltaX = particlePosition.X();
   const double deltaY = particlePosition.Y();
   const double deltaZ = particlePosition.Z() - this->bottomLeftPosition.z();
