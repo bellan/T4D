@@ -1,10 +1,10 @@
-from Parameters import *
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
 particle_index = 0
-z, gen_t, gen_x, gen_y, gen_v, gen_xz, gen_yz, pre_t, pre_st, pre_x, pre_sx, pre_y, pre_sy, pre_v, pre_sv, pre_xz, pre_sxz, pre_yz, pre_syz, fil_t, fil_st, fil_x, fil_sx, fil_y, fil_sy,fil_v, fil_sv, fil_xz, fil_sxz, fil_yz, fil_syz, smo_t, smo_st, smo_x, smo_sx, smo_y, smo_sy, smo_v, smo_sv, smo_xz, smo_sxz, smo_yz, smo_syz = np.loadtxt(f"../data/Particle {particle_index}.csv", skiprows=2, unpack=True, delimiter=",", dtype=float)
+extraction = np.loadtxt(f"../results/Particle {particle_index}.csv", skiprows=2, unpack=True, delimiter=",", dtype=float)
+z, _, _, _, _, _, _, gen_t, gen_x, gen_y, _, _, _, _, _, _, pre_t, _, pre_x, _, pre_y, _, pre_v, _, _, _, _, _, fil_t, _, fil_x, _, fil_y, _, _, _, _, _, _, _, smo_t, _, smo_x, _, smo_y, _, _, _, _, _, _, _ = extraction
 
 fig = plt.figure()
 ax: Axes3D = fig.add_subplot(111, projection='3d')

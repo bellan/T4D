@@ -63,7 +63,6 @@ for particle_index in range(PARTICLE_NUMBER):
     if np.abs(rea_x).max() < 50.e-6:
         print(particle_index)
 
-raise
 mes_t_dif = np.array(mes_t_dif)
 mes_x_dif = np.array(mes_x_dif)
 mes_y_dif = np.array(mes_y_dif)

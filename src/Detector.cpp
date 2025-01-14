@@ -19,24 +19,23 @@ Detector::Detector(double zPosition, double width, double height)
 
 std::optional<Measurement>
 Detector::measure(TLorentzVector particlePosition) const {
-  // TODO: Controllare questo
-  const double deltaX = particlePosition.X();
-  const double deltaY = particlePosition.Y();
+  const double x = particlePosition.X();
+  const double y = particlePosition.Y();
   const double deltaZ = particlePosition.Z() - this->bottomLeftPosition.z();
 
-  const bool xConstrain = deltaX > bottomLeftPosition.x() &&
-                          deltaX < bottomLeftPosition.x() + width;
-  const bool yConstrain = deltaY > bottomLeftPosition.y() &&
-                          deltaY < bottomLeftPosition.y() + height;
+  const bool xConstrain = x > bottomLeftPosition.x() &&
+                          x < bottomLeftPosition.x() + width;
+  const bool yConstrain = y > bottomLeftPosition.y() &&
+                          y < bottomLeftPosition.y() + height;
   const bool zConstrain = deltaZ == 0;
 
   RandomGenerator &randomGenerator = RandomGenerator::getInstance();
   const double measuredT = randomGenerator.generateGaussian(
       particlePosition.T(), DETECTOR_TIME_UNCERTAINTY);
   const double measuredX =
-      randomGenerator.generateGaussian(deltaX, DETECTOR_SPACE_UNCERTAINTY);
+      randomGenerator.generateGaussian(x, DETECTOR_SPACE_UNCERTAINTY);
   const double measuredY =
-      randomGenerator.generateGaussian(deltaY, DETECTOR_SPACE_UNCERTAINTY);
+      randomGenerator.generateGaussian(y, DETECTOR_SPACE_UNCERTAINTY);
   return (xConstrain && yConstrain && zConstrain)
              ? std::optional<Measurement>{{measuredT, measuredX, measuredY, id}}
              : std::nullopt;
