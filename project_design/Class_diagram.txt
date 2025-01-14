@@ -1,74 +1,169 @@
 @startuml
-class Measurement {
+
+'DataFile.hpp'
+class DataFile {
+   +Datafile(const char *filename, const char *treeName, bool exist)
+   +void SaveSingleMeasure(Measurement measure)
+   +void SaveMultipleMeasures(const std::vector<Measurement> &measurements)
+   +std::vector<Measurement> readMeasures()
+
+   -double tBuffer
+   -double xBuffer
+   -double yBuffer
+   -int idBuffer
+   -const char *treeName
+   -bool writable
+   -TFile *rootFile
+   -TTree *dataTree
+}
+
+'DataGenerator.hpp'
+struct GeneratedData {
+  std::vector<std::vector<ParticleState>> allParticlesTheoreticalStates
+  std::vector<std::vector<ParticleState>> allParticlesRealStates
+  std::vector<std::vector<Measurement>> allParticlesMeasures
+}
+
+class DataGenerator {
+   +DataGenerator()
+   +DataGenerator(SimulationSetup simulationSetup)
+   +Particle generateParticle()
+   +std::vector<ParticleState> generateParticleStates(Particle particle, bool multipleScattering)
+   +std::vector<Measurement> generateParticleMeasures(std::vector<ParticleState> &ParticleStates)
+   +GeneratedData generateAllData(int numberOfParticles, bool logging, bool useMultipleScattering)
+   -void logData(const GeneratedData &generatedData)
+
+   -SimulationSetup simulationSetup
+}
+
+'Detector.hpp'
+class Detctor {
+   +Detector(double zPosition, double width, double height)
+   +int getId()
+   +TVector3 getBottmLeftPosition()
+   +double getWidth()
+   +double getHeight()
+   +std::optional<Measurement> measure(TLorentzVector particlePosition)
+   +std::optional<Measurement> measure(TMatrixD particleState)
+   +std::optional<Measurement> measure(ParticleState particleState)
+   +TMatrixD getMeasureUncertainty()
+
+   -static int counter
+   -int id
+   -double width
+   -double height
+   -TVector3 bottomLeftPosition
+}
+
+'MeasuresAndStates.hpp'
+struct Measurement {
    double t
    double x
    double y
    int detectorID
 }
 
-class State {
+struct MatrixStateEstimate {
    TMatrixD value
    TMatrixD uncertainty
+   std::optional<int> detectorID 
 }
 
-class Detctor {
-   int id
-   double width
-   double heigh
-   TVector3 bottomLeftPosition
-
-   Measure measure(TLorentzVector particlePosition)
-   State fromMeasureToState(Measurement measure)
-   State fromMeasureToState(Measurement currentMeasure, State preaviousState)
+struct ParticleState {
+  TLorentzVector position
+  TVector3 velocity
+  std::optional<int> detectorID
 }
 
-class ParticleCannon {
-   TVector3 position
-   double maxColatitude
-   TRandom1 randomGenerator
-   double timeCounter
-
-   Particle generateParticle()
-}
-
+'Particle.hpp'
 class Particle {
-   TLorentzVector momentum
-   double charge
-   double mass
-   std::vector<TLorentzVector> position
+   +Particle(TLorentzVector initialPosition, TVector3 velocity, double mass, double charge)
+   +ParticleState getInitialState()
+   +TLorentzVector zSpaceEvolve(ParticleState preaviousState, double finalZ, bool multipleScattering, std::optional<int> detectorId)
 
-   TLorentzVector zSpaceEvolve(double finalZ)
-   TLorentzVector timeEvolve(double timeStep)
+   -ParticleState initialState
+   -const double mass
+   -const double charge
 }
 
-class SimulationSetup {
-   ParticleGun particleGun
-   std::vecto<Detector> experimentalSetup
+'ParticleGun.hpp'
+class ParticleGun {
+   +ParticleGun(TVector3 position, double timeOfEmission)
+   +ParticleGun(TVector3 position, const std::vector<Detector> &detectors, double timeOfEmission)
+   +void setMaxColatitude(double newValue)
+   +void setPosition(TVector3 newPosition)
+   +double getMaxColatitude()
+   +TVector3 getPosition()
+   +Particle generateParticle()
+
+   -TVector3 position
+   -double timeOfEmission
+   -double maxColatitude
 }
 
+'RandomGenerator.hpp'
+class RandomGenerator {
+   +static RandomGenerator &getInstance()
+   +double generateUniform(double minimumValue, double maximumuValue)
+   +double generateGaussian(double mean = 0., double sigma = 1.)
+   +double generateLongitude(double minimumAngle, double maximumAngle)
+   +double generateColatitude(double minimumAngle, double maximumAngle)
+
+   -RandomGenerator()
+   -TRandom1 rootGenerator
+}
+
+'SetupFactory.cpp'
+struct SimulationSetup {
+  ParticleGun particleGun
+  std::vector<Detector> detectors
+}
+
+class SetupFactory {
+   +SetupFactory()
+   +SimulationSetup generateExperiment() const
+}
+
+'Simulation.hpp'
 class Simulation {
-   double minTimeInterval
-   ParticleGun particleGun
-   std::vector<Detector> detectors
-   std::unique_ptr<TFile> dataFile;
+   +Simulation()
+   +void runSimulation (int particlesNumber)
+   +void testDetector (int particlesNumber, int detectorID)
 
-   double tBuffer
-   double xBuffer
-   double yBuffer
-   int idBuffer
-
-   TTree dataTree
-
-   void simulate(int particleNumber)
-   bool saveData(Measuremnt measure)
+   -std::vector<Detector> detectors
+   -DataFile dataFile
+   -Tracker tracker
+   -DataGenerator dataGenerator
 }
 
+'Tracker.hpp'
 class Tracker {
-   std::vector<Detector> experimentalSetup
+   +Tracker(const std::vector<Detector> &detectors)
+   +void ignoreDetector(int detectorIndex)
+   +void resetDetectors()
+   +MatrixStateEstimate estimateNextState(const MatrixStateEstimate &preaviousState, double deltaZ)
+   +kalmanFilterResult kalmanFilter(const std::vector<Measurement> &measures, bool logging, bool realTime)
+   +std::vector<MatrixStateEstimate> kalmanSmoother(const std::vector<MatrixStateEstimate> &filteredStates, bool looging)
+   +Chi2Variables computeChi2s(const std::vector<ParticleState> &expectedStates, const std::vector<MatrixStateEstimate> &obtainedStates, bool logging, bool skipFirst)
+   -void initializeFilterRealTime(const std::vector<Measurement> &measures, std::vector<MatrixStateEstimate> &predictedStates, std::vector<MatrixStateEstimate> &filteredStates)
+   -void initializeFilter(const std::vector<Measurement> &measures, std::vector<MatrixStateEstimate> &predictedStates, std::vector<MatrixStateEstimate> &filteredStates)
 
-   std::vector<std::vector<Measurement>> importMeasurements()
-   std::vector<State> fromMeasureToState()
-   std::vector<State> kalmanFilter(std::vector<State> unfilteredStates)
-   std::vector<State> kalmanSmoother(std::vector<State> filteredStates)
+   -std::vector<Detector> allDetectors
+   -std::vector<Detector> consideredDetectors
 }
+
+struct kalmanFilterResult {
+  std::vector<MatrixStateEstimate> predictedStates
+  std::vector<MatrixStateEstimate> filteredStates
+}
+
+struct Chi2Variables {
+  double tChi2
+  double xChi2
+  double yChi2
+  double vChi2
+  double xzChi2
+  double yzChi2
+}
+
 @enduml
