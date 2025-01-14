@@ -1,5 +1,17 @@
 #!/bin/bash
 
+setup() {
+    if [ ! -d "./build" ]; then
+        mkdir -p "./build"
+    fi
+    if [ ! -d "./data" ]; then
+        mkdir -p "./data"
+    fi
+    if [ ! -d "./results" ]; then
+        mkdir -p "./results"
+    fi
+}
+
 compile_run() {
     cd build
     echo "Creating make file"
