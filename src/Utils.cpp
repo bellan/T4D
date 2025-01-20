@@ -195,3 +195,9 @@ void Utils::saveDataToCSV(
     csvFile.close();
   }
 }
+
+void Utils::printTime(float btime, float etime){
+  std::cout << "\n Execution time: " << (int)((etime - btime)/3600) << " h " 
+            << (((int)(etime - btime)%3600)/60) << " m " 
+            << etime - btime - (int)((etime - btime)/3600)*3600 - (((int)(etime - btime)%3600)/60)*60 << " s." << std::endl;
+}

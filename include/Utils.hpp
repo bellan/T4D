@@ -26,7 +26,7 @@ void printMatrix(TMatrixD matrix);
  * has already passed through all the detectors
  *
  * @param allMeasures the vector containing the complete sequence of
- * measurements.
+ *                    measurements.
  * @param (out)(optional) particlesNumber the number of the particles
  *
  * @return a vector of vector each one representing a single particle
@@ -47,9 +47,9 @@ std::vector<Measurement> concatenateMeasures(
  *
  * @param detectors the detectors of the experiment.
  * @param theoreticalStates the theoretical states of the particles (i.e. the
- * states if multiple scattering was inactive).
+ *                          states if multiple scattering was inactive).
  * @param realStates the states of the particles with multiple scattering
- * active.
+ *                   active.
  * @param measures the registered measures.
  * @param predictedStates the states predicted by the kalman filter.
  * @param filteredStates the states filtered by the kalman filter.
@@ -69,9 +69,9 @@ void saveDataToCSV(
  *
  * @param detectors the detectors of the experiment.
  * @param theoreticalStates the theoretical states of the particles (i.e. the
- * states if multiple scattering was inactive).
+ *                          states if multiple scattering was inactive).
  * @param realStates the states of the particles with multiple scattering
- * active.
+ *                   active.
  * @param measures the registered measures.
  * @param predictedStates the states predicted by the kalman filter.
  * @param filteredStates the states filtered by the kalman filter.
@@ -82,4 +82,13 @@ void saveDataToCSV(
     const std::vector<std::vector<ParticleState>> &realStates,
     const std::vector<std::vector<Measurement>> &measures,
     const std::vector<std::vector<MatrixStateEstimate>> &smoothedStates);
-} // namespace Utils
+
+/**
+ * Print elapsed time in human readable format
+ * 
+ * @param btime begin time.
+ * @param etime end time.
+ */
+void printTime(float btime, float etime);
+
+}
