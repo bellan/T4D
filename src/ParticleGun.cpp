@@ -2,7 +2,7 @@
 
 #include "Detector.hpp"
 #include "Particle.hpp"
-#include "PhisicalParameters.hpp"
+#include "PhysicalParameters.hpp"
 #include "RandomGenerator.hpp"
 
 #include <TLorentzVector.h>

@@ -2,7 +2,7 @@
 
 #include "Detector.hpp"
 #include "ParticleGun.hpp"
-#include "PhisicalParameters.hpp"
+#include "PhysicalParameters.hpp"
 
 #include <vector>
 

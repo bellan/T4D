@@ -2,7 +2,7 @@
 
 #include "DataGenerator.hpp"
 #include "MeasuresAndStates.hpp"
-#include "PhisicalParameters.hpp"
+#include "PhysicalParameters.hpp"
 #include "SetupFactory.hpp"
 #include "Tracker.hpp"
 #include "Utils.hpp"

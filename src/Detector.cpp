@@ -1,7 +1,7 @@
 #include "Detector.hpp"
 
 #include "MeasuresAndStates.hpp"
-#include "PhisicalParameters.hpp"
+#include "PhysicalParameters.hpp"
 #include "RandomGenerator.hpp"
 
 #include <TLorentzVector.h>

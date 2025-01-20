@@ -1,4 +1,4 @@
-#include "PhisicalParameters.hpp"
+#include "PhysicalParameters.hpp"
 #include "Simulation.hpp"
 
 int main() {
