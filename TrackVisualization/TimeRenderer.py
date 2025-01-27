@@ -31,4 +31,4 @@ ax.scatter(z, smo_x, smo_t, marker=".", color="green", label="smoothed")
 ax.legend()
 
 plt.show()
-fig.savefig(f"Time3D.pdf")
+fig.savefig(f"../figures/TrackVisualization/Time3D.pdf")

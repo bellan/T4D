@@ -75,4 +75,4 @@ for (z,x,y,shape,color) in zip(zs, xs,ys,particle_shape,particle_color):
 # ax.legend()
 
 plt.show()
-fig.savefig(f"3D.pdf")
+fig.savefig(f"../figures/TrackVisualization/3D.pdf")

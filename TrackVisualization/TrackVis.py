@@ -55,5 +55,5 @@ for particle_index in PARTICLE_LIST:
         ax.errorbar(z[f:], y_f[f:]*scale_factor[yfilename], yerr=sy_f[f:]*scale_factor[yfilename], fmt="o-.", elinewidth=1.5, capsize=2.5, label="filtered", color="blue")
         ax.errorbar(z[s:], y_s[s:]*scale_factor[yfilename], yerr=sy_s[s:]*scale_factor[yfilename], fmt="o:", elinewidth=1.5, capsize=2.5, label="smoothed", color="green")
         ax.legend(fontsize=12)
-        figure.savefig(f"figures/Particle {particle_index} {yfilename}.pdf", bbox_inches="tight")
+        figure.savefig(f"../figures/TrackVisualization/Particle {particle_index} {yfilename}.pdf", bbox_inches="tight")
         plt.close(figure)

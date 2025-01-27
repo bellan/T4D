@@ -3,15 +3,11 @@
 # ~~~ Command to execute the first time
 setup() {
     # --- Creating useful directories
-    if [ ! -d "./build" ]; then
-        mkdir -p "./build"
-    fi
-    if [ ! -d "./data" ]; then
-        mkdir -p "./data"
-    fi
-    if [ ! -d "./results" ]; then
-        mkdir -p "./results"
-    fi
+    mkdir -p "./build"
+    mkdir -p "./data"
+    mkdir -p "./figures/StatisticalAnalysis"
+    mkdir -p "./figures/TrackVisualization"
+    mkdir -p "./results"
 }
 
 # ~~~ Compiling and running the code
