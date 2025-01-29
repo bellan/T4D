@@ -32,10 +32,10 @@ setup() {
 
     # --- Installing required Python packages
     echo "Installing required Python packages"
-    if [ -f "requirements.txt" ]; then
-        pip install -r requirements.txt
+    if [ -f "ProjectDesign/requirements.txt" ]; then
+        pip install -r ProjectDesign/requirements.txt
     else
-        echo "requirements.txt not found"
+        echo "ProjectDesign/requirements.txt not found"
     fi
 
     # --- Deactivating the virtual environment
