@@ -5,7 +5,6 @@
 #include <TMatrixDfwd.h>
 #include <vector>
 
-#include "DataFile.hpp"
 #include "DataGenerator.hpp"
 #include "Detector.hpp"
 #include "Tracker.hpp"
@@ -29,9 +28,9 @@ public:
   void testDetector(int particlesNumber, int detectorId);
 
 private:
+  static int runCounter;
   std::vector<Detector> detectors;
 
-  DataFile dataFile;
   Tracker tracker;
   DataGenerator dataGenerator;
 };
