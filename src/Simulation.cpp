@@ -88,7 +88,8 @@ void Simulation::runSimulation(int particlesNumber) {
   Utils::saveDataToCSV(detectors, generatedData.allParticlesTheoreticalStates,
                        generatedData.allParticlesRealStates,
                        allParticlesMeasures, allParticlesPredictedStates,
-                       allParticlesFilteredStates, allParticlesSmoothedStates);
+                       allParticlesFilteredStates, allParticlesSmoothedStates,
+                       runCounter);
   runCounter++;
 }
 
@@ -171,6 +172,7 @@ void Simulation::testDetector(int particlesNumber, int detectorId) {
   }
   tracker.resetDetectors();
   Utils::saveDataToCSV(detectors, generatedData.allParticlesRealStates,
-                       allParticlesMeasures, allParticlesSmoothedStates);
+                       allParticlesMeasures, allParticlesSmoothedStates,
+                       runCounter);
   runCounter++;
 }

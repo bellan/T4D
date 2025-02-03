@@ -3,7 +3,8 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
 particle_index = 0
-extraction = np.loadtxt(f"../results/Particle {particle_index}.csv", skiprows=2, unpack=True, delimiter=",", dtype=float)
+run_index = 0
+extraction = np.loadtxt(f"../results/Run {run_index} Particle {particle_index}.csv", skiprows=2, unpack=True, delimiter=",", dtype=float)
 z, _, _, _, _, _, _, gen_t, gen_x, gen_y, _, _, _, _, _, _, pre_t, _, pre_x, _, pre_y, _, pre_v, _, _, _, _, _, fil_t, _, fil_x, _, fil_y, _, _, _, _, _, _, _, smo_t, _, smo_x, _, smo_y, _, _, _, _, _, _, _ = extraction
 
 fig = plt.figure()

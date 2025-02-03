@@ -2,11 +2,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 PARTICLE_LIST = [0]
+RUN_INDEX = 0
 DETECTOR_SPACE_UNCERTAINTY = 1e-6;
 DETECTOR_TIME_UNCERTAINTY = 1e-11;
 
 for particle_index in PARTICLE_LIST:
-    data = np.loadtxt(f"../results/Detector test part {particle_index}.csv", skiprows=2, unpack=True, delimiter=",", dtype=float)
+    data = np.loadtxt(f"../results/Run {RUN_INDEX} Detector test part {particle_index}.csv", skiprows=2, unpack=True, delimiter=",", dtype=float)
     z, rea_t, rea_x, rea_y, rea_v, rea_xz, rea_yz, mes_t, mes_x, mes_y, smo_t, smo_st, smo_x, smo_sx, smo_y, smo_sy, smo_v, smo_sv, smo_xz, smo_sxz, smo_yz, smo_syz = data
 
     void_array = np.array([])

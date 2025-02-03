@@ -7,6 +7,7 @@
 #include <iomanip>
 #include <iostream>
 #include <stdexcept>
+#include <string>
 
 void Utils::printMatrix(TMatrixD matrix) {
   std::cout << std::scientific << std::setprecision(2);
@@ -62,7 +63,8 @@ void Utils::saveDataToCSV(
     const std::vector<std::vector<Measurement>> &measures,
     const std::vector<std::vector<MatrixStateEstimate>> &predictedStates,
     const std::vector<std::vector<MatrixStateEstimate>> &filteredStates,
-    const std::vector<std::vector<MatrixStateEstimate>> &smoothedStates) {
+    const std::vector<std::vector<MatrixStateEstimate>> &smoothedStates,
+    const int runCounter) {
 
   const bool particleLengthCheck =
       theoreticalStates.size() == realStates.size() &&
@@ -75,7 +77,8 @@ void Utils::saveDataToCSV(
 
   // Particles loop
   for (int j = 0; j < (int)theoreticalStates.size(); j++) {
-    std::string filename("../results/Particle ");
+    std::string filename =
+        "../results/Run " + std::to_string(runCounter) + " Particle ";
     filename += std::to_string(j);
     filename += ".csv";
     std::ofstream csvFile;
@@ -146,7 +149,8 @@ void Utils::saveDataToCSV(
     const std::vector<Detector> &detectors,
     const std::vector<std::vector<ParticleState>> &realStates,
     const std::vector<std::vector<Measurement>> &measures,
-    const std::vector<std::vector<MatrixStateEstimate>> &smoothedStates) {
+    const std::vector<std::vector<MatrixStateEstimate>> &smoothedStates,
+    const int runCounter) {
 
   const bool particleLengthCheck = realStates.size() == smoothedStates.size() &&
                                    realStates.size() == measures.size();
@@ -155,7 +159,7 @@ void Utils::saveDataToCSV(
 
   // Particles loop
   for (int j = 0; j < (int)realStates.size(); j++) {
-    std::string filename("../results/Detector test part ");
+    std::string filename = "../results/Run " + std::to_string(runCounter) + " Detector test part ";
     filename += std::to_string(j);
     filename += ".csv";
     std::ofstream csvFile;
@@ -196,8 +200,10 @@ void Utils::saveDataToCSV(
   }
 }
 
-void Utils::printTime(float btime, float etime){
-  std::cout << "\n Execution time: " << (int)((etime - btime)/3600) << " h " 
-            << (((int)(etime - btime)%3600)/60) << " m " 
-            << etime - btime - (int)((etime - btime)/3600)*3600 - (((int)(etime - btime)%3600)/60)*60 << " s." << std::endl;
+void Utils::printTime(float btime, float etime) {
+  std::cout << "\n Execution time: " << (int)((etime - btime) / 3600) << " h "
+            << (((int)(etime - btime) % 3600) / 60) << " m "
+            << etime - btime - (int)((etime - btime) / 3600) * 3600 -
+                   (((int)(etime - btime) % 3600) / 60) * 60
+            << " s." << std::endl;
 }

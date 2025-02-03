@@ -54,6 +54,7 @@ std::vector<Measurement> concatenateMeasures(
  * @param predictedStates the states predicted by the kalman filter.
  * @param filteredStates the states filtered by the kalman filter.
  * @param smoothedStates the states smoothed by the kalman smoother.
+ * @param runCounter the index of the run used in the name of the file.
  */
 void saveDataToCSV(
     const std::vector<Detector> &detectors,
@@ -62,7 +63,8 @@ void saveDataToCSV(
     const std::vector<std::vector<Measurement>> &measures,
     const std::vector<std::vector<MatrixStateEstimate>> &predictedStates,
     const std::vector<std::vector<MatrixStateEstimate>> &filteredStates,
-    const std::vector<std::vector<MatrixStateEstimate>> &smoothedStates);
+    const std::vector<std::vector<MatrixStateEstimate>> &smoothedStates,
+    const int runCounter = 0);
 
 /**
  * Save all the produced and filtered data to a csv file.
@@ -76,12 +78,14 @@ void saveDataToCSV(
  * @param predictedStates the states predicted by the kalman filter.
  * @param filteredStates the states filtered by the kalman filter.
  * @param smoothedStates the states smoothed by the kalman smoother.
+ * @param runCounter the index of the run used in the name of the file.
  */
 void saveDataToCSV(
     const std::vector<Detector> &detectors,
     const std::vector<std::vector<ParticleState>> &realStates,
     const std::vector<std::vector<Measurement>> &measures,
-    const std::vector<std::vector<MatrixStateEstimate>> &smoothedStates);
+    const std::vector<std::vector<MatrixStateEstimate>> &smoothedStates,
+    const int runCounter = 0);
 
 /**
  * Print elapsed time in human readable format

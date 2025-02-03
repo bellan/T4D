@@ -4,11 +4,12 @@ import matplotlib.pyplot as plt
 
 PARTICLE_LIST = range(1203, 1207)
 PARTICLE_LIST = [1200,1201,1202,1210]
+RUN_INDEX = 0
 DETECTOR_SPACE_UNCERTAINTY = 1e-6;
 DETECTOR_TIME_UNCERTAINTY = 1e-11;
 
 for particle_index in PARTICLE_LIST:
-    data = np.loadtxt(f"../results/Particle {particle_index}.csv", skiprows=2, unpack=True, delimiter=",", dtype=float)
+    data = np.loadtxt(f"../results/Run {RUN_INDEX} Particle {particle_index}.csv", skiprows=2, unpack=True, delimiter=",", dtype=float)
     z, the_t, the_x, the_y, the_v, the_xz, the_yz, rea_t, rea_x, rea_y, rea_v, rea_xz, rea_yz, mes_t, mes_x, mes_y, pre_t, pre_st, pre_x, pre_sx, pre_y, pre_sy, pre_v, pre_sv, pre_xz, pre_sxz, pre_yz, pre_syz, fil_t, fil_st, fil_x, fil_sx, fil_y, fil_sy,fil_v, fil_sv, fil_xz, fil_sxz, fil_yz, fil_syz, smo_t, smo_st, smo_x, smo_sx, smo_y, smo_sy, smo_v, smo_sv, smo_xz, smo_sxz, smo_yz, smo_syz = data
     # rea_v = 1./rea_v
     # fil_v[2:] = 1./fil_v[2:]

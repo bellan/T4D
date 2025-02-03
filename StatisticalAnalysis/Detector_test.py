@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 det_idx = 5 # NOTE: Detector indexing start at 0
 det_idx+=1 # NOTE: Because the first must be ignore since is the initial state
 PARTICLE_NUMBER = 10000
+RUN_INDEX = 0
 
 FOUNDAMENTAL_CHARGE = 1.602176634e-19;
 LIGHT_SPEED = 299792458.;
@@ -28,7 +29,7 @@ pull_mesmo_y = []
 for particle_index in range(PARTICLE_NUMBER):
     if (particle_index % 100 == 0):
         print(particle_index)
-    data = np.loadtxt(f"../results/Detector test part {particle_index}.csv", skiprows=2, unpack=True, delimiter=",", dtype=float)
+    data = np.loadtxt(f"../results/Run {RUN_INDEX} Detector test part {particle_index}.csv", skiprows=2, unpack=True, delimiter=",", dtype=float)
     z, rea_t, rea_x, rea_y, rea_v, rea_xz, rea_yz, mes_t, mes_x, mes_y, smo_t, smo_st, smo_x, smo_sx, smo_y, smo_sy, smo_v, smo_sv, smo_xz, smo_sxz, smo_yz, smo_syz = data
     mes_t_dif.append(mes_t[det_idx] - rea_t[det_idx])
     mes_x_dif.append(mes_x[det_idx] - rea_x[det_idx])

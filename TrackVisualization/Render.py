@@ -24,12 +24,13 @@ def ceiling_cylinder(center_x,center_y,center_z,radius):
 particle_shape = ["o", "v", "s", "*", "s", "+", "D"]
 particle_color = ["black", "blue", "green", "red", "orange", "purple", "brown"]
 particle_index = [1202, 1203, 1205, 1206, 1207, 1208, 1209]
+run_index = 0
 xs = []
 ys = []
 zs = []
 max = 0
 for particle in particle_index:
-    extraction = np.loadtxt(f"../results/Particle {particle}.csv", skiprows=2, unpack=True, delimiter=",", dtype=float)
+    extraction = np.loadtxt(f"../results/Run {run_index} Particle {particle}.csv", skiprows=2, unpack=True, delimiter=",", dtype=float)
     z,_,_,_,_,_,_,_,x,y,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_ = extraction
     x *= 1e3
     y *= 1e3
