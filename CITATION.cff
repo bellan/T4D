@@ -1,0 +1,23 @@
+cff-version: 1.2.0
+title: T4D
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Eleonora
+    family-names: Racca
+    email: e.racca@unito.it
+    affiliation: Università degli Studi di Torino
+    orcid: 'https://orcid.org/0000-0002-9097-5666'
+  - given-names: Andrea
+    family-names: Orione
+  - given-names: Riccardo
+    family-names: Bellan
+    email: riccardo.bellan@unito.it
+    affiliation: Università degli Studi di Torino
+repository-code: 'https://github.com/bellan/T4D/tree/main'
+abstract: >-
+  Tracking system for the new generation of silicon sensors
+  used in the CMS experiment at CERN.
+url: "https://github.com/bellan/T4D/tree/main"
