@@ -1,6 +1,10 @@
 #pragma once
 
+// Number of particles
 constexpr int NUMBER_OF_PARTICLES = 10000;
+
+// Enabling logs
+const bool LOGS = true;
 
 /**
  * PROGRAM PARAMETERS
