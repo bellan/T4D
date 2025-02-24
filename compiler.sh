@@ -58,8 +58,9 @@ compile_run() {
     echo " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
     echo " --- Compiling the code"
     cd build
-    echo " Creating make file"
+    echo " Creating make files"
     cmake ..
+    echo ""
     echo " Compiling"
 
     # Adjusting the compilation to the number of threads available    
@@ -68,7 +69,7 @@ compile_run() {
     # --- Executing the code
     echo ""
     echo " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-    echo " Executing"
+    echo " --- Executing"
     ./Tracking_simulation
 
     echo ""
@@ -83,8 +84,9 @@ compile_run_show() {
     echo " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
     echo " --- Compiling the code"
     cd build
-    echo " Creating make file"
+    echo " Creating make files"
     cmake ..
+    echo ""
     echo " Compiling"
 
     # Adjusting the compilation to the number of threads available
