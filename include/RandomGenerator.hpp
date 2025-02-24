@@ -1,6 +1,6 @@
 #pragma once
 
-#include <TRandom1.h>
+#include <TRandom3.h>
 
 class RandomGenerator {
 public:
@@ -57,5 +57,5 @@ public:
 private:
   RandomGenerator();
 
-  TRandom1 rootGenerator;
+  TRandom3 rootGenerator;
 };

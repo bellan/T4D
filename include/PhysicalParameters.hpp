@@ -4,7 +4,7 @@
 constexpr int NUMBER_OF_PARTICLES = 10000;
 
 // Enabling logs
-const bool LOGS = true;
+const bool LOGS = false;
 
 /**
  * PROGRAM PARAMETERS
@@ -36,7 +36,8 @@ constexpr int NUMBER_OF_DETECTORS = 8;
 constexpr double DISTANCE_BETWEEN_DETECTORS = 1.e-2;
 // NOTE: This parameter should be used to limit the movement along
 // the x and y axes. It can be smaller than the real dimension
-constexpr double DETECTOR_DIMENSION = 1.e-3;
+constexpr double DETECTOR_DIMENSION_WIDTH = 1.e-3;
+constexpr double DETECTOR_DIMENSION_HEIGHT = 1.e-3;
 constexpr double DETECTOR_SPACE_UNCERTAINTY = 1e-6;
 constexpr double DETECTOR_TIME_UNCERTAINTY = 1e-11;
 

@@ -24,7 +24,7 @@ vector<ParticleState> DataGenerator::generateParticleStates(Particle particle, b
   particleStates.push_back(particle.getInitialState());
 
   // For each detector, propagate the particle
-  for (Detector detector : simulationSetup.detectors) {
+  for (const Detector &detector : simulationSetup.detectors) {
     const ParticleState newState = particle.zSpaceEvolve(particleStates.back(), detector.getBottmLeftPosition().z(), multipleScattering, detector.getId());
     particleStates.push_back(newState);
   }
@@ -44,7 +44,7 @@ vector<Measurement> DataGenerator::generateParticleMeasures(vector<ParticleState
   measureVector.reserve(simulationSetup.detectors.size());
 
   // For each state in the vector of particle states, simulate the measurement
-  for (ParticleState state : particleStates) {
+  for (const ParticleState &state : particleStates) {
     // If the particle is not inside any detector, break the loop
     if (!state.detectorID)
       continue;
@@ -53,9 +53,12 @@ vector<Measurement> DataGenerator::generateParticleMeasures(vector<ParticleState
     std::optional<Measurement> measure = simulationSetup.detectors[state.detectorID.value()].measure(state);
 
     // If measurement exits the detector, print out
-    if (!measure && LOGS) {
-      const int id = state.detectorID.value();
-      cout << "Particle went out of detector line at detector " << id + 1 << " (id = " << id << ")" << endl;
+    if (!measure) {
+      if (LOGS){
+        const int id = state.detectorID.value();
+        cout << "Particle went out of detector line at detector " << id + 1 << " (id = " << id << ")" << endl;
+      }
+
       break;
     }
 
@@ -129,11 +132,11 @@ void DataGenerator::logData(const GeneratedData &generatedData) const {
 
     // Print theoretical state
     cout << theoStates[0].position.T() << "," << theoStates[0].position.X() << "," << theoStates[0].position.Y() << "," << 1. / theoStates[0].velocity.Z() << ","
-              << theoStates[0].velocity.X() / theoStates[0].velocity.Z() << ","  << theoStates[0].velocity.Y() / theoStates[0].velocity.Z() << "|";
+         << theoStates[0].velocity.X() / theoStates[0].velocity.Z() << ","  << theoStates[0].velocity.Y() / theoStates[0].velocity.Z() << "|";
 
     // Print real state (theoretical + multiple scattering)
     cout << realStates[0].position.T() << "," << realStates[0].position.X()  << "," << realStates[0].position.Y() << "," << 1. / realStates[0].velocity.Z() << ","
-              << realStates[0].velocity.X() / realStates[0].velocity.Z() << "," << realStates[0].velocity.Y() / realStates[0].velocity.Z() << endl;
+         << realStates[0].velocity.X() / realStates[0].velocity.Z() << "," << realStates[0].velocity.Y() / realStates[0].velocity.Z() << endl;
 
     // Print measurement state
     for (int i = 0; i < (int)measures.size(); i++) {
@@ -145,16 +148,12 @@ void DataGenerator::logData(const GeneratedData &generatedData) const {
       cout << the.position.Z() << " | ";
 
       // Print theoretical state
-      cout << the.position.T() << "," << the.position.X() << ","
-                << the.position.Y() << "," << 1. / the.velocity.Z() << ","
-                << the.velocity.X() / the.velocity.Z() << ","
-                << the.velocity.Y() / the.velocity.Z() << "|";
+      cout << the.position.T() << "," << the.position.X() << "," << the.position.Y() << "," << 1. / the.velocity.Z() << ","
+           << the.velocity.X() / the.velocity.Z() << "," << the.velocity.Y() / the.velocity.Z() << "|";
 
       // Print real state (theoretical + multiple scattering)
-      cout << rea.position.T() << "," << rea.position.X() << ","
-                << rea.position.Y() << "," << 1. / rea.velocity.Z() << ","
-                << rea.velocity.X() / rea.velocity.Z() << ","
-                << rea.velocity.Y() / rea.velocity.Z() << "|";
+      cout << rea.position.T() << "," << rea.position.X() << "," << rea.position.Y() << "," << 1. / rea.velocity.Z() << ","
+           << rea.velocity.X() / rea.velocity.Z() << "," << rea.velocity.Y() / rea.velocity.Z() << "|";
 
       // Print measurement
       cout << meas.t << "," << meas.x << "," << meas.y << endl;
