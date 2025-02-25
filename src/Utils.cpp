@@ -99,7 +99,7 @@ void Utils::saveDataToCSV(const vector<Detector> &detectors, const vector<vector
 
   // Particles loop
   for (int j = 0; j < (int)theoreticalStates.size(); j++) {
-    string filename = "../results/Run " + std::to_string(runCounter) + " Particle " std::to_string(j) ".csv";
+    string filename = "../results/Run " + std::to_string(runCounter) + " Particle " + std::to_string(j) + ".csv";
     std::ofstream csvFile;
     
     // Write header to the CSV file
@@ -188,7 +188,7 @@ void Utils::saveDataToCSV(const vector<Detector> &detectors, const vector<vector
   // Particles loop
   for (int j = 0; j < (int)realStates.size(); j++) {
     // File name
-    string filename = "../results/Run " + std::to_string(runCounter) + " Detector test part " std::to_string(j) ".csv";
+    string filename = "../results/Run " + std::to_string(runCounter) + " Detector test part " + std::to_string(j) + ".csv";
     std::ofstream csvFile;
     
     // Write header to the CSV file
