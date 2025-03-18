@@ -32,5 +32,5 @@ class ParticleState : public TObject {
     std::optional<int> detectorID = std::nullopt;
     //int detectorID = -1;
     
-  //ClassDef(ParticleState, 1)
+  ClassDef(ParticleState, 1)
 };

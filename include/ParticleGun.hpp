@@ -59,5 +59,5 @@ private:
 
   double maxColatitude;
 
-  //ClassDef(ParticleGun, 1)
+  ClassDef(ParticleGun, 1)
 };

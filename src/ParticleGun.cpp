@@ -11,6 +11,8 @@
 #include "PhysicalParameters.hpp"
 #include "RandomGenerator.hpp"
 
+ClassImp(ParticleGun);
+
 
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
