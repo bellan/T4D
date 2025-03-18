@@ -8,6 +8,7 @@
 #include "PhysicalParameters.hpp"
 
 
+SetupFactory::~SetupFactory() {}
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // generateExperiment

@@ -1,18 +1,19 @@
 #pragma once
 
-#include <TRandom1.h>
+#include <TObject.h>
 #include <TVector3.h>
 #include <vector>
 
 #include "Detector.hpp"
 #include "Particle.hpp"
+#include "Structs.hpp"
 
 /**
  * The particle generator.
  *
  * It generates the particle to be shot.
  */
-class ParticleGun {
+class ParticleGun : public TObject {
 public:
   /**
    * Default constructor
@@ -34,6 +35,8 @@ public:
    */
   ParticleGun(TVector3 position, const std::vector<Detector> &detectors, double timeOfEmission = 0.);
 
+  virtual ~ParticleGun();
+
   void setMaxColatitude(double newValue) { maxColatitude = newValue; }
   void setPosition(TVector3 newPosition) { position = newPosition; }
   double getMaxColatitude() const { return maxColatitude; }
@@ -48,10 +51,13 @@ public:
    * @return the particle generated
    */
   Particle generateParticle();
+  Particle generateParticle(unsigned int ID);
 
 private:
   TVector3 position;
   double timeOfEmission;
 
   double maxColatitude;
+
+  //ClassDef(ParticleGun, 1)
 };

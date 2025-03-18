@@ -1,11 +1,14 @@
 #pragma once
 
-#include "MeasuresAndStates.hpp"
+#include "Structs.hpp"
+#include "ParticleState.hpp"
 
 #include <TLorentzVector.h>
 #include <TMatrixD.h>
 #include <TVector3.h>
 #include <optional>
+
+struct Measurement;
 
 /**
  * The detector class.
@@ -21,6 +24,11 @@ public:
    * the z-axis i.d. position=(0,0,z))
    */
   Detector(double zPosition, double width, double height);
+  Detector(double zPosition, double width, double height, int ID);
+
+  Detector(const Detector&) = default;
+
+  virtual ~Detector();
 
   int getId() const { return id; }
   TVector3 getBottmLeftPosition() const { return bottomLeftPosition; }

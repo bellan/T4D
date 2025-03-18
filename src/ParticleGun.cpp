@@ -62,10 +62,11 @@ ParticleGun::ParticleGun(TVector3 position, const std::vector<Detector> &detecto
   maxColatitude = thetaMax;
 }
 
+ParticleGun::~ParticleGun() {}
 
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// generateParticle
+// generateParticle - Original
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // TODO: Change to a more accurate handling of the approximation
 Particle ParticleGun::generateParticle() {
@@ -88,7 +89,38 @@ Particle ParticleGun::generateParticle() {
   const double charge = FOUNDAMENTAL_CHARGE;
 
   // Generation of the particle
-  const Particle newParticle({position, timeOfEmission}, velocity, mass, charge);
+  const Particle newParticle({position, timeOfEmission}, velocity, mass, charge, 4.29e9);
+
+  return newParticle;
+}
+
+
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// generateParticle - Eleonora
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// TODO: Change to a more accurate handling of the approximation
+Particle ParticleGun::generateParticle(unsigned int ID) {
+  // Getting the random generator instance
+  RandomGenerator &randomGenerator = RandomGenerator::getInstance();
+
+  // Generation of particle's direction
+  const double phy = randomGenerator.generateLongitude(0., 2. * M_PI);
+  const double theta = randomGenerator.generateColatitude(0., maxColatitude);
+
+  // Generation of particle's velocity
+  const double vx = sin(theta) * cos(phy);
+  const double vy = sin(theta) * sin(phy);
+  const double vz = cos(theta);
+  const double speed = randomGenerator.generateUniform(MIN_BETA, MAX_BETA) * LIGHT_SPEED;
+  const TVector3 velocity(speed * TVector3{vx, vy, vz});
+
+  // Generation of particle's mas and charge
+  const double mass = randomGenerator.generateUniform(MIN_PARTICLE_MASS, MAX_PARTICLE_MASS);
+  const double charge = 1 * FOUNDAMENTAL_CHARGE;
+
+  // Generation of the particle
+  const Particle newParticle({position, timeOfEmission}, velocity, mass, charge, ID);
 
   return newParticle;
 }

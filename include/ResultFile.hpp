@@ -1,7 +1,8 @@
 #pragma once
 
 #include "Detector.hpp"
-#include "MeasuresAndStates.hpp"
+#include "Structs.hpp"
+#include "ParticleState.hpp"
 
 #include <TFile.h>
 #include <TTree.h>
@@ -23,7 +24,7 @@ public:
    *
    * Saves the tree in the file before closing.
    */
-  ~ResultFile();
+  virtual ~ResultFile();
 
   /**
    * Save a single measuremet to the file
@@ -66,4 +67,5 @@ private:
 
   TFile *rootFile;
   TTree *dataTree;
+
 };

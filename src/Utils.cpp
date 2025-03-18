@@ -8,7 +8,8 @@
 // Custom classes
 #include "Utils.hpp"
 #include "Detector.hpp"
-#include "MeasuresAndStates.hpp"
+#include "Structs.hpp"
+#include "ParticleState.hpp"
 
 // Namespaces
 using namespace std;

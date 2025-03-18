@@ -1,5 +1,6 @@
 #include "ResultFile.hpp"
-#include "MeasuresAndStates.hpp"
+#include "Structs.hpp"
+#include "ParticleState.hpp"
 
 #include <TFile.h>
 #include <TTree.h>

@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 # ~~~ Global variables
 # Path to python virtual environment
@@ -64,7 +65,8 @@ compile_run() {
     echo " Compiling"
 
     # Adjusting the compilation to the number of threads available    
-    make -j $num_threads
+    #make -j $num_threads
+    make
 
     # --- Executing the code
     echo ""

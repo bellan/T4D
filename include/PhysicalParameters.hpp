@@ -1,6 +1,8 @@
 #pragma once
 
-// Number of particles
+// Number of events
+constexpr int NUMBER_OF_EVENTS = 1;
+// Number of particles (must be less than 4.2e9)
 constexpr int NUMBER_OF_PARTICLES = 10000;
 
 // Enabling logs
@@ -9,7 +11,7 @@ const bool LOGS = false;
 /**
  * PROGRAM PARAMETERS
  * NOTE: this paramater should be chosen such that the standard detector
- * uncertainty is much smaller but wont be erased by this (6 orders of magnitude
+ * uncertainty is much smaller but won't be erased by this (6 orders of magnitude
  * bigger should be ok)
  */
 constexpr double VERY_HIGH_TIME_ERROR = 1e-6;
@@ -23,27 +25,24 @@ constexpr double FOUNDAMENTAL_CHARGE = 1.602176634e-19;
 constexpr double LIGHT_SPEED = 299792458.;
 
 // PARTICLE CONSTANTS
-constexpr double MIN_PARTICLE_MASS =
-    (0.5e6 * FOUNDAMENTAL_CHARGE) / (LIGHT_SPEED * LIGHT_SPEED);
-constexpr double MAX_PARTICLE_MASS =
-    (300e6 * FOUNDAMENTAL_CHARGE) / (LIGHT_SPEED * LIGHT_SPEED);
+constexpr double MIN_PARTICLE_MASS = (0.5e6 * FOUNDAMENTAL_CHARGE) / (LIGHT_SPEED * LIGHT_SPEED);
+constexpr double MAX_PARTICLE_MASS = (300e6 * FOUNDAMENTAL_CHARGE) / (LIGHT_SPEED * LIGHT_SPEED);
 
 constexpr double MIN_BETA = 0.8;
 constexpr double MAX_BETA = 1.;
 
 // DETECTOR PARAMETERS
+// NOTE: DETECTOR_DIMENSION_WIDTH and _HEIGHT should be used to limit the movement along
+// the x and y axes. It can be smaller than the real dimensions.
 constexpr int NUMBER_OF_DETECTORS = 8;
 constexpr double DISTANCE_BETWEEN_DETECTORS = 1.e-2;
-// NOTE: This parameter should be used to limit the movement along
-// the x and y axes. It can be smaller than the real dimension
 constexpr double DETECTOR_DIMENSION_WIDTH = 1.e-3;
 constexpr double DETECTOR_DIMENSION_HEIGHT = 1.e-3;
 constexpr double DETECTOR_SPACE_UNCERTAINTY = 1e-6;
 constexpr double DETECTOR_TIME_UNCERTAINTY = 1e-11;
 
 // GUN PARAMETERS (not used in this version)
-constexpr double MIN_TIME_BETWEEN_PARTICLE =
-    (NUMBER_OF_DETECTORS * DISTANCE_BETWEEN_DETECTORS * 1.1) / LIGHT_SPEED;
+constexpr double MIN_TIME_BETWEEN_PARTICLE = (NUMBER_OF_DETECTORS * DISTANCE_BETWEEN_DETECTORS * 1.1) / LIGHT_SPEED;
 
 /**
  * EVOLUTION PARAMETERS

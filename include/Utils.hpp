@@ -1,7 +1,8 @@
 #pragma once
 
 #include "Detector.hpp"
-#include "MeasuresAndStates.hpp"
+#include "Structs.hpp"
+#include "ParticleState.hpp"
 
 #include <TMatrixD.h>
 
@@ -31,16 +32,14 @@ void printMatrix(TMatrixD matrix);
  *
  * @return a vector of vector each one representing a single particle
  */
-std::vector<std::vector<Measurement>>
-separateMeasuresInParticles(const std::vector<Measurement> &allMeasures);
+std::vector<std::vector<Measurement>> separateMeasuresInParticles(const std::vector<Measurement> &allMeasures);
 
 /**
  * Concatenates a vector of vectors into one single vector.
  *
  * @param separateMeasures the vector of vectors to be concatenated.
  */
-std::vector<Measurement> concatenateMeasures(
-    const std::vector<std::vector<Measurement>> &separateMeasures);
+std::vector<Measurement> concatenateMeasures(const std::vector<std::vector<Measurement>> &separateMeasures);
 
 /**
  * Save all the produced and filtered data to a csv file.

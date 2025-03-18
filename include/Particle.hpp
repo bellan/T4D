@@ -1,9 +1,10 @@
 #pragma once
 
-#include "MeasuresAndStates.hpp"
+#include "ParticleState.hpp"
 #include <TLorentzVector.h>
 #include <TMatrixD.h>
 #include <TVector3.h>
+
 
 /**
  * The particle class.
@@ -13,6 +14,9 @@
  */
 class Particle {
 public:
+  typedef unsigned int id_t;
+  static constexpr id_t INVALID_ID = 4294967295;
+
   /**
    * The constructor
    *
@@ -24,8 +28,10 @@ public:
    * @param mass the mass of the particle.
    * @param charge the charge of the particle.
    */
-  Particle(TLorentzVector initialPosition, TVector3 velocity, double mass,
-           double charge = 0.);
+  Particle(TLorentzVector initialPosition, TVector3 velocity, double mass, double charge = 0.);
+  Particle(TLorentzVector initialPosition, TVector3 velocity, double mass, double charge = 0., id_t ID = INVALID_ID);
+
+  virtual ~Particle();
 
   ParticleState getInitialState() const { return initialState; }
 
@@ -40,14 +46,14 @@ public:
    *
    * @return the new state after the evolution.
    */
-  ParticleState
-  zSpaceEvolve(ParticleState preaviousState, double finalZ,
-               bool multipleScattering = true,
-               std::optional<int> detectorId = std::nullopt) const;
+  //ParticleState zSpaceEvolve(ParticleState preaviousState, double finalZ, bool multipleScattering = true, std::optional<int> detectorId = std::nullopt) const;
+  ParticleState zSpaceEvolve(ParticleState preaviousState, double finalZ, bool multipleScattering = true, int detectorId = -1) const;
 
 private:
   ParticleState initialState;
 
   const double mass;
   const double charge;
+  const id_t ID;
+
 };

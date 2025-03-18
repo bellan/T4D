@@ -5,12 +5,15 @@
 // Custom classes
 #include "DataGenerator.hpp"
 #include "PhysicalParameters.hpp"
-#include "MeasuresAndStates.hpp"
+#include "Structs.hpp"
+#include "ParticleState.hpp"
 
 // Namespaces
 using namespace std;
 
 
+
+DataGenerator::~DataGenerator() {}
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // generateParticleStates
@@ -43,6 +46,7 @@ vector<Measurement> DataGenerator::generateParticleMeasures(vector<ParticleState
   vector<Measurement> measureVector;
   measureVector.reserve(simulationSetup.detectors.size());
 
+  /* THIS HAS PROBLEMS WITH ELEONORA'S CODE -> commented, do something about it
   // For each state in the vector of particle states, simulate the measurement
   for (const ParticleState &state : particleStates) {
     // If the particle is not inside any detector, break the loop
@@ -64,6 +68,7 @@ vector<Measurement> DataGenerator::generateParticleMeasures(vector<ParticleState
 
     measureVector.push_back(measure.value());
   }
+    */
 
   // Return all the measurements of the particle
   return measureVector;

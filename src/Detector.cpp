@@ -6,7 +6,8 @@
 
 // Custom classes
 #include "Detector.hpp"
-#include "MeasuresAndStates.hpp"
+#include "Structs.hpp"
+#include "ParticleState.hpp"
 #include "PhysicalParameters.hpp"
 #include "RandomGenerator.hpp"
 
@@ -31,6 +32,19 @@ Detector::Detector(double zPosition, double width, double height)
 
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Detector (constructor)
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Detector::Detector(double zPosition, double width, double height, int ID)
+    : id{ID}, width{width}, height{height}, bottomLeftPosition{-width / 2., -height / 2., zPosition} {
+  counter++;
+}
+
+
+Detector::~Detector(){}
+
+
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Measure - from TLotentzVector
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 std::optional<Measurement> Detector::measure(TLorentzVector particlePosition) const {
@@ -50,6 +64,7 @@ std::optional<Measurement> Detector::measure(TLorentzVector particlePosition) co
   const double measuredX = randomGenerator.generateGaussian(x, DETECTOR_SPACE_UNCERTAINTY);
   const double measuredY = randomGenerator.generateGaussian(y, DETECTOR_SPACE_UNCERTAINTY);
 
+  // Test to see if a time measurement of 0 breaks everything
   if(id == 5){
     measuredT = 0.0;
   }

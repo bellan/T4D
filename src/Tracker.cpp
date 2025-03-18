@@ -6,7 +6,8 @@
 
 // Custom classes
 #include "Tracker.hpp"
-#include "MeasuresAndStates.hpp"
+#include "Structs.hpp"
+#include "ParticleState.hpp"
 #include "PhysicalParameters.hpp"
 #include "Utils.hpp"
 
@@ -39,6 +40,7 @@ static const TMatrixD initialStateError(6, 6, initialStateSData);
 static const MatrixStateEstimate initialState{initialStateValue, initialStateError};
 
 
+Tracker::~Tracker() {}
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // estimateNextState

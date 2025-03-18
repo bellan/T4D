@@ -6,24 +6,29 @@
 
 // Custom classes
 #include "Particle.hpp"
-#include "MeasuresAndStates.hpp"
 #include "PhysicalParameters.hpp"
 #include "RandomGenerator.hpp"
-
 
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Particle (constructor)
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Particle::Particle(const TLorentzVector initialPosition, const TVector3 initialVelocity, const double mass, const double charge)
-    : initialState{initialPosition, initialVelocity}, mass{mass}, charge{charge} {}
+    : initialState{initialPosition, initialVelocity, 0}, mass{mass}, charge{charge}, ID{Particle::INVALID_ID} {}
 
 
+Particle::Particle(const TLorentzVector initialPosition, const TVector3 initialVelocity, const double mass, const double charge, id_t ID)
+    : initialState{initialPosition, initialVelocity, 0}, mass{mass}, charge{charge}, ID{ID} {}
+
+
+
+Particle::~Particle() {}
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // zSpaceEvolve
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-ParticleState Particle::zSpaceEvolve(ParticleState preaviousState, double finalZ, bool multipleScattering, std::optional<int> detectorId) const {
+//ParticleState Particle::zSpaceEvolve(ParticleState preaviousState, double finalZ, bool multipleScattering, std::optional<int> detectorId) const {
+ParticleState Particle::zSpaceEvolve(ParticleState preaviousState, double finalZ, bool multipleScattering, int detectorId) const {
   // Starting position and velocity
   const TLorentzVector lastPosition = preaviousState.position;
   const TVector3 lastVelocity = preaviousState.velocity;

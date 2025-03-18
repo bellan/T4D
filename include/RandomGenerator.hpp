@@ -11,6 +11,8 @@ public:
    */
   static RandomGenerator &getInstance();
 
+  virtual ~RandomGenerator();
+
   RandomGenerator(const RandomGenerator &) = delete;
   RandomGenerator(const RandomGenerator &&) = delete;
   RandomGenerator operator=(const RandomGenerator &) = delete;
@@ -58,4 +60,5 @@ private:
   RandomGenerator();
 
   TRandom3 rootGenerator;
+
 };

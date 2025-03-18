@@ -15,15 +15,26 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 list(APPEND CMAKE_PREFIX_PATH $ENV{ROOTSYS})
 find_package(ROOT 6.30 REQUIRED COMPONENTS)
 
-# --- Flags
+# --- Integrating ROOT's functions and macros (e.g. ROOT_GENERATE_DICTIONARY)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} `root-config --cflags --ldflags`")
+include(${ROOT_USE_FILE})
+
+# --- Including Python libraries
+#find_package(PythonLibs REQUIRED)
+#include_directories(${PYTHON_INCLUDE_DIRS})
 
 # --- Include directories
+#message("Include dirs = " ${PROJECT_SOURCE_DIR})
 include_directories(${PROJECT_SOURCE_DIR}/include)
 include(${ROOT_USE_FILE})
 
 # --- Source directories
 file(GLOB sources ${PROJECT_SOURCE_DIR}/src/*.cpp)
+
+# --- Dictionary
+#set(EventDF_HEADERS include/*.hpp)
+#set(EventDF_LINKDEF include/STDToolsLinkDef.h)
+#ROOT_GENERATE_DICTIONARY(G_T4D_Dictionary "${EventDF_HEADERS}" LINKDEF "${EventDF_LINKDEF}")
 
 # --- Compiler options
 add_compile_options(-Wall -Wextra -Wpedantic)

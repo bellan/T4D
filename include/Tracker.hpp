@@ -1,7 +1,8 @@
 #pragma once
 
 #include "Detector.hpp"
-#include "MeasuresAndStates.hpp"
+#include "Structs.hpp"
+#include "ParticleState.hpp"
 
 #include <TMatrixD.h>
 #include <vector>
@@ -20,6 +21,8 @@ public:
   Tracker(){};
   Tracker(const std::vector<Detector> &detectors) : allDetectors(detectors), consideredDetectors(detectors) {}
 
+  virtual ~Tracker();
+
   void ignoreDetector(int detectorIndex) { consideredDetectors.erase(consideredDetectors.begin() + detectorIndex); }
   void resetDetectors() { consideredDetectors = allDetectors; }
 
@@ -33,9 +36,7 @@ public:
    * @param deltaZ the distance covered by the particle.
    * @return the estimated new state of the particle.
    */
-  MatrixStateEstimate
-  estimateNextState(const MatrixStateEstimate &preaviousState,
-                    double deltaZ) const;
+  MatrixStateEstimate estimateNextState(const MatrixStateEstimate &preaviousState, double deltaZ) const;
 
   /**
    * Apply the Kalman filter
@@ -83,4 +84,5 @@ private:
       const std::vector<Measurement> &measures,
       std::vector<MatrixStateEstimate> &predictedStates,
       std::vector<MatrixStateEstimate> &filteredStates) const;
+
 };

@@ -15,6 +15,8 @@ class SetupFactory {
 public:
   SetupFactory() {}
 
+  virtual ~SetupFactory();
+
   /**
    * Generate the simulation setup according to values specified in
    * Phisical_parameters.hpp
@@ -22,4 +24,5 @@ public:
    * @return the simulation setup generated
    */
   SimulationSetup generateExperiment() const;
+
 };

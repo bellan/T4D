@@ -1,6 +1,6 @@
 #pragma once
 
-#include "MeasuresAndStates.hpp"
+#include "Structs.hpp"
 
 #include <TFile.h>
 #include <TTree.h>
@@ -22,7 +22,7 @@ public:
    *
    * Saves the tree in the file before closing.
    */
-  ~DataFile();
+  virtual ~DataFile();
 
   /**
    * Save a single measuremet to the file.
@@ -56,4 +56,5 @@ private:
 
   TFile *rootFile;
   TTree *dataTree;
+
 };

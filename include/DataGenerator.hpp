@@ -1,22 +1,19 @@
 #pragma once
 
-#include "MeasuresAndStates.hpp"
+#include "Structs.hpp"
+#include "ParticleState.hpp"
 #include "Particle.hpp"
 #include "SetupFactory.hpp"
+#include "Structs.hpp"
 
 #include <vector>
-
-struct GeneratedData {
-  std::vector<std::vector<ParticleState>> allParticlesTheoreticalStates;
-  std::vector<std::vector<ParticleState>> allParticlesRealStates;
-  std::vector<std::vector<Measurement>> allParticlesMeasures;
-};
 
 class DataGenerator {
 public:
   DataGenerator(){};
-  DataGenerator(SimulationSetup simulationSetup)
-      : simulationSetup(simulationSetup){};
+  DataGenerator(SimulationSetup simulationSetup) : simulationSetup(simulationSetup){};
+
+  virtual ~DataGenerator();
 
   Particle generateParticle() {
     return simulationSetup.particleGun.generateParticle();
@@ -29,9 +26,7 @@ public:
    * @param multipleScattering whether to use multiple scattering.
    * @return a vector containing the particles.
    */
-  std::vector<ParticleState>
-  generateParticleStates(Particle particle,
-                         bool multipleScattering = true) const;
+  std::vector<ParticleState> generateParticleStates(Particle particle, bool multipleScattering = true) const;
   /**
    * Generate the measures from the states.
    *
@@ -42,8 +37,7 @@ public:
    * @param particleStates the states to be measured
    * @return a vector containing the measurements generated
    */
-  std::vector<Measurement>
-  generateParticleMeasures(std::vector<ParticleState> &ParticleStates) const;
+  std::vector<Measurement> generateParticleMeasures(std::vector<ParticleState> &ParticleStates) const;
 
   /**
    * Generate all the data for a given number of particles
@@ -53,11 +47,11 @@ public:
    * @param useMultipleScattering whether or not to use multiple scattering during the evolution
    * @return a vector containing all the data of all the particles
    */
-  GeneratedData generateAllData(int numberOfParticles, bool logging = false,
-                                bool useMultipleScattering = true);
+  GeneratedData generateAllData(int numberOfParticles, bool logging = false, bool useMultipleScattering = true);
 
 private:
   SimulationSetup simulationSetup;
 
   void logData(const GeneratedData &generatedData) const;
+
 };
