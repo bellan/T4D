@@ -32,8 +32,8 @@ include(${ROOT_USE_FILE})
 file(GLOB sources ${PROJECT_SOURCE_DIR}/src/*.cpp)
 
 # --- Dictionary
-set(EventDF_HEADERS include/*.hpp)
-set(EventDF_LINKDEF include/STDToolsLinkDef.h)
+set(EventDF_HEADERS ${PROJECT_SOURCE_DIR}/include/*.hpp)
+set(EventDF_LINKDEF ${PROJECT_SOURCE_DIR}/include/STDToolsLinkDef.h)
 ROOT_GENERATE_DICTIONARY(G_T4D_Dictionary "${EventDF_HEADERS}" LINKDEF "${EventDF_LINKDEF}")
 
 # --- Compiler options
