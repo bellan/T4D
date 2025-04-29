@@ -6,16 +6,6 @@
 #include <TVector3.h>
 #include <TObject.h>
 
-/**
- * The measuremnt struct.
- * Destructor for the ParticleState class.
- *
- * It contains the data produced by the detector.
- * This destructor is responsible for cleaning up any resources allocated by the class.
- * Since the class inherits from TObject, it is important to call the base class destructor.
- *
- * @return void
- */
 
 class ParticleState : public TObject {
   public:

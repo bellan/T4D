@@ -15,7 +15,7 @@
 // --- Andrea's structs
 
 /**
- * The measuremnt struct.
+ * The measuremnt struct. TO BE REMOVED after code separation
  *
  * It contains the data produced by the detector.
  */
@@ -27,6 +27,7 @@ struct Measurement {
 };
 
 
+// TO BE REMOVED after code separation
 struct GeneratedData {
   std::vector<std::vector<ParticleState>> allParticlesTheoreticalStates;
   std::vector<std::vector<ParticleState>> allParticlesRealStates;
