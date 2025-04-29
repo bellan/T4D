@@ -42,6 +42,5 @@ struct MatrixStateEstimate {
 public:
   TMatrixD value;
   TMatrixD uncertainty;
-  std::optional<int> detectorID = std::nullopt;
-  //int detectorID = -1;
+  int detectorID = -2;
 };

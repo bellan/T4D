@@ -14,11 +14,15 @@
 // Particle (constructor)
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Particle::Particle(const TLorentzVector initialPosition, const TVector3 initialVelocity, const double mass, const double charge)
-    : initialState{initialPosition, initialVelocity, 0}, mass{mass}, charge{charge}, ID{Particle::INVALID_ID} {}
+    : initialState{initialPosition, initialVelocity, -1, Particle::INVALID_ID}, mass{mass}, charge{charge}, ID{Particle::INVALID_ID} {}
 
 
 Particle::Particle(const TLorentzVector initialPosition, const TVector3 initialVelocity, const double mass, const double charge, id_t ID)
-    : initialState{initialPosition, initialVelocity, 0}, mass{mass}, charge{charge}, ID{ID} {}
+    : initialState{initialPosition, initialVelocity, -1, ID}, mass{mass}, charge{charge}, ID{ID} {}
+
+
+Particle::Particle(const ParticleState& state)
+    : initialState(state), mass(0.0), charge(0.0), ID(state.particleID) {}
 
 
 
@@ -51,7 +55,7 @@ ParticleState Particle::zSpaceEvolve(ParticleState preaviousState, double finalZ
     const TLorentzVector newPosition{lastPosition.X() + lastXZ * deltaZ, lastPosition.Y() + lastYZ * deltaZ, finalZ, lastPosition.T() + deltaT};
     const TVector3 newVelocity{lastXZ * lastVZ, lastYZ * lastVZ, lastVZ};
 
-    return ParticleState{newPosition, newVelocity, detectorId};
+    return ParticleState{newPosition, newVelocity, detectorId, preaviousState.particleID};
   }
   else{
     // Getting the random generator instance
@@ -72,6 +76,6 @@ ParticleState Particle::zSpaceEvolve(ParticleState preaviousState, double finalZ
     double newVZ = lastVZ + variationVZ;
     const TVector3 newVelocity{(lastXZ + variationXZ) * newVZ, (lastYZ + variationYZ) * newVZ, newVZ};
 
-    return ParticleState{newPosition, newVelocity, detectorId};
+    return ParticleState{newPosition, newVelocity, detectorId, preaviousState.particleID};
   }
 }

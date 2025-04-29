@@ -30,6 +30,7 @@ public:
    */
   Particle(TLorentzVector initialPosition, TVector3 velocity, double mass, double charge = 0.);
   Particle(TLorentzVector initialPosition, TVector3 velocity, double mass, double charge = 0., id_t ID = INVALID_ID);
+  Particle(const ParticleState& state);
 
   virtual ~Particle();
 
@@ -55,5 +56,4 @@ private:
   const double mass;
   const double charge;
   const id_t ID;
-
 };
