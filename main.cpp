@@ -21,7 +21,7 @@ int main() {
   cout << " Execution begins at: " << ctime(&time_now) << endl;
 
   
-  // --- Timing variables definition
+  // --- Timers definition
   TStopwatch time_execution;
   TStopwatch time_generation;
   TStopwatch time_reconstruction;
@@ -34,46 +34,44 @@ int main() {
   // --- Experiment
   cout << " --- Creating experiment" << endl;
   // Detectors
-  vector<Detector> detectors_ele;
-  detectors_ele.reserve(NUMBER_OF_DETECTORS);
+  vector<Detector> detectors;
+  detectors.reserve(NUMBER_OF_DETECTORS);
 
   for (int i = 1; i < NUMBER_OF_DETECTORS + 1; i++) {
-    detectors_ele.push_back(Detector(i * DISTANCE_BETWEEN_DETECTORS, DETECTOR_DIMENSION_WIDTH, DETECTOR_DIMENSION_HEIGHT, i));
+    detectors.push_back(Detector(i * DISTANCE_BETWEEN_DETECTORS, DETECTOR_DIMENSION_WIDTH, DETECTOR_DIMENSION_HEIGHT, i));
   }
 
-  // Creation of the simulation & output file
-  Simulation simu(detectors_ele);
+  // Creation of the simulation & its output file
+  Simulation simu(detectors);
 
  
   // --- Generation
-  cout << " --- Begining generation" << endl;
+  cout << " --- Begining the generation of the particles" << endl;
   time_generation.Start();
-  time_now = chrono::system_clock::to_time_t(chrono::system_clock::now());
   bool bool_gen = simu.Generation();
   //simulation.runSimulation(NUMBER_OF_PARTICLES);
-
-  cout << "Generation: " << bool_gen << endl;
+  cout << " Generation finished: " << bool_gen << " (1 means success)" << endl;
 
   time_generation.Stop();
 
-  /*
+  
   // --- Simulation of detector response
-  cout << "\n --- Begining reconstruction" << endl;
+  cout << "\n --- Begining the simulation of detector response" << endl;
   time_reconstruction.Start();
-  auto reconstruction = Reconstruction();
-  reconstruction.runReconstruction(NUMBER_OF_PARTICLES);
+  bool bool_dr = simu.DetectorResponse();
+  cout << " Detector response finished: " << bool_dr << " (1 means success)" << endl;
 
   time_reconstruction.Stop();
 
-
+  
   // --- Track reconstruction
-  cout << "\n --- Beginning tracking" << endl;
+  //cout << "\n --- Beginning tracking" << endl;
   time_tracking.Start();
-  auto tracker = Filter();
-  tracker.runFilter(NUMBER_OF_PARTICLES);
+  //auto tracker = Filter();
+  //tracker.runFilter(NUMBER_OF_PARTICLES);
 
   time_tracking.Stop();
-  */
+  
 
 
   // --- Simulation of layers testing

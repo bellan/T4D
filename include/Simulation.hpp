@@ -55,7 +55,7 @@ public:
    * 
    * @param detectors the experiments detector.
    */
-  bool DetectorResponse(std::vector<Detector> detectors);
+  bool DetectorResponse();
 
   /**
    * The main simulation function.
