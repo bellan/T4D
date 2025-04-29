@@ -56,7 +56,8 @@ setup() {
 # ~~~ End message
 end_message() {
     echo " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-    echo " The execution of the script has ended successfully. Please read the\n previous prinouts to get information about the status of the simulation."
+    echo " The execution of the script has ended successfully. Please read the"
+    echo " previous printouts to get information about the status of the simulation."
     echo " Thank you for your patience!"
     echo " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 }
