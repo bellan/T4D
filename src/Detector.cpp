@@ -7,6 +7,7 @@
 // Custom classes
 #include "Detector.hpp"
 #include "Structs.hpp"
+#include "Measure.hpp"
 #include "ParticleState.hpp"
 #include "PhysicalParameters.hpp"
 #include "RandomGenerator.hpp"
@@ -74,21 +75,52 @@ std::optional<Measurement> Detector::measure(TLorentzVector particlePosition) co
 }
 
 
+std::optional<Measure> Detector::measure2(TLorentzVector position, unsigned int particleID) const {
+  // Measurement of the generated particle to be measured
+  const double x = position.X();
+  const double y = position.Y();
+  const double z = position.Z();
+  const double deltaZ = position.Z() - this->bottomLeftPosition.z();
+
+  // Geometrical constraints for the particle to be in the detector
+  const bool xConstrain = x > bottomLeftPosition.x() && x < bottomLeftPosition.x() + width;
+  const bool yConstrain = y > bottomLeftPosition.y() && y < bottomLeftPosition.y() + height;
+  const bool zConstrain = deltaZ == 0;
+
+  // Gaussian smearing based on detector uncertainty
+  RandomGenerator &randomGenerator = RandomGenerator::getInstance();
+  double measuredT = randomGenerator.generateGaussian(position.T(), DETECTOR_TIME_UNCERTAINTY);
+  const double measuredX = randomGenerator.generateGaussian(x, DETECTOR_SPACE_UNCERTAINTY);
+  const double measuredY = randomGenerator.generateGaussian(y, DETECTOR_SPACE_UNCERTAINTY);
+
+  // Test to see if a time measurement of 0 breaks everything
+  if(id == 5){
+    measuredT = 0.0;
+  }
+
+  // Creating the LorentzVector
+  TLorentzVector measuredPosition(measuredX, measuredY, z, measuredT);
+
+  // Return the measurement if it satisfies the geometrical constraints
+  return (xConstrain && yConstrain && zConstrain) ? std::optional<Measure>{Measure(measuredPosition, id, particleID)} : std::nullopt;
+}
+
+
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Measure - from TMatrixD
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-std::optional<Measurement> Detector::measure(TMatrixD particleState) const {
+std::optional<Measurement> Detector::measure(TMatrixD state) const {
   // Measurement of the generated particle to be measured
-  const double t = particleState(0, 0);
-  const double x = particleState(1, 0);
-  const double y = particleState(2, 0);
+  const double t = state(0, 0);
+  const double x = state(1, 0);
+  const double y = state(2, 0);
 
   // Building the TLorentzVector
-  const TLorentzVector particlePosition{x, y, this->bottomLeftPosition.z(), t};
+  const TLorentzVector position{x, y, this->bottomLeftPosition.z(), t};
 
   // Calling the other "measure" function to get the measurement
-  return measure(particlePosition);
+  return measure(position);
 }
 
 
@@ -96,9 +128,14 @@ std::optional<Measurement> Detector::measure(TMatrixD particleState) const {
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Measure - from ParticleState
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-std::optional<Measurement> Detector::measure(ParticleState particleState) const {
+std::optional<Measurement> Detector::measure(ParticleState state) const {
   // Calling the other "measure" function to get the measurement
-  return measure(particleState.position);
+  return measure(state.position);
+}
+
+std::optional<Measure> Detector::measure2(ParticleState state) const {
+  // Calling the other "measure" function to get the measurement
+  return measure2(state.position, state.particleID);
 }
 
 

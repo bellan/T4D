@@ -24,7 +24,8 @@ int main() {
   // --- Timers definition
   TStopwatch time_execution;
   TStopwatch time_generation;
-  TStopwatch time_reconstruction;
+  TStopwatch time_detectorresponse;
+  TStopwatch time_measurement;
   TStopwatch time_tracking;
 
   // Starting execution timer
@@ -50,18 +51,39 @@ int main() {
   time_generation.Start();
   bool bool_gen = simu.Generation();
   //simulation.runSimulation(NUMBER_OF_PARTICLES);
-  cout << " Generation finished: " << bool_gen << " (1 means success)" << endl;
+  cout << " Generation finished ";
+  if (bool_gen)
+    cout << "successfully." << endl;
+  else
+    cout << "with errors." << endl;
 
   time_generation.Stop();
 
   
   // --- Simulation of detector response
   cout << "\n --- Begining the simulation of detector response" << endl;
-  time_reconstruction.Start();
+  time_detectorresponse.Start();
   bool bool_dr = simu.DetectorResponse();
-  cout << " Detector response finished: " << bool_dr << " (1 means success)" << endl;
+  cout << " Detector response simulation finished ";
+  if (bool_dr)
+    cout << "successfully." << endl;
+  else
+    cout << "with errors." << endl;
 
-  time_reconstruction.Stop();
+  time_detectorresponse.Stop();
+
+  
+  // --- Simulation of the measurement
+  cout << "\n --- Begining the simulation of the measurement" << endl;
+  time_measurement.Start();
+  bool bool_mea = simu.Measurement();
+  cout << " Measurement simulation finished ";
+  if (bool_mea)
+    cout << "successfully." << endl;
+  else
+    cout << "with errors." << endl;
+
+  time_measurement.Stop();
 
   
   // --- Track reconstruction
@@ -85,11 +107,12 @@ int main() {
   time_now = chrono::system_clock::to_time_t(chrono::system_clock::now());
   time_execution.Stop();
 
-  cout << " Execution ended at:   " << ctime(&time_now) << endl;
-  cout << " Total execution time: "; time_execution.Print();
-  cout << " Generation time:      "; time_generation.Print();
-  cout << " Reconstruction time:  "; time_reconstruction.Print();
-  cout << " Tracking time:        "; time_tracking.Print();
+  cout << " Execution ended at:                " << ctime(&time_now) << endl;
+  cout << " Total execution time:              "; time_execution.Print();
+  cout << " Generation time:                   "; time_generation.Print();
+  cout << " Detector response simulation time: "; time_detectorresponse.Print();
+  cout << " Measurement simulation time:       "; time_measurement.Print();
+  cout << " Tracking time:                     "; time_tracking.Print();
   cout << " --------------------------------------------------------------------------" << endl;
 
   return 0;

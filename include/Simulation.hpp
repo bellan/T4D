@@ -13,6 +13,10 @@
 #include "Tracker.hpp"
 
 
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Data - struct
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Struct to save the data
 struct Data{
   // Particle gun
   ParticleGun gun;
@@ -29,52 +33,89 @@ struct Data{
   std::vector<ParticleState> lay8_particles;
 };
 
+struct Measures{
+  // Hits on each detector
+  std::vector<Measure> lay1_particles;
+  std::vector<Measure> lay2_particles;
+  std::vector<Measure> lay3_particles;
+  std::vector<Measure> lay4_particles;
+  std::vector<Measure> lay5_particles;
+  std::vector<Measure> lay6_particles;
+  std::vector<Measure> lay7_particles;
+  std::vector<Measure> lay8_particles;
+};
+
+
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Simulation - class
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 class Simulation {
 public:
+  // --- Constructors
   Simulation ();
   Simulation(std::vector<Detector> detectors);
 
+  // --- Destructors
   virtual ~Simulation ();
 
+  // --- Member functions
   /**
-   * The main simulation function.
+   * The main simulation function. TO BE REMOVED after the separation of the code
    *
    * @param particlesNumber the number of particles to be simulated.
    */
   void runSimulation(int particlesNumber);
 
   /**
+   * Generation
    * Function to simulate the generated particles.
    * 
-   * @param detectors the experiments detector.
+   * @returns bool 1 when successful, 0 when errors occured
    */
   bool Generation();
 
   /**
-   * Function to simulate the reconstruction of the particles.
+   * DetectorResponse
+   * Function to simulate the detector response to the particles.
    * 
-   * @param detectors the experiments detector.
+   * @returns bool 1 when successful, 0 when errors occured
    */
   bool DetectorResponse();
 
   /**
-   * The main simulation function.
+   * Measurement
+   * Function to simulate the measurement of the particles.
+   * 
+   * @returns bool 1 when successful, 0 when errors occured
+   */
+  bool Measurement();
+
+  /**
+   * testDetector
+   * Simulates the testing of a specific detector.
+   * TO BE REFORMED after the changes in the main simulation
    *
    * @param particlesNumber the number of particles to be simulated.
    */
   void testDetector(int particlesNumber, int detectorId);
 
 private:
+  // --- Data members
   TFile file_out;
+
   TTree tree_generated;
   TTree tree_detector;
+  TTree tree_measures;
+
   Data data_generated;
   Data data_detector;
+  Measures data_measures;
 
-  static int runCounter;
   std::vector<Detector> detectors;
 
-  Tracker tracker;
-  DataGenerator dataGenerator;
+  static int runCounter; // TO BE REMOVED after the separation of the code
+  Tracker tracker; // TO BE REMOVED after the separation of the code
+  DataGenerator dataGenerator; // TO BE REMOVED after the separation of the code
 
 };

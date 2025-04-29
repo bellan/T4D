@@ -14,6 +14,7 @@
 #include "Simulation.hpp"
 #include "DataFile.hpp"
 #include "DataGenerator.hpp"
+#include "Measure.hpp"
 #include "PhysicalParameters.hpp"
 #include "SetupFactory.hpp"
 #include "Structs.hpp"
@@ -38,9 +39,9 @@ int Simulation::runCounter = 0;
 // ~Simulation (destructor)
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Simulation::~Simulation() {
-  file_out.cd();
   tree_generated.Write();
   tree_detector.Write();
+  tree_measures.Write();
   file_out.Close();
 }
 
@@ -71,6 +72,7 @@ Simulation::Simulation(vector<Detector> detectors)
 : file_out("../data/Simulation.root", "RECREATE"),
   tree_generated("tree_generation", "Simulation tree with generated particles"),
   tree_detector("tree_detector", "Simulation tree with particles after the simulation of detector response"),
+  tree_measures("tree_measures", "Simulation tree with the coordinates after the measurement simulation"),
   detectors(detectors)
 {
   // to be removed when everything is fine with the new system
@@ -119,6 +121,18 @@ Simulation::Simulation(vector<Detector> detectors)
   tree_detector.Branch("Layer6_particles_dr", &data_detector.lay6_particles);
   tree_detector.Branch("Layer7_particles_dr", &data_detector.lay7_particles);
   tree_detector.Branch("Layer8_particles_dr", &data_detector.lay8_particles);
+
+
+  // --- Measures tree
+  // Branches for the layers of the detectors
+  tree_measures.Branch("Layer1_particles_mea", &data_measures.lay1_particles);
+  tree_measures.Branch("Layer2_particles_mea", &data_measures.lay2_particles);
+  tree_measures.Branch("Layer3_particles_mea", &data_measures.lay3_particles);
+  tree_measures.Branch("Layer4_particles_mea", &data_measures.lay4_particles);
+  tree_measures.Branch("Layer5_particles_mea", &data_measures.lay5_particles);
+  tree_measures.Branch("Layer6_particles_mea", &data_measures.lay6_particles);
+  tree_measures.Branch("Layer7_particles_mea", &data_measures.lay7_particles);
+  tree_measures.Branch("Layer8_particles_mea", &data_measures.lay8_particles);
 }
 
 
@@ -184,6 +198,7 @@ bool Simulation::Generation() {
     data_generated.lay8_particles.clear();
   }
 
+  // Writing the tree
   tree_generated.Write();
 
   end_success = true;
@@ -202,11 +217,17 @@ bool Simulation::DetectorResponse() {
   particle_states.reserve(NUMBER_OF_DETECTORS + 1);
   ParticleState newState;
 
+  // Check on the number of events
+  if (tree_generated.GetEntries() != NUMBER_OF_EVENTS) {
+    cerr << " [ERROR] tree_generated has " << tree_generated.GetEntries() << " events, but " << NUMBER_OF_EVENTS << " were expected." << endl;
+    return end_success;
+  }
+
   // --- Loop on number of events
   for (unsigned int e = 0; e < NUMBER_OF_EVENTS; e++) {
     // Load the e-th event from the generation tree
     if (tree_generated.GetEntry(e) <= 0) {
-      cout << " Error in reading the events from the generation tree." << endl;
+      cerr << "[ERROR] Unable to read entry " << e << " from tree_detector." << endl;
       return end_success;
     }
 
@@ -254,13 +275,8 @@ bool Simulation::DetectorResponse() {
     data_detector.lay8_particles.clear();
   }
 
+  // Writing the tree
   tree_detector.Write();
-
-  // Check on the number of events
-  if (tree_generated.GetEntries() != NUMBER_OF_EVENTS) {
-    cerr << "Warning: tree_generated has " << tree_generated.GetEntries() << " events, but " << NUMBER_OF_EVENTS << " were expected." << endl;
-    return end_success;
-  }
 
   end_success = true;
   return end_success;
@@ -268,11 +284,96 @@ bool Simulation::DetectorResponse() {
 
 
 
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Measurement
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+bool Simulation::Measurement() {
+  // Declaring variables
+  bool end_success = false;
+  vector<ParticleState>* detector_particles = nullptr;
+
+  // Check on the number of events
+  if (tree_detector.GetEntries() != NUMBER_OF_EVENTS) {
+    cerr << " [ERROR] tree_generated has " << tree_generated.GetEntries() << " events, but " << NUMBER_OF_EVENTS << " were expected." << endl;
+    return end_success;
+  }
+
+  // --- Loop on particles of the event
+  for (unsigned int e = 0; e < NUMBER_OF_EVENTS; ++e) {
+    if (tree_detector.GetEntry(e) <= 0) {
+      cerr << "[ERROR] Unable to read entry " << e << " from tree_detector." << endl;
+      return false;
+    }
+
+    // --- Loop on detectors
+    for (int d = 1; d < NUMBER_OF_DETECTORS + 1; d++) {
+      // -- Getting the particle states for each detector
+      switch (d) {
+        case 1: detector_particles = &data_detector.lay1_particles; break;
+        case 2: detector_particles = &data_detector.lay2_particles; break;
+        case 3: detector_particles = &data_detector.lay3_particles; break;
+        case 4: detector_particles = &data_detector.lay4_particles; break;
+        case 5: detector_particles = &data_detector.lay5_particles; break;
+        case 6: detector_particles = &data_detector.lay6_particles; break;
+        case 7: detector_particles = &data_detector.lay7_particles; break;
+        case 8: detector_particles = &data_detector.lay8_particles; break;
+      }
+
+      // If there are not particles, continue to the next detector
+      if (!detector_particles) continue;
+
+      // -- Loop on the particle states on each detector
+      for (const ParticleState& state : *detector_particles) {
+        // Getting the (d-1)-th detector because in the vector of the detectors, the particle gun is not included:
+        // the IDs of the detectors are 1-8, however their positions in the vector are 0-7 
+        const Detector& detector = this->detectors.at(d-1);
+
+        // Simulating the measurement for the state
+        std::optional<Measure> state_measure = detector.measure2(state.position);
+
+        if (state_measure) {
+          switch (d) {
+            case 1: data_measures.lay1_particles.push_back(*state_measure); break;
+            case 2: data_measures.lay2_particles.push_back(*state_measure); break;
+            case 3: data_measures.lay3_particles.push_back(*state_measure); break;
+            case 4: data_measures.lay4_particles.push_back(*state_measure); break;
+            case 5: data_measures.lay5_particles.push_back(*state_measure); break;
+            case 6: data_measures.lay6_particles.push_back(*state_measure); break;
+            case 7: data_measures.lay7_particles.push_back(*state_measure); break;
+            case 8: data_measures.lay8_particles.push_back(*state_measure); break;
+          }
+        }
+      }
+    }
+
+    // Filling the tree
+    tree_measures.Fill();
+
+    // Clear measures for the next event
+    data_measures.lay1_particles.clear();
+    data_measures.lay2_particles.clear();
+    data_measures.lay3_particles.clear();
+    data_measures.lay4_particles.clear();
+    data_measures.lay5_particles.clear();
+    data_measures.lay6_particles.clear();
+    data_measures.lay7_particles.clear();
+    data_measures.lay8_particles.clear();
+  }
+
+  // Writing the tree
+  tree_measures.Write();
+
+  end_success = true;
+  return end_success;
+}
+
+
 // OLD -----------------------------------------------------------------------
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // runSimulation
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/*
 void Simulation::runSimulation(int particlesNumber) {
   // --- Data creation
   GeneratedData generatedData = dataGenerator.generateAllData(particlesNumber, false, true);
@@ -283,7 +384,6 @@ void Simulation::runSimulation(int particlesNumber) {
   DataFile dataFile = DataFile(dataFileName.c_str(), "DataTree", false);
   dataFile.SaveMultipleMeasures(allMeasures);
 
-  // /*
   // --- Data elaboration
   allMeasures = dataFile.readMeasures();
   vector<vector<Measurement>> allParticlesMeasures = Utils::separateMeasuresInParticles(allMeasures);
@@ -333,12 +433,13 @@ void Simulation::runSimulation(int particlesNumber) {
   Utils::saveDataToCSV(detectors, generatedData.allParticlesTheoreticalStates, generatedData.allParticlesRealStates,
                        allParticlesMeasures, allParticlesPredictedStates, allParticlesFilteredStates, allParticlesSmoothedStates,
                        runCounter);
-  // */
+  //
   runCounter++;
 }
+*/
 
 
-
+/*
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // testDetector
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -405,3 +506,4 @@ void Simulation::testDetector(int particlesNumber, int detectorId) {
   Utils::saveDataToCSV(detectors, generatedData.allParticlesRealStates, allParticlesMeasures, allParticlesSmoothedStates, runCounter);
   runCounter++;
 }
+*/
