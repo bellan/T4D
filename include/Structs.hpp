@@ -1,14 +1,32 @@
 #pragma once
 
-#include <vector>
+// Header files needed
 #include <TClonesArray.h>
-#include "PhysicalParameters.hpp"
+#include <vector>
 
+// Custom classes
+#include "Measure.hpp"
 #include "Particle.hpp"
 #include "ParticleState.hpp"
+#include "PhysicalParameters.hpp"
+
+// Namespaces
+using namespace std;
 
 
 // --- Data saving struct
+// Struct for the measures
+struct Measures{
+  // Hits on each detector
+  vector<Measure> lay1_particles;
+  vector<Measure> lay2_particles;
+  vector<Measure> lay3_particles;
+  vector<Measure> lay4_particles;
+  vector<Measure> lay5_particles;
+  vector<Measure> lay6_particles;
+  vector<Measure> lay7_particles;
+  vector<Measure> lay8_particles;
+};
 
 
 
@@ -29,9 +47,9 @@ struct Measurement {
 
 // TO BE REMOVED after code separation
 struct GeneratedData {
-  std::vector<std::vector<ParticleState>> allParticlesTheoreticalStates;
-  std::vector<std::vector<ParticleState>> allParticlesRealStates;
-  std::vector<std::vector<Measurement>> allParticlesMeasures;
+  vector<vector<ParticleState>> allParticlesTheoreticalStates;
+  vector<vector<ParticleState>> allParticlesRealStates;
+  vector<vector<Measurement>> allParticlesMeasures;
 };
 
 /**

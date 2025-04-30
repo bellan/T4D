@@ -11,7 +11,11 @@
 #include "ParticleState.hpp"
 #include "Structs.hpp"
 
+// Namespaces
+//using namespace std;
 
+
+// TO BE REMOVED after code separation
 struct Measurement;
 
 /**

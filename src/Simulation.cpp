@@ -1,27 +1,27 @@
 // Header files needed
 #include <TFile.h>
 #include <TLorentzVector.h>
-#include <TMatrixD.h>
-#include <TMatrixDfwd.h>
+#include <TMatrixD.h> // TO BE REMOVED after code separation
+#include <TMatrixDfwd.h> // TO BE REMOVED after code separation
 #include <TTree.h>
-#include <stdexcept>
-#include <string>
+#include <stdexcept> // ??? TO BE REMOVED after code separation 
+#include <string> // ??? TO BE REMOVED after code separation
 #include <vector>
-#include <TVector3.h>
-#include <TClonesArray.h>
+#include <TVector3.h> // ??? TO BE REMOVED after code separation
+#include <TClonesArray.h> // TO BE REMOVED after code separation
 
 // Custom classes
 #include "Simulation.hpp"
-#include "DataFile.hpp"
-#include "DataGenerator.hpp"
+#include "DataFile.hpp" // TO BE REMOVED after code separation
+#include "DataGenerator.hpp" // TO BE REMOVED after code separation
 #include "Measure.hpp"
 #include "PhysicalParameters.hpp"
-#include "SetupFactory.hpp"
+#include "SetupFactory.hpp" // TO BE REMOVED after code separation
 #include "Structs.hpp"
 #include "ParticleGun.hpp"
 #include "ParticleState.hpp"
-#include "Tracker.hpp"
-#include "Utils.hpp"
+#include "Tracker.hpp" // TO BE REMOVED after code separation
+#include "Utils.hpp" // TO BE REMOVED after code separation
 
 // Namespaces
 using namespace std;
@@ -65,11 +65,8 @@ Simulation::Simulation()
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Simulation (constructor)
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Simulation::Simulation(vector<Detector> detectors) 
+Simulation::Simulation(const vector<Detector>& detectors) 
 : file_out("../data/Simulation.root", "RECREATE"),
-  tree_generated("tree_generation", "Simulation tree with generated particles"),
-  tree_detector("tree_detector", "Simulation tree with particles after the simulation of detector response"),
-  tree_measures("tree_measures", "Simulation tree with the coordinates after the measurement simulation"),
   detectors(detectors)
 {
   // to be removed when everything is fine with the new system
@@ -81,15 +78,25 @@ Simulation::Simulation(vector<Detector> detectors)
   tracker = Tracker(detectors);
   // end of removal
 
+
   // --- Detectors
   if (detectors.size() == 0) {
     throw std::invalid_argument("No detector found.");
   }
 
+
   // --- Output file
   if(file_out.IsZombie()){
     throw std::invalid_argument("Problem in creating the simulation output file.");
   }
+
+  file_out.cd();
+
+  // Planting the trees in the output file
+  tree_generated = TTree("tree_generation", "Simulation tree with generated particles");
+  tree_detector = TTree("tree_detector", "Simulation tree with particles after the simulation of detector response");
+  tree_measures = TTree("tree_measures", "Simulation tree with the coordinates after the measurement simulation");
+
 
   // --- Generation tree
   // Branch for the particle gun
@@ -344,7 +351,7 @@ bool Simulation::Measurement() {
       }
 
       // Cleaning vectors
-      detector_particles.clear();
+      detector_particles -> clear();
     }
 
     // Filling the tree

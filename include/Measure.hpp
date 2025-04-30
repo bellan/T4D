@@ -26,5 +26,5 @@ class Measure : public TObject {
     int detectorID;
     unsigned int particleID;
     
-    ClassDef(Measure, 1)
+  ClassDef(Measure, 1)
 };

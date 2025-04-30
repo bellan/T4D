@@ -1,48 +1,43 @@
 #pragma once
 
+// Header files needed
 #include <TLorentzVector.h>
-#include <TMatrixD.h>
-#include <TMatrixDfwd.h>
+#include <TMatrixD.h> // TO BE REMOVED after code separation
+#include <TMatrixDfwd.h> // TO BE REMOVED after code separation
 #include <TFile.h>
 #include <TTree.h>
 #include <vector>
 
-#include "DataGenerator.hpp"
+// Custom classes
+#include "DataGenerator.hpp" // TO BE REMOVED after code separation
 #include "Detector.hpp"
+#include "Measure.hpp"
 #include "Structs.hpp"
-#include "Tracker.hpp"
+#include "Tracker.hpp" // TO BE REMOVED after code separation
+
+// Namespaces
+using namespace std;
+
 
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Data - struct
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// Struct to save the data
+// Struct to save the particle states of the generated particles
 struct Data{
   // Particle gun
   ParticleGun gun;
 
   // Hits on each detector
-  std::vector<ParticleState> lay0_particles;
-  std::vector<ParticleState> lay1_particles;
-  std::vector<ParticleState> lay2_particles;
-  std::vector<ParticleState> lay3_particles;
-  std::vector<ParticleState> lay4_particles;
-  std::vector<ParticleState> lay5_particles;
-  std::vector<ParticleState> lay6_particles;
-  std::vector<ParticleState> lay7_particles;
-  std::vector<ParticleState> lay8_particles;
-};
-
-struct Measures{
-  // Hits on each detector
-  std::vector<Measure> lay1_particles;
-  std::vector<Measure> lay2_particles;
-  std::vector<Measure> lay3_particles;
-  std::vector<Measure> lay4_particles;
-  std::vector<Measure> lay5_particles;
-  std::vector<Measure> lay6_particles;
-  std::vector<Measure> lay7_particles;
-  std::vector<Measure> lay8_particles;
+  vector<ParticleState> lay0_particles;
+  vector<ParticleState> lay1_particles;
+  vector<ParticleState> lay2_particles;
+  vector<ParticleState> lay3_particles;
+  vector<ParticleState> lay4_particles;
+  vector<ParticleState> lay5_particles;
+  vector<ParticleState> lay6_particles;
+  vector<ParticleState> lay7_particles;
+  vector<ParticleState> lay8_particles;
 };
 
 
@@ -54,7 +49,7 @@ class Simulation {
 public:
   // --- Constructors
   Simulation ();
-  Simulation(std::vector<Detector> detectors);
+  Simulation(const vector<Detector>& detectors);
 
   // --- Destructors
   virtual ~Simulation ();
@@ -112,7 +107,7 @@ private:
   Data data_detector;
   Measures data_measures;
 
-  std::vector<Detector> detectors;
+  vector<Detector> detectors;
 
   static int runCounter; // TO BE REMOVED after the separation of the code
   Tracker tracker; // TO BE REMOVED after the separation of the code
