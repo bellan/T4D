@@ -39,9 +39,6 @@ int Simulation::runCounter = 0;
 // ~Simulation (destructor)
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Simulation::~Simulation() {
-  tree_generated.Write();
-  tree_detector.Write();
-  tree_measures.Write();
   file_out.Close();
 }
 
@@ -331,6 +328,7 @@ bool Simulation::Measurement() {
         // Simulating the measurement for the state
         std::optional<Measure> state_measure = detector.measure2(state.position);
 
+        // Putting the measures in the correct branch of the event
         if (state_measure) {
           switch (d) {
             case 1: data_measures.lay1_particles.push_back(*state_measure); break;
@@ -344,12 +342,15 @@ bool Simulation::Measurement() {
           }
         }
       }
+
+      // Cleaning vectors
+      detector_particles.clear();
     }
 
     // Filling the tree
     tree_measures.Fill();
 
-    // Clear measures for the next event
+    // Cleaning vectors
     data_measures.lay1_particles.clear();
     data_measures.lay2_particles.clear();
     data_measures.lay3_particles.clear();
