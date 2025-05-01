@@ -39,6 +39,10 @@ int Simulation::runCounter = 0;
 // ~Simulation (destructor)
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Simulation::~Simulation() {
+  delete tree_generated;
+  delete tree_detector;
+  delete tree_measures;
+
   file_out.Close();
 }
 
@@ -47,18 +51,20 @@ Simulation::~Simulation() {
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Simulation (original constructor)
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/*
 Simulation::Simulation() 
 : detectors() {
   SetupFactory factory{};
   const SimulationSetup experiment = factory.generateExperiment();
   detectors = experiment.detectors;
   dataGenerator = DataGenerator(experiment);
-  tracker = Tracker(experiment.detectors);
+  tracker = Tracker(detectors);
 
   if (detectors.size() == 0) {
     throw std::invalid_argument("No detector");
   }
 }
+*/
 
 
 
@@ -70,12 +76,12 @@ Simulation::Simulation(const vector<Detector>& detectors)
   detectors(detectors)
 {
   // to be removed when everything is fine with the new system
-  SetupFactory factory{};
-  const SimulationSetup experiment = factory.generateExperiment();
+  //SetupFactory factory{};
+  //const SimulationSetup experiment = factory.generateExperiment();
   //detectors = experiment.detectors;
-  dataGenerator = DataGenerator(experiment);
+  //dataGenerator = DataGenerator(experiment);
   //tracker = Tracker(experiment.detectors);
-  tracker = Tracker(detectors);
+  //tracker = Tracker(detectors);
   // end of removal
 
 
@@ -93,50 +99,50 @@ Simulation::Simulation(const vector<Detector>& detectors)
   file_out.cd();
 
   // Planting the trees in the output file
-  tree_generated = TTree("tree_generation", "Simulation tree with generated particles");
-  tree_detector = TTree("tree_detector", "Simulation tree with particles after the simulation of detector response");
-  tree_measures = TTree("tree_measures", "Simulation tree with the coordinates after the measurement simulation");
+  tree_generated = new TTree("tree_generation", "Simulation tree with generated particles");
+  tree_detector = new TTree("tree_detector", "Simulation tree with particles after the simulation of detector response");
+  tree_measures = new TTree("tree_measures", "Simulation tree with the coordinates after the measurement simulation");
 
 
   // --- Generation tree
   // Branch for the particle gun
-  tree_generated.Branch("ParticleGun", &data_generated.gun);
+  tree_generated -> Branch("ParticleGun", &data_generated.gun);
   // Branches for the layers of the detectors
-  tree_generated.Branch("Layer0_particles_gen", &data_generated.lay0_particles); // Particles' initial direction and velocity
-  tree_generated.Branch("Layer1_particles_gen", &data_generated.lay1_particles);
-  tree_generated.Branch("Layer2_particles_gen", &data_generated.lay2_particles);
-  tree_generated.Branch("Layer3_particles_gen", &data_generated.lay3_particles);
-  tree_generated.Branch("Layer4_particles_gen", &data_generated.lay4_particles);
-  tree_generated.Branch("Layer5_particles_gen", &data_generated.lay5_particles);
-  tree_generated.Branch("Layer6_particles_gen", &data_generated.lay6_particles);
-  tree_generated.Branch("Layer7_particles_gen", &data_generated.lay7_particles);
-  tree_generated.Branch("Layer8_particles_gen", &data_generated.lay8_particles);
+  tree_generated -> Branch("Layer0_particles_gen", &data_generated.lay0_particles); // Particles' initial direction and velocity
+  tree_generated -> Branch("Layer1_particles_gen", &data_generated.lay1_particles);
+  tree_generated -> Branch("Layer2_particles_gen", &data_generated.lay2_particles);
+  tree_generated -> Branch("Layer3_particles_gen", &data_generated.lay3_particles);
+  tree_generated -> Branch("Layer4_particles_gen", &data_generated.lay4_particles);
+  tree_generated -> Branch("Layer5_particles_gen", &data_generated.lay5_particles);
+  tree_generated -> Branch("Layer6_particles_gen", &data_generated.lay6_particles);
+  tree_generated -> Branch("Layer7_particles_gen", &data_generated.lay7_particles);
+  tree_generated -> Branch("Layer8_particles_gen", &data_generated.lay8_particles);
 
 
   // --- Detector response tree
   // Branch for the particle gun
   //tree_detector -> Branch("ParticleGun", &data_detector.gun);
   // Branches for the layers of the detectors
-  tree_detector.Branch("Layer1_particles_dr", &data_detector.lay1_particles);
-  tree_detector.Branch("Layer2_particles_dr", &data_detector.lay2_particles);
-  tree_detector.Branch("Layer3_particles_dr", &data_detector.lay3_particles);
-  tree_detector.Branch("Layer4_particles_dr", &data_detector.lay4_particles);
-  tree_detector.Branch("Layer5_particles_dr", &data_detector.lay5_particles);
-  tree_detector.Branch("Layer6_particles_dr", &data_detector.lay6_particles);
-  tree_detector.Branch("Layer7_particles_dr", &data_detector.lay7_particles);
-  tree_detector.Branch("Layer8_particles_dr", &data_detector.lay8_particles);
+  tree_detector -> Branch("Layer1_particles_dr", &data_detector.lay1_particles);
+  tree_detector -> Branch("Layer2_particles_dr", &data_detector.lay2_particles);
+  tree_detector -> Branch("Layer3_particles_dr", &data_detector.lay3_particles);
+  tree_detector -> Branch("Layer4_particles_dr", &data_detector.lay4_particles);
+  tree_detector -> Branch("Layer5_particles_dr", &data_detector.lay5_particles);
+  tree_detector -> Branch("Layer6_particles_dr", &data_detector.lay6_particles);
+  tree_detector -> Branch("Layer7_particles_dr", &data_detector.lay7_particles);
+  tree_detector -> Branch("Layer8_particles_dr", &data_detector.lay8_particles);
 
 
   // --- Measures tree
   // Branches for the layers of the detectors
-  tree_measures.Branch("Layer1_particles_mea", &data_measures.lay1_particles);
-  tree_measures.Branch("Layer2_particles_mea", &data_measures.lay2_particles);
-  tree_measures.Branch("Layer3_particles_mea", &data_measures.lay3_particles);
-  tree_measures.Branch("Layer4_particles_mea", &data_measures.lay4_particles);
-  tree_measures.Branch("Layer5_particles_mea", &data_measures.lay5_particles);
-  tree_measures.Branch("Layer6_particles_mea", &data_measures.lay6_particles);
-  tree_measures.Branch("Layer7_particles_mea", &data_measures.lay7_particles);
-  tree_measures.Branch("Layer8_particles_mea", &data_measures.lay8_particles);
+  tree_measures -> Branch("Layer1_particles_mea", &data_measures.lay1_particles);
+  tree_measures -> Branch("Layer2_particles_mea", &data_measures.lay2_particles);
+  tree_measures -> Branch("Layer3_particles_mea", &data_measures.lay3_particles);
+  tree_measures -> Branch("Layer4_particles_mea", &data_measures.lay4_particles);
+  tree_measures -> Branch("Layer5_particles_mea", &data_measures.lay5_particles);
+  tree_measures -> Branch("Layer6_particles_mea", &data_measures.lay6_particles);
+  tree_measures -> Branch("Layer7_particles_mea", &data_measures.lay7_particles);
+  tree_measures -> Branch("Layer8_particles_mea", &data_measures.lay8_particles);
 }
 
 
@@ -187,7 +193,7 @@ bool Simulation::Generation() {
     }
 
     // Filling the tree
-    tree_generated.Fill();
+    tree_generated -> Fill();
 
     // Cleaning vectors
     particle_states.clear();
@@ -203,7 +209,7 @@ bool Simulation::Generation() {
   }
 
   // Writing the tree
-  tree_generated.Write();
+  tree_generated -> Write();
 
   end_success = true;
   return end_success;
@@ -222,15 +228,15 @@ bool Simulation::DetectorResponse() {
   ParticleState newState;
 
   // Check on the number of events
-  if (tree_generated.GetEntries() != NUMBER_OF_EVENTS) {
-    cerr << " [ERROR] tree_generated has " << tree_generated.GetEntries() << " events, but " << NUMBER_OF_EVENTS << " were expected." << endl;
+  if (tree_generated -> GetEntries() != NUMBER_OF_EVENTS) {
+    cerr << " [ERROR] tree_generated has " << tree_generated -> GetEntries() << " events, but " << NUMBER_OF_EVENTS << " were expected." << endl;
     return end_success;
   }
 
   // --- Loop on number of events
   for (unsigned int e = 0; e < NUMBER_OF_EVENTS; e++) {
     // Load the e-th event from the generation tree
-    if (tree_generated.GetEntry(e) <= 0) {
+    if (tree_generated -> GetEntry(e) <= 0) {
       cerr << "[ERROR] Unable to read entry " << e << " from tree_detector." << endl;
       return end_success;
     }
@@ -265,7 +271,7 @@ bool Simulation::DetectorResponse() {
     }
 
     // Filling the tree
-    tree_detector.Fill();
+    tree_detector -> Fill();
 
     // Cleaning vectors
     particle_states.clear();
@@ -280,7 +286,7 @@ bool Simulation::DetectorResponse() {
   }
 
   // Writing the tree
-  tree_detector.Write();
+  tree_detector -> Write();
 
   end_success = true;
   return end_success;
@@ -297,14 +303,14 @@ bool Simulation::Measurement() {
   vector<ParticleState>* detector_particles = nullptr;
 
   // Check on the number of events
-  if (tree_detector.GetEntries() != NUMBER_OF_EVENTS) {
-    cerr << " [ERROR] tree_generated has " << tree_generated.GetEntries() << " events, but " << NUMBER_OF_EVENTS << " were expected." << endl;
+  if (tree_detector -> GetEntries() != NUMBER_OF_EVENTS) {
+    cerr << " [ERROR] tree_generated has " << tree_generated -> GetEntries() << " events, but " << NUMBER_OF_EVENTS << " were expected." << endl;
     return end_success;
   }
 
   // --- Loop on particles of the event
   for (unsigned int e = 0; e < NUMBER_OF_EVENTS; ++e) {
-    if (tree_detector.GetEntry(e) <= 0) {
+    if (tree_detector -> GetEntry(e) <= 0) {
       cerr << "[ERROR] Unable to read entry " << e << " from tree_detector." << endl;
       return false;
     }
@@ -333,7 +339,7 @@ bool Simulation::Measurement() {
         const Detector& detector = this->detectors.at(d-1);
 
         // Simulating the measurement for the state
-        std::optional<Measure> state_measure = detector.measure2(state.position);
+        std::optional<Measure> state_measure = detector.measure2(state.position, state.particleID);
 
         // Putting the measures in the correct branch of the event
         if (state_measure) {
@@ -355,7 +361,7 @@ bool Simulation::Measurement() {
     }
 
     // Filling the tree
-    tree_measures.Fill();
+    tree_measures -> Fill();
 
     // Cleaning vectors
     data_measures.lay1_particles.clear();
@@ -369,7 +375,7 @@ bool Simulation::Measurement() {
   }
 
   // Writing the tree
-  tree_measures.Write();
+  tree_measures -> Write();
 
   end_success = true;
   return end_success;

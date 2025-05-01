@@ -99,9 +99,9 @@ private:
   // --- Data members
   TFile file_out;
 
-  TTree tree_generated;
-  TTree tree_detector;
-  TTree tree_measures;
+  TTree* tree_generated;
+  TTree* tree_detector;
+  TTree* tree_measures;
 
   Data data_generated;
   Data data_detector;
