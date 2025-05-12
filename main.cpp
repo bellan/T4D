@@ -7,8 +7,7 @@
 #include "PhysicalParameters.hpp"
 #include "Detector.hpp"
 #include "Simulation.hpp"
-#include "ParticleGun.hpp"
-#include "ParticleState.hpp"
+#include "Tracker.hpp"
 
 // Namespaces
 using namespace std;
@@ -32,68 +31,91 @@ int main() {
   time_execution.Start();
 
 
+  // --- Output files paths 
+  string path_file_generation = "../data/Simulation.root"; // TODO: change the constructor of Simulation to get this path
+  string path_file_filter = "../data/Filter.root";
+
+
   // --- Experiment
-  cout << " --- Creating experiment" << endl;
+  cout << " ~~~ Creating experiment" << endl;
   // Detectors
   vector<Detector> detectors;
   detectors.reserve(NUMBER_OF_DETECTORS);
 
   for (int i = 1; i < NUMBER_OF_DETECTORS + 1; i++) {
     detectors.push_back(Detector(i * DISTANCE_BETWEEN_DETECTORS, DETECTOR_DIMENSION_WIDTH, DETECTOR_DIMENSION_HEIGHT, i));
-  }
-
-  // Creation of the simulation & its output file
-  Simulation simu(detectors);
+  };
 
  
-  // --- Generation
-  cout << " --- Begining the generation of the particles" << endl;
-  time_generation.Start();
-  bool bool_gen = simu.Generation();
-  //simulation.runSimulation(NUMBER_OF_PARTICLES);
-  cout << " Generation finished ";
-  if (bool_gen)
-    cout << "successfully." << endl;
-  else
-    cout << "with errors." << endl;
+  // --- Simulation
+  {
+    // Creation of the simulation & its output file
+    Simulation simu(detectors);
+    cout << "\n ~~~ Simulation" << endl;
+    
+    // -- Generation
+    cout << " --- Begining the generation of the particles" << endl;
+    time_generation.Start();
+    bool bool_gen = simu.Generation();
+    //simulation.runSimulation(NUMBER_OF_PARTICLES);
+    cout << " Generation completed ";
+    if (bool_gen)
+      cout << "successfully." << endl;
+    else
+      cout << "with errors." << endl;
 
-  time_generation.Stop();
+    time_generation.Stop();
+
+    
+    // -- Simulation of detector response
+    cout << "\n --- Begining the simulation of detector response" << endl;
+    time_detectorresponse.Start();
+    bool bool_dr = simu.DetectorResponse();
+    cout << " Detector response simulation completed ";
+    if (bool_dr)
+      cout << "successfully." << endl;
+    else
+      cout << "with errors." << endl;
+
+    time_detectorresponse.Stop();
+
+    
+    // -- Simulation of the measurement
+    cout << "\n --- Begining the simulation of the measurement" << endl;
+    time_measurement.Start();
+    bool bool_mea = simu.Measurement();
+    cout << " Measurement simulation completed ";
+    if (bool_mea)
+      cout << "successfully." << endl;
+    else
+      cout << "with errors." << endl;
+
+    time_measurement.Stop();
+
+    // -- End of Simulation
+  }
 
   
-  // --- Simulation of detector response
-  cout << "\n --- Begining the simulation of detector response" << endl;
-  time_detectorresponse.Start();
-  bool bool_dr = simu.DetectorResponse();
-  cout << " Detector response simulation finished ";
-  if (bool_dr)
-    cout << "successfully." << endl;
-  else
-    cout << "with errors." << endl;
+  // --- Tracker
+  {
+    time_tracking.Start();
+    // Creation of the tracker & its in/out files
+    Tracker tracker(detectors, path_file_generation, path_file_filter);
+    cout << "\n ~~~ Tracker" << endl;
 
-  time_detectorresponse.Stop();
+    // -- Kalman filter
+    cout << " --- Kalman filter" << endl;
+    bool bool_kf = tracker.Tracking();
+    cout << "\n Kalman filter completed ";
+    if (bool_kf)
+      cout << "successfully." << endl;
+    else
+      cout << "with errors." << endl;
 
-  
-  // --- Simulation of the measurement
-  cout << "\n --- Begining the simulation of the measurement" << endl;
-  time_measurement.Start();
-  bool bool_mea = simu.Measurement();
-  cout << " Measurement simulation finished ";
-  if (bool_mea)
-    cout << "successfully." << endl;
-  else
-    cout << "with errors." << endl;
+    time_tracking.Stop();
 
-  time_measurement.Stop();
-
-  
-  // --- Track reconstruction
-  //cout << "\n --- Beginning tracking" << endl;
-  time_tracking.Start();
-  //auto tracker = Filter();
-  //tracker.runFilter(NUMBER_OF_PARTICLES);
-
-  time_tracking.Stop();
-  
+    // -- End of Tracker
+  } 
 
 
   // --- Simulation of layers testing
