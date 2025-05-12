@@ -1,19 +1,17 @@
 #pragma once
 
 // Header files needed
-#include <TLorentzVector.h>
-#include <TMatrixD.h> // TO BE REMOVED after code separation
-#include <TMatrixDfwd.h> // TO BE REMOVED after code separation
 #include <TFile.h>
+#include <TLorentzVector.h>
 #include <TTree.h>
 #include <vector>
 
 // Custom classes
-#include "DataGenerator.hpp" // TO BE REMOVED after code separation
 #include "Detector.hpp"
 #include "Measure.hpp"
-#include "Structs.hpp"
-#include "Tracker.hpp" // TO BE REMOVED after code separation
+#include "ParticleGun.hpp"
+#include "ParticleState.hpp"
+#include "StructMeasures.hpp"
 
 // Namespaces
 using namespace std;
@@ -23,7 +21,7 @@ using namespace std;
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Data - struct
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// Struct to save the particle states of the generated particles
+// Struct to save the particle states of the generated particles for each layer
 struct Data{
   // Particle gun
   ParticleGun gun;
@@ -54,14 +52,6 @@ public:
   // --- Destructors
   virtual ~Simulation ();
 
-  // --- Member functions
-  /**
-   * The main simulation function. TO BE REMOVED after the separation of the code
-   *
-   * @param particlesNumber the number of particles to be simulated.
-   */
-  void runSimulation(int particlesNumber);
-
   /**
    * Generation
    * Function to simulate the generated particles.
@@ -86,15 +76,6 @@ public:
    */
   bool Measurement();
 
-  /**
-   * testDetector
-   * Simulates the testing of a specific detector.
-   * TO BE REFORMED after the changes in the main simulation
-   *
-   * @param particlesNumber the number of particles to be simulated.
-   */
-  void testDetector(int particlesNumber, int detectorId);
-
 private:
   // --- Data members
   TFile file_out;
@@ -108,9 +89,4 @@ private:
   Measures data_measures;
 
   vector<Detector> detectors;
-
-  static int runCounter; // TO BE REMOVED after the separation of the code
-  Tracker tracker; // TO BE REMOVED after the separation of the code
-  DataGenerator dataGenerator; // TO BE REMOVED after the separation of the code
-
 };
