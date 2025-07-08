@@ -1,28 +1,65 @@
 #pragma once
 
-#include "Detector.hpp"
-#include "Structs.hpp"
-#include "ParticleState.hpp"
-
+// Header files needed
+#include <string>
+#include <TFile.h>
 #include <TMatrixD.h>
+#include <TTree.h>
 #include <vector>
 
+// Custom classes
+#include "Detector.hpp"
+#include "Simulation.hpp"
+#include "Structs.hpp"
+#include "ParticleState.hpp"
+#include "MatrixEstimate.hpp"
+#include "Measure.hpp"
+#include "StructMeasures.hpp"
+
+// Namespaces
+using namespace std;
+
+
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// kalmanFilterResults - struct
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 struct kalmanFilterResult {
-  std::vector<MatrixStateEstimate> predictedStates;
-  std::vector<MatrixStateEstimate> filteredStates;
+  vector<MatrixStateEstimate> predictedStates;
+  vector<MatrixStateEstimate> filteredStates;
 };
 
+
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Chi2Variables - struct
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 struct Chi2Variables {
   double tChi2, xChi2, yChi2, vChi2, xzChi2, yzChi2;
 };
 
+
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Tracker - class
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 class Tracker {
 public:
+  // --- Constructors
   Tracker(){};
-  Tracker(const std::vector<Detector> &detectors) : allDetectors(detectors), consideredDetectors(detectors) {}
+  Tracker(const vector<Detector> &detectors) : allDetectors(detectors), consideredDetectors(detectors) {}
+  Tracker(const vector<Detector>& detectors, string& path_fin, string& path_fout);
 
+  // --- Destructors
   virtual ~Tracker();
 
+  // --- Public member functions
+  // New functions
+  vector<vector<Measure>> ParticlesFromMeasure(unsigned int event_index);
+  bool Tracking();
+
+
+  // Original functions
   void ignoreDetector(int detectorIndex) { consideredDetectors.erase(consideredDetectors.begin() + detectorIndex); }
   void resetDetectors() { consideredDetectors = allDetectors; }
 
@@ -46,7 +83,7 @@ public:
    * @param realTime whether or not to initialize the state as if the kalman filter was executed in real time
    * @return a kalmanFilterResult object containing predicted states and filtered states
    */
-  kalmanFilterResult kalmanFilter(const std::vector<Measurement> &measures,
+  kalmanFilterResult kalmanFilter(const vector<Measurement> &measures,
                                   bool logging = false,
                                   bool realTime = false) const;
 
@@ -57,8 +94,8 @@ public:
    * @param logging whether or not to show logs to stdout
    * @return a vector containing the smoothed states
    */
-  std::vector<MatrixStateEstimate>
-  kalmanSmoother(const std::vector<MatrixStateEstimate> &filteredStates,
+  vector<MatrixStateEstimate>
+  kalmanSmoother(const vector<MatrixStateEstimate> &filteredStates,
                  bool looging = false) const;
 
   /**
@@ -68,21 +105,41 @@ public:
    * @param obtainedStates the vector of obtained values for the states
    */
   Chi2Variables
-  computeChi2s(const std::vector<ParticleState> &expectedStates,
-               const std::vector<MatrixStateEstimate> &obtainedStates,
+  computeChi2s(const vector<ParticleState> &expectedStates,
+               const vector<MatrixStateEstimate> &obtainedStates,
                bool logging = false, bool skipFirst = false) const;
 
 private:
-  std::vector<Detector> allDetectors;
-  std::vector<Detector> consideredDetectors;
+  // New data members  
+  TFile file_in;
+  TFile file_out;
+
+  TTree* tree_measures = nullptr;
+  TTree* tree_predicted = nullptr;
+  TTree* tree_filtered = nullptr;
+  TTree* tree_smoothed = nullptr;
+
+  MeasuresPointer data_measures;
+  Data filter_filtered;
+  Data filter_sfiltered;
+  Data filter_predicted;
+  Data filter_spredicted;
+  Data filter_smoothed;
+  Data filter_ssmoothed;
+
+  vector<Detector> detectors;
+
+  // Original data members TO BE REMOVED after code separation
+  vector<Detector> allDetectors;
+  vector<Detector> consideredDetectors;
 
   void initializeFilterRealTime(
-      const std::vector<Measurement> &measures,
-      std::vector<MatrixStateEstimate> &predictedStates,
-      std::vector<MatrixStateEstimate> &filteredStates) const;
+      const vector<Measurement> &measures,
+      vector<MatrixStateEstimate> &predictedStates,
+      vector<MatrixStateEstimate> &filteredStates) const;
   void initializeFilter(
-      const std::vector<Measurement> &measures,
-      std::vector<MatrixStateEstimate> &predictedStates,
-      std::vector<MatrixStateEstimate> &filteredStates) const;
+      const vector<Measurement> &measures,
+      vector<MatrixStateEstimate> &predictedStates,
+      vector<MatrixStateEstimate> &filteredStates) const;
 
 };

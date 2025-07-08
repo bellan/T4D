@@ -6,6 +6,9 @@
 #include <TVector3.h>
 #include <TObject.h>
 
+// Custom classes
+#include "MatrixEstimate.hpp"
+
 
 class ParticleState : public TObject {
   public:
@@ -16,6 +19,10 @@ class ParticleState : public TObject {
 
     // Destructor
     virtual ~ParticleState();
+
+    // Public member functions
+    static ParticleState ParticleStateFromMatrixStateEstimate(MatrixStateEstimate& m, unsigned int particleID = 4294967295, double z = -3.0);
+    static ParticleState sParticleStateFromMatrixStateEstimate(MatrixStateEstimate& m, unsigned int particleID = 4294967295);
 
     // Data members
     TLorentzVector position;

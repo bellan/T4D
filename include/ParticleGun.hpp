@@ -6,7 +6,6 @@
 
 #include "Detector.hpp"
 #include "Particle.hpp"
-#include "Structs.hpp"
 
 /**
  * The particle generator.

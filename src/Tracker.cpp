@@ -1,15 +1,23 @@
 // Header files needed
+#include <cmath>
+#include <string>
+#include <TFile.h>
 #include <TMatrixD.h>
 #include <TMatrixDfwd.h>
-#include <cmath>
+#include <TTree.h>
 #include <vector>
 
 // Custom classes
-#include "Tracker.hpp"
-#include "Structs.hpp"
+#include "Detector.hpp"
+#include "Measure.hpp"
 #include "ParticleState.hpp"
 #include "PhysicalParameters.hpp"
-#include "Utils.hpp"
+#include "Simulation.hpp"
+#include "Structs.hpp"
+#include "Tracker.hpp"
+#include "Utils.hpp" // TO BE REMOVED after code separation
+#include "MatrixEstimate.hpp"
+#include "StructMeasures.hpp"
 
 // Namespaces
 using namespace std;
@@ -40,7 +48,460 @@ static const TMatrixD initialStateError(6, 6, initialStateSData);
 static const MatrixStateEstimate initialState{initialStateValue, initialStateError};
 
 
-Tracker::~Tracker() {}
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Tracker (constructor)
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Tracker::Tracker(const vector<Detector>& detectors, string& path_fin, string& path_fout) 
+  : file_in(path_fin.c_str(), "READ"),
+    file_out(path_fout.c_str(), "RECREATE"),
+    detectors(detectors),
+    consideredDetectors(detectors)
+{
+  // --- Reading measurements from file
+  // Opening input file
+  if (file_in.IsZombie()) {
+    cerr << "Error: Cannot open input file " << path_fin << endl;
+    throw std::runtime_error("Input file not found or corrupted");
+  }
+
+  // Linking the tree and its branches
+  TTree* tree_temp = nullptr;
+  file_in.GetObject("tree_measures", tree_temp);
+  tree_measures = tree_temp;
+
+  if (!tree_measures){
+    cerr << "Error: TTree 'tree_measures' not found in input file." << endl;
+    file_in.ls();
+    throw std::runtime_error("Missing input tree");
+  }
+
+  // Measures tree
+  tree_measures -> SetBranchAddress("Layer1_particles_mea", &data_measures.lay1_particles);
+  tree_measures -> SetBranchAddress("Layer2_particles_mea", &data_measures.lay2_particles);
+  tree_measures -> SetBranchAddress("Layer3_particles_mea", &data_measures.lay3_particles);
+  tree_measures -> SetBranchAddress("Layer4_particles_mea", &data_measures.lay4_particles);
+  tree_measures -> SetBranchAddress("Layer5_particles_mea", &data_measures.lay5_particles);
+  tree_measures -> SetBranchAddress("Layer6_particles_mea", &data_measures.lay6_particles);
+  tree_measures -> SetBranchAddress("Layer7_particles_mea", &data_measures.lay7_particles);
+  tree_measures -> SetBranchAddress("Layer8_particles_mea", &data_measures.lay8_particles);
+
+
+  // --- Output file
+  if(file_out.IsZombie()){
+    throw std::invalid_argument("Problem in creating the simulation output file.");
+  }
+
+  // Planting the trees in the output files
+  file_out.cd();
+  tree_predicted = new TTree("tree_predicted", "Kalman filter tree with predicted states");
+  tree_filtered = new TTree("tree_filtered", "Kalman filter tree with filtered states");
+  tree_smoothed = new TTree("tree_smoothed", "Kalman filter tree with smoothed states");
+
+  // -- Predicted states tree
+  // Branches
+  tree_predicted -> Branch("Layer0_particles_pre", &filter_predicted.lay0_particles); // Initial state of the filter
+  tree_predicted -> Branch("Layer1_particles_pre", &filter_predicted.lay1_particles);
+  tree_predicted -> Branch("Layer2_particles_pre", &filter_predicted.lay2_particles);
+  tree_predicted -> Branch("Layer3_particles_pre", &filter_predicted.lay3_particles);
+  tree_predicted -> Branch("Layer4_particles_pre", &filter_predicted.lay4_particles);
+  tree_predicted -> Branch("Layer5_particles_pre", &filter_predicted.lay5_particles);
+  tree_predicted -> Branch("Layer6_particles_pre", &filter_predicted.lay6_particles);
+  tree_predicted -> Branch("Layer7_particles_pre", &filter_predicted.lay7_particles);
+  tree_predicted -> Branch("Layer8_particles_pre", &filter_predicted.lay8_particles);
+
+  tree_predicted -> Branch("Layer0_errors_pre", &filter_spredicted.lay0_particles); // Initial state of the filter
+  tree_predicted -> Branch("Layer1_errors_pre", &filter_spredicted.lay1_particles);
+  tree_predicted -> Branch("Layer2_errors_pre", &filter_spredicted.lay2_particles);
+  tree_predicted -> Branch("Layer3_errors_pre", &filter_spredicted.lay3_particles);
+  tree_predicted -> Branch("Layer4_errors_pre", &filter_spredicted.lay4_particles);
+  tree_predicted -> Branch("Layer5_errors_pre", &filter_spredicted.lay5_particles);
+  tree_predicted -> Branch("Layer6_errors_pre", &filter_spredicted.lay6_particles);
+  tree_predicted -> Branch("Layer7_errors_pre", &filter_spredicted.lay7_particles);
+  tree_predicted -> Branch("Layer8_errors_pre", &filter_spredicted.lay8_particles);
+
+  // -- Filtered states tree
+  // Branches
+  tree_filtered -> Branch("Layer0_particles_fil", &filter_filtered.lay0_particles); // Initial state of the filter
+  tree_filtered -> Branch("Layer1_particles_fil", &filter_filtered.lay1_particles);
+  tree_filtered -> Branch("Layer2_particles_fil", &filter_filtered.lay2_particles);
+  tree_filtered -> Branch("Layer3_particles_fil", &filter_filtered.lay3_particles);
+  tree_filtered -> Branch("Layer4_particles_fil", &filter_filtered.lay4_particles);
+  tree_filtered -> Branch("Layer5_particles_fil", &filter_filtered.lay5_particles);
+  tree_filtered -> Branch("Layer6_particles_fil", &filter_filtered.lay6_particles);
+  tree_filtered -> Branch("Layer7_particles_fil", &filter_filtered.lay7_particles);
+  tree_filtered -> Branch("Layer8_particles_fil", &filter_filtered.lay8_particles);
+
+  tree_filtered -> Branch("Layer0_errors_fil", &filter_sfiltered.lay0_particles); // Initial state of the filter
+  tree_filtered -> Branch("Layer1_errors_fil", &filter_sfiltered.lay1_particles);
+  tree_filtered -> Branch("Layer2_errors_fil", &filter_sfiltered.lay2_particles);
+  tree_filtered -> Branch("Layer3_errors_fil", &filter_sfiltered.lay3_particles);
+  tree_filtered -> Branch("Layer4_errors_fil", &filter_sfiltered.lay4_particles);
+  tree_filtered -> Branch("Layer5_errors_fil", &filter_sfiltered.lay5_particles);
+  tree_filtered -> Branch("Layer6_errors_fil", &filter_sfiltered.lay6_particles);
+  tree_filtered -> Branch("Layer7_errors_fil", &filter_sfiltered.lay7_particles);
+  tree_filtered -> Branch("Layer8_errors_fil", &filter_sfiltered.lay8_particles);
+
+  // -- Smoothed states tree
+  // Branches
+  tree_smoothed -> Branch("Layer0_particles_smo", &filter_smoothed.lay0_particles); // Initial state of the filter
+  tree_smoothed -> Branch("Layer1_particles_smo", &filter_smoothed.lay1_particles);
+  tree_smoothed -> Branch("Layer2_particles_smo", &filter_smoothed.lay2_particles);
+  tree_smoothed -> Branch("Layer3_particles_smo", &filter_smoothed.lay3_particles);
+  tree_smoothed -> Branch("Layer4_particles_smo", &filter_smoothed.lay4_particles);
+  tree_smoothed -> Branch("Layer5_particles_smo", &filter_smoothed.lay5_particles);
+  tree_smoothed -> Branch("Layer6_particles_smo", &filter_smoothed.lay6_particles);
+  tree_smoothed -> Branch("Layer7_particles_smo", &filter_smoothed.lay7_particles);
+  tree_smoothed -> Branch("Layer8_particles_smo", &filter_smoothed.lay8_particles);
+
+  tree_smoothed -> Branch("Layer0_errors_smo", &filter_ssmoothed.lay0_particles); // Initial state of the filter
+  tree_smoothed -> Branch("Layer1_errors_smo", &filter_ssmoothed.lay1_particles);
+  tree_smoothed -> Branch("Layer2_errors_smo", &filter_ssmoothed.lay2_particles);
+  tree_smoothed -> Branch("Layer3_errors_smo", &filter_ssmoothed.lay3_particles);
+  tree_smoothed -> Branch("Layer4_errors_smo", &filter_ssmoothed.lay4_particles);
+  tree_smoothed -> Branch("Layer5_errors_smo", &filter_ssmoothed.lay5_particles);
+  tree_smoothed -> Branch("Layer6_errors_smo", &filter_ssmoothed.lay6_particles);
+  tree_smoothed -> Branch("Layer7_errors_smo", &filter_ssmoothed.lay7_particles);
+  tree_smoothed -> Branch("Layer8_errors_smo", &filter_ssmoothed.lay8_particles);
+
+
+  // --- Detectors
+  if (detectors.size() == 0) {
+    throw std::invalid_argument("No detector found.");
+  }
+}
+
+
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Tracker (destructor)
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Tracker::~Tracker() {
+  delete tree_filtered;
+  delete tree_predicted;
+  delete tree_smoothed;
+
+  file_in.Close();
+  file_out.Close();
+}
+
+
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// ParticlesFromMeasure
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+vector<vector<Measure>> Tracker::ParticlesFromMeasure(unsigned int event_index){
+  // Check on the initialization of the tree
+  if (!tree_measures) {
+    cerr << "[ERROR] tree_measures is null. Did you forget to set it with SetTreeMeasures()?" << endl;
+    return {};
+  }
+
+  // Load the e-th event from the measures tree
+  if (tree_measures->GetEntry(event_index) <= 0) {
+    cerr << "[ERROR] Unable to read entry " << event_index << " from tree_measures." << endl;
+    return {};
+  }
+  
+  // Vettore delle particelle (le particelle hanno tutti i loro hit)
+  // TODO: far sì che possa essere di dimensione diversa da NUMBER_OF_PARTICLES
+  vector<vector<Measure>> particles(NUMBER_OF_PARTICLES);
+
+  // Layers list to compat the for loop
+  const vector<vector<Measure>*> layers = {
+    data_measures.lay1_particles, 
+    data_measures.lay2_particles,
+    data_measures.lay3_particles, 
+    data_measures.lay4_particles,
+    data_measures.lay5_particles, 
+    data_measures.lay6_particles,
+    data_measures.lay7_particles, 
+    data_measures.lay8_particles
+  };
+
+  // Associating hits to a particle based on particleID
+  for (const auto& layer : layers) {
+    for (const auto& hit : *layer) {
+      if (hit.particleID < static_cast<unsigned int>(NUMBER_OF_PARTICLES)) {
+        particles[hit.particleID].push_back(hit);
+      } else {
+        cout << "[WARNING] Ignoring hit with particleID " << hit.particleID 
+                  << " (out of valid range 0.." << NUMBER_OF_PARTICLES - 1 << ")" << endl;
+      }
+    }
+  }
+
+  // Statistics on number of particles reaching n-th layer
+  vector<int> count_hits(9, 0);
+  for (const auto& track : particles) {
+    if (track.size() <= 8) {
+        count_hits[track.size()]++;
+    } else {
+        cerr << "Warning: particle with more than 8 hits (unexpected)" << endl;
+    }
+  }
+
+  cout << " Summary: Number of hits per particle " << endl;
+  for (int i = 0; i <= 8; ++i) {
+    cout << " " << i << " hits: " << count_hits[i] << " particles" << endl;
+  }
+  
+  return particles;
+}
+
+
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Tracking
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+bool Tracker::Tracking(){
+  // Creating variables
+  vector<vector<Measure>> particles;
+  vector<Measurement> measurements;
+  
+  // Vectors for the Kalman filter particles
+  vector<vector<MatrixStateEstimate>> particles_predicted;
+  particles_predicted.reserve(particles.size());
+  vector<vector<MatrixStateEstimate>> particles_filtered;
+  particles_filtered.reserve(particles.size());
+  vector<vector<MatrixStateEstimate>> particles_smoothed;
+  particles_smoothed.reserve(particles.size());
+
+  // Vectors for the Kalman filter results
+  kalmanFilterResult results_filter;
+  vector<MatrixStateEstimate> states_predicted;
+  vector<MatrixStateEstimate> states_filtered;
+  vector<MatrixStateEstimate> states_smoothed;
+
+  // Vectors to fill the tree
+  vector<ParticleState> particlestates_predicted;
+  vector<ParticleState> particlestates_spredicted;
+  vector<ParticleState> particlestates_filtered;
+  vector<ParticleState> particlestates_sfiltered;
+  vector<ParticleState> particlestates_smoothed;
+  vector<ParticleState> particlestates_ssmoothed;
+
+  // Loop on events of the tree 
+  // TODO: get the number of events from the tree
+  for (unsigned int e = 0; e < NUMBER_OF_EVENTS; e++) {
+    particles = ParticlesFromMeasure(e);
+    
+    // Loop on particles
+    for (unsigned int p = 0; p < (unsigned int)particles.size(); p++){
+      // Conversion from Measure to Measurement for compatibility
+      measurements = Measure().vMeasurementFromMeasure(particles[p]);
+      cout << " measurements detector ID " << measurements[2].detectorID << endl;
+
+      // Kalman filter
+      results_filter = kalmanFilter(measurements, false, false);
+      states_predicted = results_filter.predictedStates;
+      states_filtered = results_filter.filteredStates;
+
+      cout << " states_filtered detector ID " << states_filtered[2].detectorID << endl;
+
+      // Kalman smoother
+      states_smoothed = kalmanSmoother(states_filtered, false);
+
+      // --- Conversion for the tree
+      // Filtered
+      for (size_t i = 0; i < states_filtered.size(); ++i) {
+        // DetectorID
+        int detectorID = states_filtered[i].detectorID;
+        cout << "states_filtered " << i << "\t detectorID " << detectorID << endl; 
+
+        // Z
+        double z = -2.0;
+        if(detectorID > 0){
+          z = detectors[detectorID-1].getBottmLeftPosition().z();
+        } else{
+          z = 0.0;
+        }
+
+        // States
+        ParticleState particle = ParticleState::ParticleStateFromMatrixStateEstimate(states_filtered[i], p, z);
+        particlestates_filtered.push_back(particle);
+
+        // Uncertainty
+        ParticleState sparticle = ParticleState::sParticleStateFromMatrixStateEstimate(states_filtered[i], p);
+        particlestates_sfiltered.push_back(sparticle);
+      }
+
+      // Predicted
+      for (size_t i = 0; i < states_predicted.size(); ++i) {
+        // DetectorID
+        int detectorID = states_predicted[i].detectorID;
+        cout << "states_predicted " << i << "\t detectorID " << detectorID << endl; 
+
+        // Z
+        double z = -2.0;
+        if(detectorID > 0){
+          z = detectors[detectorID-1].getBottmLeftPosition().z();
+        } else{
+          z = 0.0;
+        }
+
+        // States
+        ParticleState particle = ParticleState::ParticleStateFromMatrixStateEstimate(states_predicted[i], p, z);
+        particlestates_predicted.push_back(particle);
+
+        // Uncertainty
+        ParticleState sparticle = ParticleState::sParticleStateFromMatrixStateEstimate(states_predicted[i], p);
+        particlestates_spredicted.push_back(sparticle);
+      }
+
+      // Smoothed
+      for (size_t i = 0; i < states_smoothed.size(); ++i) {
+        // DetectorID
+        int detectorID = states_smoothed[i].detectorID;
+        cout << "states_smoothed " << i << "\t detectorID " << detectorID << endl; 
+
+        // Z
+        double z = -2.0;
+        if(detectorID > 0){
+          z = detectors[detectorID-1].getBottmLeftPosition().z();
+        } else{
+          z = 0.0;
+        }
+
+        // States
+        ParticleState particle = ParticleState::ParticleStateFromMatrixStateEstimate(states_smoothed[i], p, z);
+        particlestates_smoothed.push_back(particle);
+
+        // Uncertainty
+        ParticleState sparticle = ParticleState::sParticleStateFromMatrixStateEstimate(states_smoothed[i], p);
+        particlestates_ssmoothed.push_back(sparticle);
+      }
+
+      // Adding the hits to the tree branches
+      // Filtered
+      for (const auto& pa : particlestates_filtered) {
+        switch (pa.detectorID) {
+          case 0: filter_filtered.lay0_particles.push_back(pa); break;
+          case 1: filter_filtered.lay1_particles.push_back(pa); break;
+          case 2: filter_filtered.lay1_particles.push_back(pa); break;
+          case 3: filter_filtered.lay1_particles.push_back(pa); break;
+          case 4: filter_filtered.lay1_particles.push_back(pa); break;
+          case 5: filter_filtered.lay1_particles.push_back(pa); break;
+          case 6: filter_filtered.lay1_particles.push_back(pa); break;
+          case 7: filter_filtered.lay1_particles.push_back(pa); break;
+          case 8: filter_filtered.lay8_particles.push_back(pa); break;
+          default: break;
+        }
+      }
+
+      for (const auto& pa : particlestates_sfiltered) {
+        switch (pa.detectorID) {
+          case 0: filter_sfiltered.lay0_particles.push_back(pa); break;
+          case 1: filter_sfiltered.lay1_particles.push_back(pa); break;
+          case 2: filter_sfiltered.lay1_particles.push_back(pa); break;
+          case 3: filter_sfiltered.lay1_particles.push_back(pa); break;
+          case 4: filter_sfiltered.lay1_particles.push_back(pa); break;
+          case 5: filter_sfiltered.lay1_particles.push_back(pa); break;
+          case 6: filter_sfiltered.lay1_particles.push_back(pa); break;
+          case 7: filter_sfiltered.lay1_particles.push_back(pa); break;
+          case 8: filter_sfiltered.lay8_particles.push_back(pa); break;
+          default: break;
+        }
+      }
+
+      // Predicted
+      for (const auto& pa : particlestates_predicted) {
+        switch (pa.detectorID) {
+          case 0: filter_predicted.lay0_particles.push_back(pa); break;
+          case 1: filter_predicted.lay1_particles.push_back(pa); break;
+          case 2: filter_predicted.lay1_particles.push_back(pa); break;
+          case 3: filter_predicted.lay1_particles.push_back(pa); break;
+          case 4: filter_predicted.lay1_particles.push_back(pa); break;
+          case 5: filter_predicted.lay1_particles.push_back(pa); break;
+          case 6: filter_predicted.lay1_particles.push_back(pa); break;
+          case 7: filter_predicted.lay1_particles.push_back(pa); break;
+          case 8: filter_predicted.lay8_particles.push_back(pa); break;
+          default: break;
+        }
+      }
+
+      for (const auto& pa : particlestates_spredicted) {
+        switch (pa.detectorID) {
+          case 0: filter_spredicted.lay0_particles.push_back(pa); break;
+          case 1: filter_spredicted.lay1_particles.push_back(pa); break;
+          case 2: filter_spredicted.lay1_particles.push_back(pa); break;
+          case 3: filter_spredicted.lay1_particles.push_back(pa); break;
+          case 4: filter_spredicted.lay1_particles.push_back(pa); break;
+          case 5: filter_spredicted.lay1_particles.push_back(pa); break;
+          case 6: filter_spredicted.lay1_particles.push_back(pa); break;
+          case 7: filter_spredicted.lay1_particles.push_back(pa); break;
+          case 8: filter_spredicted.lay8_particles.push_back(pa); break;
+          default: break;
+        }
+      }
+
+      // Smoothed
+      for (const auto& pa : particlestates_smoothed) {
+        switch (pa.detectorID) {
+          case 0: filter_smoothed.lay0_particles.push_back(pa); break;
+          case 1: filter_smoothed.lay1_particles.push_back(pa); break;
+          case 2: filter_smoothed.lay1_particles.push_back(pa); break;
+          case 3: filter_smoothed.lay1_particles.push_back(pa); break;
+          case 4: filter_smoothed.lay1_particles.push_back(pa); break;
+          case 5: filter_smoothed.lay1_particles.push_back(pa); break;
+          case 6: filter_smoothed.lay1_particles.push_back(pa); break;
+          case 7: filter_smoothed.lay1_particles.push_back(pa); break;
+          case 8: filter_smoothed.lay8_particles.push_back(pa); break;
+          default: break;
+        }
+      }
+
+      for (const auto& pa : particlestates_ssmoothed) {
+        switch (pa.detectorID) {
+          case 0: filter_ssmoothed.lay0_particles.push_back(pa); break;
+          case 1: filter_ssmoothed.lay1_particles.push_back(pa); break;
+          case 2: filter_ssmoothed.lay1_particles.push_back(pa); break;
+          case 3: filter_ssmoothed.lay1_particles.push_back(pa); break;
+          case 4: filter_ssmoothed.lay1_particles.push_back(pa); break;
+          case 5: filter_ssmoothed.lay1_particles.push_back(pa); break;
+          case 6: filter_ssmoothed.lay1_particles.push_back(pa); break;
+          case 7: filter_ssmoothed.lay1_particles.push_back(pa); break;
+          case 8: filter_ssmoothed.lay8_particles.push_back(pa); break;
+          default: break;
+        }
+      }
+
+      cout << "size di particlestates_ssmoothed " << particlestates_ssmoothed.size() << endl;
+      cout << "id di particlestates_ssmoothed " << particlestates_ssmoothed[2].detectorID << endl;
+      cout << "size di filter_ssmoothed " << filter_ssmoothed.lay8_particles.size() << endl << endl;
+
+      // Clearing the vectors
+      states_filtered.clear();
+      states_predicted.clear();
+      states_smoothed.clear();
+      particlestates_predicted.clear();
+      particlestates_spredicted.clear();
+      particlestates_filtered.clear();
+      particlestates_sfiltered.clear();
+      particlestates_smoothed.clear();
+      particlestates_ssmoothed.clear();
+    }
+
+    // Filling the tree
+    tree_filtered -> Fill();
+    tree_predicted -> Fill();
+    tree_smoothed -> Fill();
+
+    // Clearing the vectors
+    particles.clear();
+    particles_predicted.clear();
+    particles_filtered.clear();
+    particles_smoothed.clear();
+  }
+
+  tree_filtered -> Write();
+  tree_predicted -> Write();
+  tree_smoothed -> Write();
+
+  return true;
+}
+
+
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // estimateNextState
@@ -65,7 +526,7 @@ MatrixStateEstimate Tracker::estimateNextState(const MatrixStateEstimate& preavi
   double evolutionUncertaintyData[36] = {
         TIME_EVOLUTION_SIGMA * TIME_EVOLUTION_SIGMA, 0., 0., 0., 0., 0.,
         0., SPACE_EVOLUTION_SIGMA * SPACE_EVOLUTION_SIGMA, 0., 0., 0., 0.,
-        0., 0., SPACE_EVOLUTION_SIGMA* SPACE_EVOLUTION_SIGMA, 0., 0., 0.,
+        0., 0., SPACE_EVOLUTION_SIGMA * SPACE_EVOLUTION_SIGMA, 0., 0., 0.,
         0., 0., 0., inverseVelocityEvolutionSigma * inverseVelocityEvolutionSigma, 0., 0.,
         0., 0., 0., 0., DIRECTION_EVOLUTION_SIGMA * DIRECTION_EVOLUTION_SIGMA, 0.,
         0., 0., 0., 0., 0., DIRECTION_EVOLUTION_SIGMA * DIRECTION_EVOLUTION_SIGMA};
@@ -271,8 +732,11 @@ kalmanFilterResult Tracker::kalmanFilter(const vector<Measurement> &measures, bo
     TMatrixD filteredStateError = TMatrixD(kalmanGain, TMatrixD::kMult, TMatrixD(projectionMatrix, TMatrixD::kMult, estimatedStateError));
     filteredStateError = TMatrixD(estimatedStateError, TMatrixD::kMinus, filteredStateError);
 
-    predictedStates.push_back(MatrixStateEstimate{estimatedStateValue, estimatedStateError});
-    filteredStates.push_back(MatrixStateEstimate{filteredStateValue, filteredStateError});
+
+    //predictedStates.push_back(MatrixStateEstimate{estimatedStateValue, estimatedStateError});
+    //filteredStates.push_back(MatrixStateEstimate{filteredStateValue, filteredStateError});
+    predictedStates.push_back(MatrixStateEstimate{estimatedStateValue, estimatedStateError, measures[i].detectorID});
+    filteredStates.push_back(MatrixStateEstimate{filteredStateValue, filteredStateError, measures[i].detectorID});
   }
 
   return kalmanFilterResult{predictedStates, filteredStates};

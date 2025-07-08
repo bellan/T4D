@@ -8,6 +8,7 @@
 #include "Particle.hpp"
 #include "PhysicalParameters.hpp"
 #include "RandomGenerator.hpp"
+#include "ParticleState.hpp"
 
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

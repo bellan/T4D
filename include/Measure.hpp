@@ -3,9 +3,11 @@
 // Header files needed
 #include <TLorentzVector.h>
 #include <TObject.h>
+#include <vector>
 
 // Custom classes
 #include "ParticleState.hpp"
+#include "Structs.hpp"
 
 
 // Class
@@ -20,6 +22,10 @@ class Measure : public TObject {
   
     // Destructor
     virtual ~Measure();
+
+    // Public member functions
+    Measurement MeasurementFromMeasure(Measure& particle);
+    vector<Measurement> vMeasurementFromMeasure(vector<Measure>& particles);
 
     // Data members
     TLorentzVector position;

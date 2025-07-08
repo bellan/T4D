@@ -1,3 +1,4 @@
+#include "Measure.hpp"
 #include "ParticleGun.hpp"
 #include "ParticleState.hpp"
 #include <vector>
