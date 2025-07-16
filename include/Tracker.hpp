@@ -83,9 +83,7 @@ public:
    * @param realTime whether or not to initialize the state as if the kalman filter was executed in real time
    * @return a kalmanFilterResult object containing predicted states and filtered states
    */
-  kalmanFilterResult kalmanFilter(const vector<Measurement> &measures,
-                                  bool logging = false,
-                                  bool realTime = false) const;
+  kalmanFilterResult kalmanFilter(const vector<Measure> &measures, bool logging = false, bool realTime = false) const;
 
   /**
    * Apply the Kalman smoother
@@ -94,9 +92,7 @@ public:
    * @param logging whether or not to show logs to stdout
    * @return a vector containing the smoothed states
    */
-  vector<MatrixStateEstimate>
-  kalmanSmoother(const vector<MatrixStateEstimate> &filteredStates,
-                 bool looging = false) const;
+  vector<MatrixStateEstimate> kalmanSmoother(const vector<MatrixStateEstimate> &filteredStates, bool looging = false) const;
 
   /**
    * Compute the chi squared between two set of data
@@ -104,10 +100,7 @@ public:
    * @param expectedStates the vector of expected values for the states
    * @param obtainedStates the vector of obtained values for the states
    */
-  Chi2Variables
-  computeChi2s(const vector<ParticleState> &expectedStates,
-               const vector<MatrixStateEstimate> &obtainedStates,
-               bool logging = false, bool skipFirst = false) const;
+  Chi2Variables computeChi2s(const vector<ParticleState> &expectedStates, const vector<MatrixStateEstimate> &obtainedStates, bool logging = false, bool skipFirst = false) const;
 
 private:
   // New data members  
@@ -133,13 +126,6 @@ private:
   vector<Detector> allDetectors;
   vector<Detector> consideredDetectors;
 
-  void initializeFilterRealTime(
-      const vector<Measurement> &measures,
-      vector<MatrixStateEstimate> &predictedStates,
-      vector<MatrixStateEstimate> &filteredStates) const;
-  void initializeFilter(
-      const vector<Measurement> &measures,
-      vector<MatrixStateEstimate> &predictedStates,
-      vector<MatrixStateEstimate> &filteredStates) const;
-
+  void initializeFilterRealTime(const vector<Measure> &measures, vector<MatrixStateEstimate> &predictedStates, vector<MatrixStateEstimate> &filteredStates) const;
+  void initializeFilter(const vector<Measure> &measures, vector<MatrixStateEstimate> &predictedStates, vector<MatrixStateEstimate> &filteredStates) const;
 };

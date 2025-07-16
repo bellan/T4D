@@ -28,8 +28,11 @@ using namespace std;
 // Global variables
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Initializing the state at 0, that is at the particle cannon 6 dimentional vector (t, x, y, 1/speed, thetazx, thetazy)
+// Initial state
 static constexpr double initialStateData[6] = {0., 0., 0., 1. / LIGHT_SPEED, 0., 0.};
+static const TMatrixD initialStateValue(6, 1, initialStateData);
 
+// Initial state uncertainties
 static constexpr double bigT = VERY_HIGH_TIME_ERROR * VERY_HIGH_TIME_ERROR;
 static constexpr double bigX = VERY_HIGH_SPACE_ERROR * VERY_HIGH_SPACE_ERROR;
 static constexpr double bigVInv = VERY_HIGH_VELOCITY_INVERSE_ERROR * VERY_HIGH_VELOCITY_INVERSE_ERROR;
@@ -43,8 +46,9 @@ static constexpr double initialStateSData[36] = {
     0., 0., 0., 0., bigDirection, 0.,
     0., 0., 0., 0., 0., bigDirection};
 
-static const TMatrixD initialStateValue(6, 1, initialStateData);
 static const TMatrixD initialStateError(6, 6, initialStateSData);
+
+// Initial state estimated
 static const MatrixStateEstimate initialState{initialStateValue, initialStateError};
 
 
@@ -203,8 +207,8 @@ vector<vector<Measure>> Tracker::ParticlesFromMeasure(unsigned int event_index){
     return {};
   }
   
-  // Vettore delle particelle (le particelle hanno tutti i loro hit)
-  // TODO: far sì che possa essere di dimensione diversa da NUMBER_OF_PARTICLES
+  // Vector of particles (each particle has its hits)
+  // TODO: find a way to get this value from the tree or the event
   vector<vector<Measure>> particles(NUMBER_OF_PARTICLES);
 
   // Layers list to compat the for loop
@@ -220,6 +224,7 @@ vector<vector<Measure>> Tracker::ParticlesFromMeasure(unsigned int event_index){
   };
 
   // Associating hits to a particle based on particleID
+  // TODO: pick the number of particles from the vector size
   for (const auto& layer : layers) {
     for (const auto& hit : *layer) {
       if (hit.particleID < static_cast<unsigned int>(NUMBER_OF_PARTICLES)) {
@@ -255,7 +260,7 @@ vector<vector<Measure>> Tracker::ParticlesFromMeasure(unsigned int event_index){
 // Tracking
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 bool Tracker::Tracking(){
-  // Creating variables
+  // -- Creating variables
   vector<vector<Measure>> particles;
   vector<Measurement> measurements;
   
@@ -281,19 +286,17 @@ bool Tracker::Tracking(){
   vector<ParticleState> particlestates_smoothed;
   vector<ParticleState> particlestates_ssmoothed;
 
-  // Loop on events of the tree 
+  // -- Loop on events of the tree 
   // TODO: get the number of events from the tree
   for (unsigned int e = 0; e < NUMBER_OF_EVENTS; e++) {
     particles = ParticlesFromMeasure(e);
-    
-    // Loop on particles
-    for (unsigned int p = 0; p < (unsigned int)particles.size(); p++){
-      // Conversion from Measure to Measurement for compatibility
-      measurements = Measure().vMeasurementFromMeasure(particles[p]);
-      cout << " measurements detector ID " << measurements[2].detectorID << endl;
 
+    // TODO: Insert here the vertexing
+    
+    // -- Loop on particles
+    for (unsigned int p = 0; p < (unsigned int)particles.size(); p++){
       // Kalman filter
-      results_filter = kalmanFilter(measurements, false, false);
+      results_filter = kalmanFilter(particles[p], false, false);
       states_predicted = results_filter.predictedStates;
       states_filtered = results_filter.filteredStates;
 
@@ -543,9 +546,9 @@ MatrixStateEstimate Tracker::estimateNextState(const MatrixStateEstimate& preavi
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // initializeFilterRealTime
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-void Tracker::initializeFilterRealTime(const vector<Measurement> &measures, vector<MatrixStateEstimate> &predictedStates, vector<MatrixStateEstimate> &filteredStates) const {
+void Tracker::initializeFilterRealTime(const vector<Measure> &measures, vector<MatrixStateEstimate> &predictedStates, vector<MatrixStateEstimate> &filteredStates) const {
   // Predicted state
-  double predictedData[6] = {measures[0].t, measures[0].x, measures[0].y, 1. / LIGHT_SPEED, 0., 0.};
+  double predictedData[6] = {measures[0].position.T(), measures[0].position.X(), measures[0].position.Y(), 1. / LIGHT_SPEED, 0., 0.};
   TMatrixD stateValue(6, 1, predictedData);
 
   // Measure uncertainty
@@ -569,9 +572,9 @@ void Tracker::initializeFilterRealTime(const vector<Measurement> &measures, vect
 
   // State
   const double deltaZ = consideredDetectors[1].getBottmLeftPosition().Z() - consideredDetectors[0].getBottmLeftPosition().Z();
-  const double t = measures[1].t;
-  const double x = measures[1].x;
-  const double y = measures[1].y;
+  const double t = measures[1].position.T();
+  const double x = measures[1].position.X();
+  const double y = measures[1].position.Y();
 
   // Variations
   TMatrixD preaviousStateValue = TMatrixD(filteredStates[1].value);
@@ -607,19 +610,19 @@ void Tracker::initializeFilterRealTime(const vector<Measurement> &measures, vect
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // initializeFilter
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-void Tracker::initializeFilter(const vector<Measurement> &measures, vector<MatrixStateEstimate> &predictedStates, vector<MatrixStateEstimate> &filteredStates) const {
+void Tracker::initializeFilter(const vector<Measure> &measures, vector<MatrixStateEstimate> &predictedStates, vector<MatrixStateEstimate> &filteredStates) const {
   if (measures.size() == 1) {
     initializeFilterRealTime(measures, predictedStates, filteredStates);
     return;
   }
 
   // Considered states
-  const double t = measures[0].t;
-  const double x = measures[0].x;
-  const double y = measures[0].y;
-  const double nextT = measures[1].t;
-  const double nextX = measures[1].x;
-  const double nextY = measures[1].y;
+  const double t = measures[0].position.T();
+  const double x = measures[0].position.X();
+  const double y = measures[0].position.Y();
+  const double nextT = measures[1].position.T();
+  const double nextX = measures[1].position.X();
+  const double nextY = measures[1].position.Y();
 
   // Variations
   const double deltaT = nextT - t;
@@ -628,7 +631,7 @@ void Tracker::initializeFilter(const vector<Measurement> &measures, vector<Matri
   const double deltaZ = consideredDetectors[1].getBottmLeftPosition().Z() - consideredDetectors[0].getBottmLeftPosition().Z();
 
   // State
-  double data[6] = {measures[0].t,   measures[0].x,   measures[0].y, deltaT / deltaZ, deltaX / deltaZ, deltaY / deltaZ};
+  double data[6] = {t, x, y, deltaT / deltaZ, deltaX / deltaZ, deltaY / deltaZ};
   TMatrixD stateValue(6, 1, data);
 
   // Uncertainties
@@ -655,13 +658,16 @@ void Tracker::initializeFilter(const vector<Measurement> &measures, vector<Matri
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // kalmanFilter
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-kalmanFilterResult Tracker::kalmanFilter(const vector<Measurement> &measures, bool logging, bool realTime) const {
+//kalmanFilterResult Tracker::kalmanFilter(const vector<Measurement> &measures, bool logging, bool realTime) const {
+kalmanFilterResult Tracker::kalmanFilter(const vector<Measure> &measures, bool logging, bool realTime) const {
+  // Logging
   if (logging) cout << "KALMAN FILTER LOGS" << endl;
+
+  // Variables initialization
   vector<MatrixStateEstimate> filteredStates;
   vector<MatrixStateEstimate> predictedStates;
 
   // State at the particle gun
-  // TODO: Consider removing this if using root file to save results
   predictedStates.push_back(initialState);
   filteredStates.push_back(initialState);
 
@@ -674,7 +680,7 @@ kalmanFilterResult Tracker::kalmanFilter(const vector<Measurement> &measures, bo
   // Initializing the first state
   for (int i = firstMeasureIndex; i < (int)measures.size(); i++) {
     // Measure
-    double measureData[3] = {measures[i].t, measures[i].x, measures[i].y};
+    double measureData[3] = {measures[i].position.T(), measures[i].position.X(), measures[i].position.Y()};
     TMatrixD measure(3, 1, measureData);
     TMatrixD measureError = consideredDetectors[i].getMeasureUncertainty();
 
@@ -732,9 +738,7 @@ kalmanFilterResult Tracker::kalmanFilter(const vector<Measurement> &measures, bo
     TMatrixD filteredStateError = TMatrixD(kalmanGain, TMatrixD::kMult, TMatrixD(projectionMatrix, TMatrixD::kMult, estimatedStateError));
     filteredStateError = TMatrixD(estimatedStateError, TMatrixD::kMinus, filteredStateError);
 
-
-    //predictedStates.push_back(MatrixStateEstimate{estimatedStateValue, estimatedStateError});
-    //filteredStates.push_back(MatrixStateEstimate{filteredStateValue, filteredStateError});
+    // Filling the vectors to be returned
     predictedStates.push_back(MatrixStateEstimate{estimatedStateValue, estimatedStateError, measures[i].detectorID});
     filteredStates.push_back(MatrixStateEstimate{filteredStateValue, filteredStateError, measures[i].detectorID});
   }
