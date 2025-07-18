@@ -10,7 +10,7 @@
 // Custom classes
 #include "Detector.hpp"
 #include "Simulation.hpp"
-#include "Structs.hpp"
+//#include "Structs.hpp"
 #include "ParticleState.hpp"
 #include "MatrixEstimate.hpp"
 #include "Measure.hpp"

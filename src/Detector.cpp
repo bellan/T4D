@@ -6,7 +6,7 @@
 
 // Custom classes
 #include "Detector.hpp"
-#include "Structs.hpp"
+//#include "Structs.hpp"
 #include "Measure.hpp"
 #include "ParticleState.hpp"
 #include "PhysicalParameters.hpp"
@@ -48,6 +48,7 @@ Detector::~Detector(){}
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Measure - from TLotentzVector
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/*
 std::optional<Measurement> Detector::measure(TLorentzVector particlePosition) const {
   // Measurement of the generated particle to be measured
   const double x = particlePosition.X();
@@ -73,6 +74,7 @@ std::optional<Measurement> Detector::measure(TLorentzVector particlePosition) co
   // Return the measurement if it satisfies the geometrical constraints
   return (xConstrain && yConstrain && zConstrain) ? std::optional<Measurement>{{measuredT, measuredX, measuredY, id}} : std::nullopt;
 }
+*/
 
 
 std::optional<Measure> Detector::measure2(TLorentzVector position, unsigned int particleID) const {
@@ -110,6 +112,7 @@ std::optional<Measure> Detector::measure2(TLorentzVector position, unsigned int 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Measure - from TMatrixD
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/*
 std::optional<Measurement> Detector::measure(TMatrixD state) const {
   // Measurement of the generated particle to be measured
   const double t = state(0, 0);
@@ -132,6 +135,8 @@ std::optional<Measurement> Detector::measure(ParticleState state) const {
   // Calling the other "measure" function to get the measurement
   return measure(state.position);
 }
+
+*/
 
 std::optional<Measure> Detector::measure2(ParticleState state) const {
   // Calling the other "measure" function to get the measurement

@@ -7,7 +7,6 @@
 
 // Custom classes
 #include "ParticleState.hpp"
-#include "Structs.hpp"
 
 
 // Class
@@ -24,8 +23,8 @@ class Measure : public TObject {
     virtual ~Measure();
 
     // Public member functions
-    Measurement MeasurementFromMeasure(Measure& particle);
-    vector<Measurement> vMeasurementFromMeasure(vector<Measure>& particles);
+    //Measurement MeasurementFromMeasure(Measure& particle);
+    //vector<Measurement> vMeasurementFromMeasure(vector<Measure>& particles);
 
     // Data members
     TLorentzVector position;

@@ -16,7 +16,8 @@ struct Measures{
     vector<Measure> lay7_particles;
     vector<Measure> lay8_particles;
   };
-  struct MeasuresPointer {
+
+struct MeasuresPointer {
     vector<Measure>* lay1_particles;
     vector<Measure>* lay2_particles;
     vector<Measure>* lay3_particles;

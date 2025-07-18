@@ -13,7 +13,7 @@
 #include "ParticleState.hpp"
 #include "PhysicalParameters.hpp"
 #include "Simulation.hpp"
-#include "Structs.hpp"
+//#include "Structs.hpp"
 #include "Tracker.hpp"
 #include "Utils.hpp" // TO BE REMOVED after code separation
 #include "MatrixEstimate.hpp"
@@ -262,7 +262,6 @@ vector<vector<Measure>> Tracker::ParticlesFromMeasure(unsigned int event_index){
 bool Tracker::Tracking(){
   // -- Creating variables
   vector<vector<Measure>> particles;
-  vector<Measurement> measurements;
   
   // Vectors for the Kalman filter particles
   vector<vector<MatrixStateEstimate>> particles_predicted;

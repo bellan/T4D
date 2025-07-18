@@ -9,14 +9,10 @@
 // Custom classes
 #include "Measure.hpp"
 #include "ParticleState.hpp"
-#include "Structs.hpp"
+//#include "Structs.hpp"
 
 // Namespaces
 //using namespace std;
-
-
-// TO BE REMOVED after code separation
-struct Measurement;
 
 /**
  * The detector class.
@@ -52,7 +48,7 @@ public:
    * @return an optional measurement. It contains the measure if the particle was
    * inside, nullopt otherwise.
    */
-  std::optional<Measurement> measure(TLorentzVector particlePosition) const;
+  //std::optional<Measurement> measure(TLorentzVector particlePosition) const;
   std::optional<Measure> measure2(TLorentzVector position, unsigned int particleID) const;
 
   /**
@@ -64,7 +60,7 @@ public:
    * @return an optional measurement. It contains the measure if the particle was
    * inside, nullopt otherwise.
    */
-  std::optional<Measurement> measure(TMatrixD particleState) const;
+  //std::optional<Measurement> measure(TMatrixD particleState) const;
 
   /**
    * Creates a Measurement from a ParticleState, if the particle is inside the
@@ -75,7 +71,7 @@ public:
    * @return an optional measurement. It contains the measure if the particle was
    * inside, nullopt otherwise.
    */
-  std::optional<Measurement> measure(ParticleState particleState) const;
+  //std::optional<Measurement> measure(ParticleState particleState) const;
   std::optional<Measure> measure2(ParticleState state) const;
 
   /**

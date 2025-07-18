@@ -11,7 +11,6 @@
 #include "PhysicalParameters.hpp"
 #include "ParticleGun.hpp"
 #include "ParticleState.hpp"
-#include "Structs.hpp"
 
 // Namespaces
 using namespace std;
