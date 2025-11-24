@@ -24,6 +24,8 @@ setup() {
     mkdir -p "./figures/StatisticalAnalysis"
     mkdir -p "./figures/TrackVisualization"
     mkdir -p "./results"
+    mkdir -p "./raw"
+    mkdir -p "./samples"
 
     # --- Creating a virtual environment for Python
     echo " --- Creating virtual environment"
