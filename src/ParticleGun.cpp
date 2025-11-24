@@ -88,7 +88,7 @@ Particle ParticleGun::generateParticle() {
 
   // Generation of particle's mas and charge
   const double mass = randomGenerator.generateUniform(MIN_PARTICLE_MASS, MAX_PARTICLE_MASS);
-  const double charge = FOUNDAMENTAL_CHARGE;
+  const double charge = 1 * FUNDAMENTAL_CHARGE;
 
   // Generation of the particle
   const Particle newParticle({position, timeOfEmission}, velocity, mass, charge, 4.29e9);
@@ -119,7 +119,7 @@ Particle ParticleGun::generateParticle(unsigned int ID) {
 
   // Generation of particle's mas and charge
   const double mass = randomGenerator.generateUniform(MIN_PARTICLE_MASS, MAX_PARTICLE_MASS);
-  const double charge = 1 * FOUNDAMENTAL_CHARGE;
+  const double charge = 1 * FUNDAMENTAL_CHARGE;
 
   // Generation of the particle
   const Particle newParticle({position, timeOfEmission}, velocity, mass, charge, ID);

@@ -43,7 +43,10 @@ int main() {
   detectors.reserve(NUMBER_OF_DETECTORS);
 
   for (int i = 1; i < NUMBER_OF_DETECTORS + 1; i++) {
-    detectors.push_back(Detector(i * DISTANCE_BETWEEN_DETECTORS, DETECTOR_DIMENSION_WIDTH, DETECTOR_DIMENSION_HEIGHT, i));
+    if(i != 5)
+      detectors.push_back(Detector(i * DISTANCE_BETWEEN_DETECTORS, DETECTOR_DIMENSION_X, DETECTOR_DIMENSION_Y, i, true));
+    else
+      detectors.push_back(Detector(i * DISTANCE_BETWEEN_DETECTORS, DETECTOR_DIMENSION_X, DETECTOR_DIMENSION_Y, i, false));
   };
 
  

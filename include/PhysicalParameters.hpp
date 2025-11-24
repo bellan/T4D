@@ -20,26 +20,28 @@ constexpr double VERY_HIGH_VELOCITY_INVERSE_ERROR = 1e-4;
 constexpr double VERY_HIGH_DIRECTION_ERROR = 1e4;
 constexpr double DETERMINANT_TOLERANCE = 1e-80;
 
-// PHISICAL CONSTANTS
-constexpr double FOUNDAMENTAL_CHARGE = 1.602176634e-19; // In Coulomb
+// PHYSICAL CONSTANTS
+constexpr double FUNDAMENTAL_CHARGE = 1.602176634e-19; // In coulomb
 constexpr double LIGHT_SPEED = 299792458.; // In m/s
 
 // PARTICLE CONSTANTS
-constexpr double MIN_PARTICLE_MASS = (0.5e6 * FOUNDAMENTAL_CHARGE) / (LIGHT_SPEED * LIGHT_SPEED); // In kg
-constexpr double MAX_PARTICLE_MASS = (300e6 * FOUNDAMENTAL_CHARGE) / (LIGHT_SPEED * LIGHT_SPEED); // In kg
+constexpr double MIN_PARTICLE_MASS = 0.511e6 / (LIGHT_SPEED * LIGHT_SPEED); // In kg
+constexpr double MAX_PARTICLE_MASS = 300e6 / (LIGHT_SPEED * LIGHT_SPEED); // In kg
 
+// VELOCITY in units of beta 
 constexpr double MIN_BETA = 0.8;
 constexpr double MAX_BETA = 1.;
 
 // DETECTOR PARAMETERS
-// NOTE: DETECTOR_DIMENSION_WIDTH and _HEIGHT should be used to limit the movement along
+// NOTE: DETECTOR_DIMENSION_X and _Y should be used to limit the movement along
 // the x and y axes. It can be smaller than the real dimensions.
+// LGAD dimensions: 1.3mm x 1.3mm, pad dimensions: 208mm x 208mm
 constexpr int NUMBER_OF_DETECTORS = 8;
-constexpr double DISTANCE_BETWEEN_DETECTORS = 1.e-2;
-constexpr double DETECTOR_DIMENSION_WIDTH = 1.e-3;
-constexpr double DETECTOR_DIMENSION_HEIGHT = 1.e-3;
-constexpr double DETECTOR_SPACE_UNCERTAINTY = 1e-6;
-constexpr double DETECTOR_TIME_UNCERTAINTY = 1e-11;
+constexpr double DISTANCE_BETWEEN_DETECTORS = 1.e-2; // In m
+constexpr double DETECTOR_DIMENSION_X = 1.3e-3 * 16; // In m (original value 1.e-3)
+constexpr double DETECTOR_DIMENSION_Y = 1.3e-3 * 16; // In m (original value 1.e-3)
+constexpr double DETECTOR_SPACE_UNCERTAINTY = 1.3e-3 * 3.4641016151377544; // In m (original value 1.e-6), sqrt(12) = 3.4641016151377544
+constexpr double DETECTOR_TIME_UNCERTAINTY = 1e-11; // In s
 
 // GUN PARAMETERS (not used in this version)
 constexpr double MIN_TIME_BETWEEN_PARTICLE = (NUMBER_OF_DETECTORS * DISTANCE_BETWEEN_DETECTORS * 1.1) / LIGHT_SPEED;
