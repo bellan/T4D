@@ -1,60 +1,6 @@
 #!/bin/bash
 set -e
 
-# ~~~ Global variables
-# Path to python virtual environment
-VENV_DIR="env"
-
-# Number of thread
-num_threads=$(($(nproc) -1))
-if [ "$num_threads" -lt 1 ]; then
-    num_threads=1
-fi
-
-# ~~~ Command to execute the first time
-setup() {
-    echo " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-    echo " ~~~ Beginning the setup of the framework environment"
-    echo ""
-
-    # --- Creating useful directories
-    echo " --- Creating useful directories"
-    mkdir -p "./build"
-    mkdir -p "./data"
-    mkdir -p "./figures/StatisticalAnalysis"
-    mkdir -p "./figures/TrackVisualization"
-    mkdir -p "./results"
-    mkdir -p "./raw"
-    mkdir -p "./samples"
-
-    # --- Creating a virtual environment for Python
-    echo " --- Creating virtual environment"
-    if [ ! -d "$VENV_DIR" ]; then
-        python3 -m venv "$VENV_DIR"
-    fi
-
-    # --- Activating the virtual environment
-    echo " --- Activating virtual environment"
-    source $VENV_DIR/bin/activate
-
-    # --- Installing required Python packages
-    echo " --- Installing required Python packages"
-    if [ -f "ProjectDesign/requirements.txt" ]; then
-        pip install -r ProjectDesign/requirements.txt
-    else
-        echo " ProjectDesign/requirements.txt not found"
-    fi
-
-    # --- Deactivating the virtual environment
-    echo " --- Deactivating virtual environment"
-    deactivate
-
-    echo ""
-    echo " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-    echo " Setup completed successfully."
-    echo " Thank you for your patience!"
-}
-
 # ~~~ End message
 end_message() {
     echo " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
